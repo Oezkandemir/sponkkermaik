@@ -1,27 +1,56 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { contactInfo } from "@/lib/data";
+import { useState, useEffect } from "react";
 
 /**
  * Footer-Komponente
  * Mobile-first Design mit optimierter Touch-Navigation
  */
+const atelierImages = [
+  "IMG_5264-1152x1536.webp",
+  "IMG_5345-1152x1536.webp",
+  "IMG_6970-1536x2048.webp",
+  "IMG_6971-1536x2048.webp",
+  "IMG_6986-1024x939.webp",
+  "IMG_6987-1536x2048.webp",
+  "IMG_6988-1012x1024.webp",
+  "IMG_6989-1152x1536.webp",
+  "IMG_6990-1152x1536.webp",
+  "IMG_6991-1152x1536.webp",
+  "IMG_6992-1152x1536.webp",
+  "MG_0176-1-1024x683.webp",
+];
+
 export default function Footer() {
+  const [randomBgImage, setRandomBgImage] = useState<string>("");
+
+  useEffect(() => {
+    // Zufälliges Atelier-Bild für Hintergrund
+    const randomImage =
+      atelierImages[Math.floor(Math.random() * atelierImages.length)];
+    setRandomBgImage(randomImage);
+  }, []);
+
   return (
     <footer className="relative bg-gray-800 text-white mt-auto overflow-hidden">
       {/* Hintergrundbild */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/images/Download.jpeg"
-          alt="Sponk Keramik Atelier Hintergrund"
-          fill
-          className="object-cover opacity-70"
-          quality={75}
-          sizes="100vw"
-        />
-        {/* Overlay für bessere Lesbarkeit */}
-        <div className="absolute inset-0 bg-gray-900/50"></div>
-      </div>
+      {randomBgImage && (
+        <div className="absolute inset-0 z-0">
+          <Image
+            src={`/images/atelier/${randomBgImage}`}
+            alt="Sponk Keramik Atelier Hintergrund"
+            fill
+            className="object-cover opacity-70"
+            quality={75}
+            sizes="100vw"
+          />
+          {/* Overlay für bessere Lesbarkeit */}
+          <div className="absolute inset-0 bg-gray-900/50"></div>
+        </div>
+      )}
       
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 sm:px-6 py-6 sm:py-8">

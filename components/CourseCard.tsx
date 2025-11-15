@@ -1,4 +1,8 @@
+"use client";
+
 import { Workshop } from "@/lib/data";
+import Image from "next/image";
+import { useState, useEffect } from "react";
 
 interface CourseCardProps {
   workshop: Workshop;
@@ -7,11 +11,82 @@ interface CourseCardProps {
 /**
  * CourseCard-Komponente
  * Zeigt eine Kurs-Karte mit allen relevanten Informationen an
- * Mobile-first Design mit direkten Buchungslinks
+ * Mobile-first Design mit Modal für Buchungslinks
  */
 export default function CourseCard({ workshop }: CourseCardProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // ESC-Taste zum Schließen
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isModalOpen) {
+        setIsModalOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isModalOpen]);
+
+  // Body scroll lock wenn Modal offen
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isModalOpen]);
+  const hasBadgeText = workshop.badgeText !== undefined && workshop.badgeText !== "";
+  const hasTopOffer = workshop.topOffer === true && !hasBadgeText;
+  const isFirstWorkshop = workshop.id === "workshop-nur-keramik-bemalen-glasieren";
+  const useObjectContain = workshop.id === "workshop-nur-keramik-bemalen-glasieren" || workshop.id === "aufbau-workshop-2" || workshop.id === "einsteiger-kurse-topferscheibe" || workshop.id === "gruppen-events-workshops";
+  
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full">
+    <div className={`bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 border flex flex-col h-full ${
+      isFirstWorkshop 
+        ? "border-amber-500 border-2 shadow-xl ring-2 ring-amber-300" 
+        : "border-gray-100"
+    }`}>
+      {/* Badge für "Best preis garantie" */}
+      {hasBadgeText && (
+        <div className="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 text-white text-center py-4 px-6 font-bold text-lg sm:text-xl md:text-2xl shadow-lg border-b-4 border-amber-700">
+          <div className="flex items-center justify-center gap-2 sm:gap-3">
+            <span className="text-2xl sm:text-3xl">⭐</span>
+            <span className="uppercase tracking-wide">{workshop.badgeText}</span>
+            <span className="text-2xl sm:text-3xl">⭐</span>
+          </div>
+        </div>
+      )}
+      {/* Badge für "TOP ANGEBOT" */}
+      {hasTopOffer && (
+        <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-center py-3 px-6 font-bold text-base sm:text-lg shadow-md border-b-2 border-amber-700">
+          ⭐ TOP ANGEBOT ⭐
+        </div>
+      )}
+      
+      {/* Bilder Galerie - Alle Bilder nebeneinander */}
+      {workshop.images && workshop.images.length > 0 && (
+        <div className="flex gap-1 p-2 bg-gray-50">
+          {workshop.images.map((image, index) => (
+            <div key={index} className={`relative flex-1 rounded overflow-hidden ${
+              useObjectContain 
+                ? "h-[300px] sm:h-[400px] bg-gray-100" 
+                : "h-[270px] sm:h-[336px]"
+            }`}>
+              <Image
+                src={image}
+                alt={`${workshop.title} - Bild ${index + 1}`}
+                fill
+                className={useObjectContain ? "object-contain" : "object-cover"}
+                sizes="(max-width: 640px) 33vw, 16vw"
+              />
+            </div>
+          ))}
+        </div>
+      )}
+      
       <div className="p-4 sm:p-6 flex-grow flex flex-col">
         <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3 leading-tight">
           {workshop.title}
@@ -72,14 +147,12 @@ export default function CourseCard({ workshop }: CourseCardProps) {
 
         {/* Buchungsbutton - Mobile optimiert mit großem Touch-Target */}
         {workshop.bookingLink ? (
-          <a
-            href={workshop.bookingLink}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => setIsModalOpen(true)}
             className="block w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg text-center text-sm sm:text-base transition-colors duration-200 shadow-md hover:shadow-lg active:bg-amber-800 touch-manipulation"
           >
             Jetzt buchen →
-          </a>
+          </button>
         ) : (
           <a
             href="/kontakt"
@@ -89,6 +162,56 @@ export default function CourseCard({ workshop }: CourseCardProps) {
           </a>
         )}
       </div>
+
+      {/* Modal für cal.com Buchung */}
+      {isModalOpen && workshop.bookingLink && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn"
+          onClick={(e) => {
+            // Schließen beim Klick außerhalb des Modals
+            if (e.target === e.currentTarget) {
+              setIsModalOpen(false);
+            }
+          }}
+        >
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col animate-slideUp">
+            {/* Header mit X-Button */}
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900">
+                {workshop.title} - Termin buchen
+              </h3>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 group"
+                aria-label="Modal schließen"
+              >
+                <svg
+                  className="w-6 h-6 text-gray-500 group-hover:text-gray-700"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* iframe Container */}
+            <div className="flex-1 overflow-hidden relative">
+              <iframe
+                src={workshop.bookingLink}
+                className="w-full h-full min-h-[500px] sm:min-h-[600px] border-0"
+                title={`Buchung für ${workshop.title}`}
+                allow="camera; microphone; geolocation"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

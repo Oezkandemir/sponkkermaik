@@ -1,5 +1,6 @@
 import { contactInfo } from "@/lib/data";
 import Link from "next/link";
+import Image from "next/image";
 
 /**
  * Kontakt Seite
@@ -89,92 +90,34 @@ export default function KontaktPage() {
             </div>
           </div>
 
-          {/* Kontaktformular */}
+          {/* Anfahrt Text und Karte/Bild */}
           <div className="bg-white rounded-lg shadow-md p-8">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-              Nachricht senden
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+              So findest du uns ganz einfach!
             </h2>
-            <form className="space-y-6">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Name *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  E-Mail *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="subject"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Betreff
-                </label>
-                <input
-                  type="text"
-                  id="subject"
-                  name="subject"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="message"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Nachricht *
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows={6}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                ></textarea>
-              </div>
-              <div className="bg-amber-50 rounded-lg p-4">
-                <p className="text-sm text-gray-700">
-                  <strong>Hinweis:</strong> Dieses Kontaktformular ist aktuell ein
-                  Platzhalter. Für die vollständige Funktionalität muss ein
-                  Backend-Service (z.B. Email-Service oder API) integriert werden.
-                  Alternativ können Sie uns direkt per E-Mail kontaktieren:{" "}
-                  <a
-                    href={`mailto:${contactInfo.email}`}
-                    className="text-amber-600 hover:text-amber-700 font-medium"
-                  >
-                    {contactInfo.email}
-                  </a>
-                </p>
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+            <p className="text-gray-700 mb-6 leading-relaxed">
+              Das Atelier von Sponk Keramik & Kurse Düsseldorf liegt zentral in Düsseldorf und ist sowohl mit dem Auto als auch mit den öffentlichen Verkehrsmitteln bequem zu erreichen. Unsere Lage bietet dir die Möglichkeit, stressfrei zu uns zu kommen und deine kreative Reise zu starten.
+            </p>
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              <a
+                href="https://www.google.com/maps?client=ms-android-samsung-ss&sca_esv=86c19ffd07ed6128&sxsrf=AE3TifMAH_qJaSVxwXQJaOeWGbbL5GlV9Q:1763249264872&gs_lp=Egxnd3Mtd2l6LXNlcnAiBXNwb25rKgIIADIOEC4YgAQYxwEYjgUYrwEyCxAuGIAEGMcBGK8BMgUQABiABDIFEAAYgAQyBxAAGIAEGAoyBRAAGIAEMgUQABiABDIHEAAYgAQYCjIHEAAYgAQYCjIHEAAYgAQYCjIdEC4YgAQYxwEYjgUYrwEYlwUY3AQY3gQY4ATYAQFIuBVQwgVYoQpwAngBkAEAmAFSoAGEA6oBATW4AQPIAQD4AQGYAgegAqYDwgIKEAAYsAMY1gQYR8ICCxAAGIAEGLEDGIMBwgILEC4YgAQY0QMYxwHCAhEQLhiABBixAxjRAxiDARjHAcICDhAuGIAEGLEDGNEDGMcBwgIQEAAYgAQYsQMYQxiDARiKBcICExAuGIAEGLEDGNEDGEMYxwEYigXCAhYQLhiABBixAxjRAxhDGIMBGMcBGIoFwgIKEAAYgAQYQxiKBcICCBAAGIAEGLEDwgIiEC4YgAQYsQMY0QMYQxjHARiKBRiXBRjcBBjeBBjgBNgBAcICCxAuGIAEGLEDGIMBwgINEAAYgAQYsQMYQxiKBZgDAIgGAZAGCLoGBggBEAEYFJIHATegB8I5sgcBNbgHmwPCBwUwLjIuNcgHGg&um=1&ie=UTF-8&fb=1&gl=de&sa=X&geocode=KZlOECpBy7hHMSKgFmszEm9F&daddr=F%C3%BCrstenpl.+15,+40215+D%C3%BCsseldorf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-amber-600 hover:text-amber-700 transition-colors"
               >
-                Nachricht senden
-              </button>
-            </form>
+                Anfahrt Sponk Keramik
+              </a>
+            </h3>
+            <div className="overflow-hidden rounded-lg">
+              <Image
+                src="/images/maps-bild.webp"
+                alt="Karte und Parkhaus Creativ Center"
+                width={1200}
+                height={800}
+                className="w-full h-auto"
+                priority
+              />
+            </div>
           </div>
         </div>
       </div>
