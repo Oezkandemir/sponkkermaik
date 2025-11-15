@@ -11,9 +11,9 @@ export default function Home() {
   const featuredWorkshops = workshops.filter((w) => w.featured);
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gray-50" style={{ marginTop: '0', paddingTop: '0' }}>
       {/* Hero Section - Mobile-first mit Hintergrundbild - 100vh */}
-      <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden" style={{ marginTop: '0', paddingTop: '0' }}>
         {/* Hintergrundbild */}
         <div className="absolute inset-0 z-0">
           <Image

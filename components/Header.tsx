@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const kurswerkeImages = [
   "image00001.jpeg",
@@ -51,17 +51,7 @@ const kurswerkeImages = [
 export default function Header() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [menuBackgroundImage, setMenuBackgroundImage] = useState<string>("");
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const handleMenuToggle = () => {
     if (!isMenuOpen) {
@@ -89,13 +79,9 @@ export default function Header() {
   return (
     <>
       <header
-        className={`bg-white shadow-sm  fixed top-0 left-0 right-0 z-50 border-b border-gray-100 transition-all duration-300 ${
-          !isScrolled
-            ? "-translate-y-full opacity-0 pointer-events-none"
-            : "translate-y-0 opacity-100 pointer-events-auto"
-        }`}
+        className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50 border-b border-gray-100"
       >
-        <nav className="container mx-auto px-4 py-0 mt-2 mb-2">
+        <nav className="container mx-auto px-4 py-2">
           <div className="flex items-center justify-between leading-none">
             <Link
               href="/"
