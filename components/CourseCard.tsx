@@ -8,6 +8,21 @@ interface CourseCardProps {
   workshop: Workshop;
 }
 
+const atelierImages = [
+  "IMG_5264-1152x1536.webp",
+  "IMG_5345-1152x1536.webp",
+  "IMG_6970-1536x2048.webp",
+  "IMG_6971-1536x2048.webp",
+  "IMG_6986-1024x939.webp",
+  "IMG_6987-1536x2048.webp",
+  "IMG_6988-1012x1024.webp",
+  "IMG_6989-1152x1536.webp",
+  "IMG_6990-1152x1536.webp",
+  "IMG_6991-1152x1536.webp",
+  "IMG_6992-1152x1536.webp",
+  "MG_0176-1-1024x683.webp",
+];
+
 /**
  * CourseCard-Komponente
  * Zeigt eine Kurs-Karte mit allen relevanten Informationen an
@@ -15,6 +30,16 @@ interface CourseCardProps {
  */
 export default function CourseCard({ workshop }: CourseCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [randomHeaderImage, setRandomHeaderImage] = useState<string>("");
+
+  // Zufälliges Atelier-Bild beim Öffnen des Modals
+  useEffect(() => {
+    if (isModalOpen) {
+      const randomImage =
+        atelierImages[Math.floor(Math.random() * atelierImages.length)];
+      setRandomHeaderImage(randomImage);
+    }
+  }, [isModalOpen]);
 
   // ESC-Taste zum Schließen
   useEffect(() => {
@@ -174,36 +199,52 @@ export default function CourseCard({ workshop }: CourseCardProps) {
             }
           }}
         >
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col animate-slideUp">
-            {/* Header mit X-Button */}
-            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900">
-                {workshop.title} - Termin buchen
-              </h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 group"
-                aria-label="Modal schließen"
-              >
-                <svg
-                  className="w-6 h-6 text-gray-500 group-hover:text-gray-700"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[93vh] flex flex-col animate-slideUp overflow-hidden">
+            {/* Header mit zufälligem Atelier-Bild als Hintergrund */}
+            <div className="relative h-20 sm:h-28 overflow-hidden">
+              {randomHeaderImage && (
+                <>
+                  <Image
+                    src={`/images/atelier/${randomHeaderImage}`}
+                    alt="Atelier Hintergrund"
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                  {/* Overlay für bessere Lesbarkeit */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/70 to-black/75"></div>
+                </>
+              )}
+              {/* Header Content */}
+              <div className="relative z-10 flex items-center justify-between p-3 sm:p-4 h-full">
+                <h3 className="text-base sm:text-lg font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] leading-tight pr-2">
+                  {workshop.title} - Termin buchen
+                </h3>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-2 hover:bg-white/30 rounded-full transition-colors duration-200 group flex-shrink-0"
+                  aria-label="Modal schließen"
                 >
-                  <path d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+                  <svg
+                    className="w-6 h-6 text-white group-hover:text-gray-100 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="3"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             {/* iframe Container */}
-            <div className="flex-1 overflow-hidden relative">
+            <div className="flex-1 overflow-hidden relative min-h-0">
               <iframe
                 src={workshop.bookingLink}
-                className="w-full h-full min-h-[500px] sm:min-h-[600px] border-0"
+                className="w-full h-full border-0"
                 title={`Buchung für ${workshop.title}`}
                 allow="camera; microphone; geolocation"
                 loading="lazy"
