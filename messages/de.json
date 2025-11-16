@@ -51,6 +51,8 @@
   "workshops": {
     "title": "Workshops & Preise",
     "subtitle": "Entdecken Sie unsere vielfältigen Angebote für Keramik bemalen und Töpferkurse",
+    "coursesAvailableInEnglish": "Kurse auch auf Englisch verfügbar",
+    "englishNotice": "",
     "bookingNote": "Hinweis: Wenn Ihr Wunschtermin bei der Buchung nicht verfügbar ist, bitte eine E-Mail an",
     "bookingInfo": "Buchungsinformationen",
     "bookingDescription": "Die meisten Workshops können Sie direkt über die Buchungslinks oben buchen. Alternativ kontaktieren Sie uns per E-Mail oder besuchen Sie uns während unserer Öffnungszeiten im Atelier.",

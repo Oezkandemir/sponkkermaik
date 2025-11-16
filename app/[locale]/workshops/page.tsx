@@ -5,6 +5,9 @@ import CourseCard from "@/components/CourseCard";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
+import enMessages from "@/messages/en.json";
 
 // Atelier Bilder für Header
 const atelierImages = [
@@ -28,6 +31,9 @@ const atelierImages = [
  */
 export default function WorkshopsPage() {
   const [randomHeaderImage, setRandomHeaderImage] = useState<string>("");
+  const t = useTranslations("workshops");
+  const params = useParams();
+  const currentLocale = (params.locale as string) || "de";
 
   // Setze zufälliges Bild nach dem Mount (verhindert Hydration Mismatch)
   useEffect(() => {
@@ -85,10 +91,23 @@ export default function WorkshopsPage() {
       <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="max-w-6xl mx-auto">
 
+          {/* English Courses Notice - Always show in English */}
+          <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 sm:p-5 mb-6 sm:mb-8">
+            <p className="text-base sm:text-lg md:text-xl text-gray-800 leading-relaxed">
+              {enMessages.workshops.englishNotice && enMessages.workshops.englishNotice.trim() ? (
+                <>
+                  <strong>{enMessages.workshops.coursesAvailableInEnglish}</strong> - {enMessages.workshops.englishNotice}
+                </>
+              ) : (
+                <strong>{enMessages.workshops.coursesAvailableInEnglish}</strong>
+              )}
+            </p>
+          </div>
+
           {/* Info-Banner */}
           <div className="bg-amber-100 border-l-4 border-amber-600 rounded-lg p-4 sm:p-5 mb-6 sm:mb-8">
             <p className="text-base sm:text-lg md:text-xl text-gray-800 leading-relaxed">
-              <strong>Hinweis:</strong> Wenn Ihr Wunschtermin bei der Buchung nicht verfügbar ist, bitte eine E-Mail an{" "}
+              {t("bookingNote")}{" "}
               <a href="mailto:info@sponkkeramik.de" className="text-amber-700 hover:text-amber-800 font-semibold underline">
                 info@sponkkeramik.de
               </a>

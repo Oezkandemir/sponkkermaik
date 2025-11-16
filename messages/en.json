@@ -51,6 +51,8 @@
   "workshops": {
     "title": "Workshops & Prices",
     "subtitle": "Discover our diverse offers for ceramic painting and pottery courses",
+    "coursesAvailableInEnglish": "Courses also available in English",
+    "englishNotice": "Note: All our courses can be conducted in English. Please contact us if you prefer English instruction.",
     "bookingNote": "Note: If your desired date is not available when booking, please send an email to",
     "bookingInfo": "Booking Information",
     "bookingDescription": "Most workshops can be booked directly via the booking links above. Alternatively, contact us by email or visit us during our opening hours at the studio.",
