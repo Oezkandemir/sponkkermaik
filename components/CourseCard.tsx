@@ -3,6 +3,7 @@
 import { Workshop } from "@/lib/data";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 interface CourseCardProps {
   workshop: Workshop;
@@ -31,6 +32,7 @@ const atelierImages = [
 export default function CourseCard({ workshop }: CourseCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [randomHeaderImage, setRandomHeaderImage] = useState<string>("");
+  const t = useTranslations("courseCard");
 
   // Zufälliges Atelier-Bild beim Öffnen des Modals
   useEffect(() => {
@@ -149,7 +151,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
               </svg>
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-medium">Dauer</p>
+              <p className="text-xs text-gray-500 font-medium">{t("duration")}</p>
               <p className="text-sm sm:text-base font-semibold text-gray-900">{workshop.duration}</p>
             </div>
           </div>
@@ -170,7 +172,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
                 </svg>
               </div>
               <div>
-                <p className="text-xs text-gray-500 font-medium">Tag</p>
+                <p className="text-xs text-gray-500 font-medium">{t("day")}</p>
                 <p className="text-sm sm:text-base font-semibold text-gray-900">{workshop.day}</p>
               </div>
             </div>
@@ -191,7 +193,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
               </svg>
             </div>
             <div>
-              <p className="text-xs text-gray-600 font-medium">Preis</p>
+              <p className="text-xs text-gray-600 font-medium">{t("price")}</p>
               <p className="text-sm sm:text-base font-bold text-amber-700">{workshop.price}</p>
             </div>
           </div>
@@ -203,14 +205,14 @@ export default function CourseCard({ workshop }: CourseCardProps) {
             onClick={() => setIsModalOpen(true)}
             className="block w-full bg-amber-700 hover:bg-amber-800 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg text-center text-sm sm:text-base transition-colors duration-200 shadow-md hover:shadow-lg active:bg-amber-900 touch-manipulation"
           >
-            Jetzt buchen →
+            {t("bookNow")}
           </button>
         ) : (
           <a
-            href="/kontakt"
+            href="/kontakt-sponk-keramik"
             className="block w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg text-center text-sm sm:text-base transition-colors duration-200 shadow-md hover:shadow-lg active:bg-gray-800 touch-manipulation"
           >
-            Kontakt aufnehmen
+            {t("contactUs")}
           </a>
         )}
       </div>
@@ -245,12 +247,12 @@ export default function CourseCard({ workshop }: CourseCardProps) {
               {/* Header Content */}
               <div className="relative z-10 flex items-center justify-between p-3 sm:p-4 h-full">
                 <h3 className="text-base sm:text-lg font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] leading-tight pr-2">
-                  {workshop.title} - Termin buchen
+                  {workshop.title} - {t("bookingTitle")}
                 </h3>
                 <button
                   onClick={() => setIsModalOpen(false)}
                   className="p-2 hover:bg-white/30 rounded-full transition-colors duration-200 group flex-shrink-0"
-                  aria-label="Modal schließen"
+                  aria-label={t("closeModal")}
                 >
                   <svg
                     className="w-6 h-6 text-white group-hover:text-gray-100 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"

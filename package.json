@@ -12,6 +12,7 @@
     "@polar-sh/nextjs": "^0.7.0",
     "jsonwebtoken": "^9.0.2",
     "next": "16.0.3",
+    "next-intl": "^4.5.3",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "zod": "^4.1.12"

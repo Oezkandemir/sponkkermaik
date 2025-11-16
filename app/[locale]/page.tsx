@@ -1,9 +1,10 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { workshops } from "@/lib/data";
 import CourseCard from "@/components/CourseCard";
 import TrustIndexWidget from "@/components/TrustIndexWidget";
 import { Metadata } from "next";
+import { getTranslations } from 'next-intl/server';
 
 export const metadata: Metadata = {
   title: "Sponk Keramik - Keramik bemalen & Töpferkurse in Düsseldorf",
@@ -41,7 +42,13 @@ export const metadata: Metadata = {
  * Homepage
  * Zeigt eine Begrüßung, Hauptangebote und Call-to-Action Buttons
  */
-export default function Home() {
+export default async function Home({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale });
   const featuredWorkshops = workshops.filter((w) => w.featured);
 
   return (
@@ -77,31 +84,29 @@ export default function Home() {
                   <svg className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  🎁 Jetzt Gutschein Kaufen
+                  🎁 {t("home.buyGiftCard")}
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
               </Link>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight drop-shadow-lg">
-              Sponk Keramik & Kurse Düsseldorf
+              {t("home.title")}
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-white/95 mb-6 sm:mb-8 leading-relaxed px-2 drop-shadow-md font-bold">
-              Entdecken Sie die Kunst des Keramik bemalens und Töpferns in unserem
-              Atelier. Handgefertigte Keramikkunst und kreative Workshops für
-              Anfänger und Fortgeschrittene.
+              {t("home.subtitle")}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
               <Link
-                href="/workshops"
+                href="/kurse-preise-sponk-keramik"
                 className="bg-amber-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:bg-amber-800 active:bg-amber-900 transition-all duration-200 shadow-lg hover:shadow-xl touch-manipulation min-h-[48px] flex items-center justify-center backdrop-blur-sm"
               >
-                Workshops entdecken
+                {t("home.discoverWorkshops")}
               </Link>
               <Link
-                href="/kontakt"
+                href="/kontakt-sponk-keramik"
                 className="bg-white/95 text-amber-800 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg border-2 border-white/50 hover:bg-white active:bg-white/90 transition-all duration-200 shadow-lg hover:shadow-xl touch-manipulation min-h-[48px] flex items-center justify-center backdrop-blur-sm"
               >
-                Kontakt
+                {t("home.contact")}
               </Link>
             </div>
           </div>
@@ -111,37 +116,34 @@ export default function Home() {
       {/* Angebote Section - Mobile-first */}
       <section className="py-12 sm:py-16 container mx-auto px-4 sm:px-6">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 mb-8 sm:mb-12">
-          Unsere Angebote
+          {t("home.ourOffers")}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           <div className="bg-white p-5 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow text-center">
             <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">🎨</div>
             <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">
-              Keramik bemalen
+              {t("home.ceramicPainting.title")}
             </h3>
             <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-              bemalen Sie vorgefertigte Keramikstücke nach Ihren Wünschen. Eine
-              große Auswahl an Formen und Farben steht Ihnen zur Verfügung.
+              {t("home.ceramicPainting.description")}
             </p>
           </div>
           <div className="bg-white p-5 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow text-center">
             <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">⚱️</div>
             <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">
-              Töpferkurse / + Aufbau
+              {t("home.potteryCourses.title")}
             </h3>
             <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-              Lernen Sie die traditionelle Kunst des Töpferns an der Drehscheibe / Werkbank.
-              Unter fachkundiger Anleitung erstellen Sie Ihr eigenes Kunstwerk.
+              {t("home.potteryCourses.description")}
             </p>
           </div>
           <div className="bg-white p-5 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow text-center sm:col-span-2 lg:col-span-1">
             <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">✨</div>
             <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">
-              Handgefertigte Keramikkunst
+              {t("home.handcraftedCeramics.title")}
             </h3>
             <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-              Entdecken Sie einzigartige Keramikkunstwerke von Bülent Tepe. Jedes
-              Stück ist ein Unikat und mit Liebe zum Detail gefertigt.
+              {t("home.handcraftedCeramics.description")}
             </p>
           </div>
         </div>
@@ -151,7 +153,7 @@ export default function Home() {
       <section className="py-12 sm:py-16 bg-white">
         <div className="container mx-auto px-4 sm:px-6">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 mb-8 sm:mb-12">
-            Beliebte Workshops
+            {t("home.popularWorkshops")}
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 max-w-5xl mx-auto">
             {featuredWorkshops.map((workshop) => (
@@ -166,7 +168,7 @@ export default function Home() {
                     <span className="text-3xl sm:text-4xl">📅</span>
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-                    Keramik Mal Workshop
+                    {t("home.ceramicPaintingWorkshop.title")}
                   </h3>
                 </div>
                 
@@ -177,10 +179,10 @@ export default function Home() {
                     </div>
                     <div className="flex-1">
                       <h4 className="font-bold text-gray-900 text-base mb-1">
-                        Jeden ersten Sonntag im Monat
+                        {t("home.ceramicPaintingWorkshop.firstSunday")}
                       </h4>
                       <p className="text-sm text-gray-600">
-                        Keramik Mal Workshop
+                        {t("home.ceramicPaintingWorkshop.title")}
                       </p>
                     </div>
                   </div>
@@ -191,10 +193,10 @@ export default function Home() {
                     </div>
                     <div className="flex-1">
                       <h4 className="font-bold text-amber-900 text-base mb-1">
-                        Im Dezember jeden Sonntag geöffnet
+                        {t("home.ceramicPaintingWorkshop.decemberOpen")}
                       </h4>
                       <p className="text-sm text-amber-800">
-                        Besonderes Angebot zur Weihnachtszeit
+                        {t("home.ceramicPaintingWorkshop.decemberOffer")}
                       </p>
                     </div>
                   </div>
@@ -213,22 +215,22 @@ export default function Home() {
                 </div>
 
                 <div className="text-center mt-auto">
-                  <Link
-                    href="/workshops"
-                    className="block w-full bg-amber-700 text-white px-6 py-3 sm:py-4 rounded-lg font-bold text-base hover:bg-amber-800 active:bg-amber-900 transition-all duration-200 shadow-md hover:shadow-lg"
-                  >
-                    Workshop jetzt buchen
-                  </Link>
+              <Link
+                href="/kurse-preise-sponk-keramik"
+                className="block w-full bg-amber-700 text-white px-6 py-3 sm:py-4 rounded-lg font-bold text-base hover:bg-amber-800 active:bg-amber-900 transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                {t("home.bookWorkshop")}
+              </Link>
                 </div>
               </div>
             </div>
           </div>
           <div className="text-center mt-6 sm:mt-8">
             <Link
-              href="/workshops"
+              href="/kurse-preise-sponk-keramik"
               className="inline-block text-amber-700 font-bold text-base sm:text-lg hover:text-amber-800 active:text-amber-900 transition-colors touch-manipulation py-2 px-4 rounded-lg hover:bg-amber-50"
             >
-              Alle Workshops ansehen →
+              {t("home.viewAllWorkshops")}
             </Link>
           </div>
 
@@ -241,24 +243,23 @@ export default function Home() {
       <section className="py-12 sm:py-16 bg-amber-700 text-white">
         <div className="container mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-2">
-            Bereit für Ihr kreatives Abenteuer?
+            {t("home.readyForAdventure")}
           </h2>
           <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 text-white px-2 leading-relaxed">
-            Besuchen Sie uns im Atelier oder kontaktieren Sie uns für eine
-            individuelle Beratung.
+            {t("home.visitUs")}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
             <Link
-              href="/oeffnungszeiten"
+              href="/kurse-atelier-zeiten"
               className="bg-white text-amber-800 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:bg-amber-50 active:bg-amber-100 transition-all duration-200 shadow-lg hover:shadow-xl touch-manipulation min-h-[48px] flex items-center justify-center"
             >
-              Öffnungszeiten
+              {t("home.viewOpeningHours")}
             </Link>
             <Link
-              href="/kontakt"
+              href="/kontakt-sponk-keramik"
               className="bg-amber-800 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:bg-amber-900 active:bg-black transition-all duration-200 shadow-lg hover:shadow-xl touch-manipulation min-h-[48px] flex items-center justify-center"
             >
-              Kontakt aufnehmen
+              {t("home.getInTouch")}
             </Link>
           </div>
         </div>

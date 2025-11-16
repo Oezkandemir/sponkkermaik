@@ -20,6 +20,22 @@
 - [x] Canonical URLs für alle Seiten setzen
 - [x] Keywords für bessere Auffindbarkeit optimieren
 
+### 2025-01-XX - Internationalisierung (i18n) mit next-intl
+- [x] next-intl Package installiert
+- [x] i18n Konfiguration erstellt (de als Standard, en als zweite Sprache)
+- [x] Middleware für Locale-Erkennung eingerichtet
+- [x] App-Struktur für [locale] Routing umgestellt
+- [x] Übersetzungsdateien für Deutsch und Englisch erstellt
+- [x] Homepage mit Übersetzungen aktualisiert
+- [x] Header-Komponente mit Übersetzungen und Sprachumschalter aktualisiert
+- [x] Footer-Komponente mit Übersetzungen aktualisiert
+- [x] CourseCard-Komponente mit Übersetzungen aktualisiert
+- [x] Sprachumschalter-Komponente erstellt
+- [ ] Weitere Seiten (Workshops, Kontakt, Öffnungszeiten, Anfahrt, etc.) mit Übersetzungen aktualisieren
+- [ ] Workshop-Inhalte (Titel, Beschreibungen) übersetzen
+- [ ] Metadata für beide Sprachen aktualisieren
+- [ ] Sitemap und Robots für Locale-Support aktualisieren
+
 ## Abgeschlossene Aufgaben
 
 ### 2024-12-19

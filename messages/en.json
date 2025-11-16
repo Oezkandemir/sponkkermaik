@@ -1,0 +1,147 @@
+{
+  "common": {
+    "siteName": "Sponk Keramik",
+    "siteDescription": "Ceramic Painting & Pottery Courses in Düsseldorf"
+  },
+  "nav": {
+    "home": "Home",
+    "workshops": "Workshops",
+    "galleryAtelier": "Gallery Atelier",
+    "galleryCourseWorks": "Gallery Course Works",
+    "infoProcess": "Info Process",
+    "openingHours": "Opening Hours",
+    "directions": "Directions",
+    "contact": "Contact",
+    "menuOpen": "Open menu",
+    "menuClose": "Close menu"
+  },
+  "home": {
+    "title": "Sponk Keramik & Courses Düsseldorf",
+    "subtitle": "Discover the art of ceramic painting and pottery in our studio. Handcrafted ceramic art and creative workshops for beginners and advanced students.",
+    "buyGiftCard": "Buy Gift Card Now",
+    "discoverWorkshops": "Discover Workshops",
+    "contact": "Contact",
+    "ourOffers": "Our Offers",
+    "ceramicPainting": {
+      "title": "Ceramic Painting",
+      "description": "Paint pre-made ceramic pieces according to your wishes. A wide selection of shapes and colors is available to you."
+    },
+    "potteryCourses": {
+      "title": "Pottery Courses / + Building",
+      "description": "Learn the traditional art of pottery on the potter's wheel / workbench. Under expert guidance, you will create your own work of art."
+    },
+    "handcraftedCeramics": {
+      "title": "Handcrafted Ceramic Art",
+      "description": "Discover unique ceramic artworks by Bülent Tepe. Each piece is unique and crafted with attention to detail."
+    },
+    "popularWorkshops": "Popular Workshops",
+    "ceramicPaintingWorkshop": {
+      "title": "Ceramic Painting Workshop",
+      "firstSunday": "Every first Sunday of the month",
+      "decemberOpen": "Open every Sunday in December",
+      "decemberOffer": "Special offer for the Christmas season"
+    },
+    "bookWorkshop": "Book Workshop Now",
+    "viewAllWorkshops": "View All Workshops →",
+    "readyForAdventure": "Ready for your creative adventure?",
+    "visitUs": "Visit us at the studio or contact us for individual consultation.",
+    "viewOpeningHours": "Opening Hours",
+    "getInTouch": "Get in Touch"
+  },
+  "workshops": {
+    "title": "Workshops & Prices",
+    "subtitle": "Discover our diverse offers for ceramic painting and pottery courses",
+    "bookingNote": "Note: If your desired date is not available when booking, please send an email to",
+    "bookingInfo": "Booking Information",
+    "bookingDescription": "Most workshops can be booked directly via the booking links above. Alternatively, contact us by email or visit us during our opening hours at the studio.",
+    "contactUs": "Contact Us",
+    "viewOpeningHours": "View Opening Hours",
+    "whatToExpect": "What to Expect",
+    "expectations": {
+      "expertGuidance": "Expert guidance from experienced ceramists",
+      "materialsIncluded": "All materials are included in the price",
+      "pickupAfterFiring": "You can pick up your works after firing",
+      "allLevels": "Perfect for beginners and advanced students",
+      "groupCourses": "Group courses and individual support possible",
+      "onlineBooking": "Direct online booking via cal.com possible"
+    }
+  },
+  "courseCard": {
+    "duration": "Duration",
+    "day": "Day",
+    "price": "Price",
+    "bookNow": "Book Now →",
+    "contactUs": "Contact Us",
+    "bookingTitle": "Book Appointment",
+    "closeModal": "Close modal"
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "We look forward to hearing from you",
+    "contactInfo": "Contact Information",
+    "address": "Address",
+    "email": "Email",
+    "visitUs": "Visit Us",
+    "visitDescription": "Visit us during our opening hours at the studio. We look forward to your visit!",
+    "viewOpeningHours": "View Opening Hours",
+    "findUs": "Find us easily!",
+    "findUsDescription": "The studio of Sponk Keramik & Courses Düsseldorf is centrally located in Düsseldorf and can be easily reached both by car and by public transport. Our location offers you the opportunity to come to us stress-free and start your creative journey.",
+    "directionsLink": "Directions to Sponk Keramik"
+  },
+  "openingHours": {
+    "title": "Opening Hours",
+    "subtitle": "Visit us at the following times or arrange an individual appointment",
+    "atelier": "Studio Opening Hours",
+    "courses": "Course Times",
+    "specialNote": "Special Offer",
+    "decemberOpen": "Open every Sunday in December",
+    "decemberDescription": "Special offer for the Christmas season - we are here for you every Sunday!",
+    "firstSunday": "Every first Sunday of the month",
+    "firstSundayDescription": "Ceramic Painting Workshop - a special event for all ceramic lovers!",
+    "contactForAppointment": "Contact for Appointment",
+    "contactDescription": "For individual appointments or group events, please contact us by email or visit us during opening hours."
+  },
+  "directions": {
+    "title": "Directions",
+    "subtitle": "How to find us - easy and convenient",
+    "address": "Address",
+    "parking": "Parking",
+    "parkingName": "Parkhaus Creativ Center",
+    "parkingDescription": "Paid parking available",
+    "publicTransport": "Public Transport",
+    "publicTransportDescription": "The studio is easily accessible by public transport. The nearest stops are in the immediate vicinity.",
+    "directionsLink": "Show route on Google Maps"
+  },
+  "footer": {
+    "contact": "Contact",
+    "navigation": "Navigation",
+    "legal": "Legal",
+    "vatId": "VAT ID",
+    "imprint": "Imprint",
+    "followUs": "Follow Us",
+    "instagram": "Instagram",
+    "copyright": "All rights reserved.",
+    "nav": {
+      "home": "Home",
+      "workshops": "Workshops",
+      "galleryAtelier": "Gallery Atelier",
+      "galleryCourseWorks": "Gallery Course Works",
+      "openingHours": "Opening Hours",
+      "directions": "Directions",
+      "contact": "Contact"
+    }
+  },
+  "atelier": {
+    "title": "Gallery Atelier",
+    "subtitle": "Handcrafted ceramic artworks by Bülent Tepe"
+  },
+  "gallery": {
+    "title": "Gallery Course Works",
+    "subtitle": "Works by our course participants"
+  },
+  "about": {
+    "title": "Info Process",
+    "subtitle": "Everything you need to know about our courses"
+  }
+}
+

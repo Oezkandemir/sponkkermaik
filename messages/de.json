@@ -1,0 +1,147 @@
+{
+  "common": {
+    "siteName": "Sponk Keramik",
+    "siteDescription": "Keramik bemalen & Töpferkurse in Düsseldorf"
+  },
+  "nav": {
+    "home": "Startseite",
+    "workshops": "Workshops",
+    "galleryAtelier": "Galerie Atelier",
+    "galleryCourseWorks": "Galerie Kurswerke",
+    "infoProcess": "Info Ablauf",
+    "openingHours": "Öffnungszeiten",
+    "directions": "Anfahrt",
+    "contact": "Kontakt",
+    "menuOpen": "Menü öffnen",
+    "menuClose": "Menü schließen"
+  },
+  "home": {
+    "title": "Sponk Keramik & Kurse Düsseldorf",
+    "subtitle": "Entdecken Sie die Kunst des Keramik bemalens und Töpferns in unserem Atelier. Handgefertigte Keramikkunst und kreative Workshops für Anfänger und Fortgeschrittene.",
+    "buyGiftCard": "Jetzt Gutschein kaufen",
+    "discoverWorkshops": "Workshops entdecken",
+    "contact": "Kontakt",
+    "ourOffers": "Unsere Angebote",
+    "ceramicPainting": {
+      "title": "Keramik bemalen",
+      "description": "bemalen Sie vorgefertigte Keramikstücke nach Ihren Wünschen. Eine große Auswahl an Formen und Farben steht Ihnen zur Verfügung."
+    },
+    "potteryCourses": {
+      "title": "Töpferkurse / + Aufbau",
+      "description": "Lernen Sie die traditionelle Kunst des Töpferns an der Drehscheibe / Werkbank. Unter fachkundiger Anleitung erstellen Sie Ihr eigenes Kunstwerk."
+    },
+    "handcraftedCeramics": {
+      "title": "Handgefertigte Keramikkunst",
+      "description": "Entdecken Sie einzigartige Keramikkunstwerke von Bülent Tepe. Jedes Stück ist ein Unikat und mit Liebe zum Detail gefertigt."
+    },
+    "popularWorkshops": "Beliebte Workshops",
+    "ceramicPaintingWorkshop": {
+      "title": "Keramik Mal Workshop",
+      "firstSunday": "Jeden ersten Sonntag im Monat",
+      "decemberOpen": "Im Dezember jeden Sonntag geöffnet",
+      "decemberOffer": "Besonderes Angebot zur Weihnachtszeit"
+    },
+    "bookWorkshop": "Workshop jetzt buchen",
+    "viewAllWorkshops": "Alle Workshops ansehen →",
+    "readyForAdventure": "Bereit für Ihr kreatives Abenteuer?",
+    "visitUs": "Besuchen Sie uns im Atelier oder kontaktieren Sie uns für eine individuelle Beratung.",
+    "viewOpeningHours": "Öffnungszeiten",
+    "getInTouch": "Kontakt aufnehmen"
+  },
+  "workshops": {
+    "title": "Workshops & Preise",
+    "subtitle": "Entdecken Sie unsere vielfältigen Angebote für Keramik bemalen und Töpferkurse",
+    "bookingNote": "Hinweis: Wenn Ihr Wunschtermin bei der Buchung nicht verfügbar ist, bitte eine E-Mail an",
+    "bookingInfo": "Buchungsinformationen",
+    "bookingDescription": "Die meisten Workshops können Sie direkt über die Buchungslinks oben buchen. Alternativ kontaktieren Sie uns per E-Mail oder besuchen Sie uns während unserer Öffnungszeiten im Atelier.",
+    "contactUs": "Kontakt aufnehmen",
+    "viewOpeningHours": "Öffnungszeiten ansehen",
+    "whatToExpect": "Was Sie erwartet",
+    "expectations": {
+      "expertGuidance": "Fachkundige Anleitung durch erfahrene Keramiker",
+      "materialsIncluded": "Alle Materialien sind im Preis enthalten",
+      "pickupAfterFiring": "Ihre Werke können Sie nach dem Brennen abholen",
+      "allLevels": "Perfekt für Anfänger und Fortgeschrittene",
+      "groupCourses": "Gruppenkurse und individuelle Betreuung möglich",
+      "onlineBooking": "Direkte Online-Buchung über cal.com möglich"
+    }
+  },
+  "courseCard": {
+    "duration": "Dauer",
+    "day": "Tag",
+    "price": "Preis",
+    "bookNow": "Jetzt buchen →",
+    "contactUs": "Kontakt aufnehmen",
+    "bookingTitle": "Termin buchen",
+    "closeModal": "Modal schließen"
+  },
+  "contact": {
+    "title": "Kontakt",
+    "subtitle": "Wir freuen uns auf Ihre Nachricht",
+    "contactInfo": "Kontaktinformationen",
+    "address": "Adresse",
+    "email": "E-Mail",
+    "visitUs": "Besuchen Sie uns",
+    "visitDescription": "Besuchen Sie uns während unserer Öffnungszeiten im Atelier. Wir freuen uns auf Ihren Besuch!",
+    "viewOpeningHours": "Öffnungszeiten ansehen",
+    "findUs": "So findest du uns ganz einfach!",
+    "findUsDescription": "Das Atelier von Sponk Keramik & Kurse Düsseldorf liegt zentral in Düsseldorf und ist sowohl mit dem Auto als auch mit den öffentlichen Verkehrsmitteln bequem zu erreichen. Unsere Lage bietet dir die Möglichkeit, stressfrei zu uns zu kommen und deine kreative Reise zu starten.",
+    "directionsLink": "Anfahrt Sponk Keramik"
+  },
+  "openingHours": {
+    "title": "Öffnungszeiten",
+    "subtitle": "Besuchen Sie uns zu den folgenden Zeiten oder vereinbaren Sie einen individuellen Termin",
+    "atelier": "Atelier Öffnungszeiten",
+    "courses": "Kurszeiten",
+    "specialNote": "Besonderes Angebot",
+    "decemberOpen": "Im Dezember jeden Sonntag geöffnet",
+    "decemberDescription": "Besonderes Angebot zur Weihnachtszeit - wir sind jeden Sonntag für Sie da!",
+    "firstSunday": "Jeden ersten Sonntag im Monat",
+    "firstSundayDescription": "Keramik Mal Workshop - ein besonderes Event für alle Keramik-Liebhaber!",
+    "contactForAppointment": "Kontakt für Terminvereinbarung",
+    "contactDescription": "Für individuelle Termine oder Gruppenveranstaltungen kontaktieren Sie uns bitte per E-Mail oder besuchen Sie uns während der Öffnungszeiten."
+  },
+  "directions": {
+    "title": "Anfahrt",
+    "subtitle": "So finden Sie uns - einfach und bequem",
+    "address": "Adresse",
+    "parking": "Parkmöglichkeiten",
+    "parkingName": "Parkhaus Creativ Center",
+    "parkingDescription": "Kostenpflichtige Parkplätze verfügbar",
+    "publicTransport": "Öffentliche Verkehrsmittel",
+    "publicTransportDescription": "Das Atelier ist gut mit öffentlichen Verkehrsmitteln erreichbar. Die nächsten Haltestellen befinden sich in unmittelbarer Nähe.",
+    "directionsLink": "Route auf Google Maps anzeigen"
+  },
+  "footer": {
+    "contact": "Kontakt",
+    "navigation": "Navigation",
+    "legal": "Rechtliches",
+    "vatId": "Umsatzsteuer-ID",
+    "imprint": "Impressum",
+    "followUs": "Folgen Sie uns",
+    "instagram": "Instagram",
+    "copyright": "Alle Rechte vorbehalten.",
+    "nav": {
+      "home": "Startseite",
+      "workshops": "Workshops",
+      "galleryAtelier": "Galerie Atelier",
+      "galleryCourseWorks": "Galerie Kurswerke",
+      "openingHours": "Öffnungszeiten",
+      "directions": "Anfahrt",
+      "contact": "Kontakt"
+    }
+  },
+  "atelier": {
+    "title": "Galerie Atelier",
+    "subtitle": "Handgefertigte Keramikkunstwerke von Bülent Tepe"
+  },
+  "gallery": {
+    "title": "Galerie Kurswerke",
+    "subtitle": "Werke unserer Kursteilnehmer"
+  },
+  "about": {
+    "title": "Info Ablauf",
+    "subtitle": "Alles was Sie über unsere Kurse wissen müssen"
+  }
+}
+

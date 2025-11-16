@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { contactInfo } from "@/lib/data";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 /**
  * Footer-Komponente
@@ -26,6 +27,7 @@ const atelierImages = [
 
 export default function Footer() {
   const [randomBgImage, setRandomBgImage] = useState<string>("");
+  const t = useTranslations("footer");
 
   useEffect(() => {
     // Zufälliges Atelier-Bild für Hintergrund
@@ -57,7 +59,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Kontakt */}
           <div>
-            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">Kontakt</h3>
+            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">{t("contact")}</h3>
             <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
               {contactInfo.address}
               <br />
@@ -74,41 +76,41 @@ export default function Footer() {
 
           {/* Navigation */}
           <div>
-            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">Navigation</h3>
+            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">{t("navigation")}</h3>
             <ul className="space-y-2 text-sm sm:text-base text-gray-300">
               <li>
                 <Link href="/" className="hover:text-amber-400 transition-colors touch-manipulation block py-1">
-                  Startseite
+                  {t("nav.home")}
                 </Link>
               </li>
               <li>
-                <Link href="/workshops" className="hover:text-amber-400 transition-colors touch-manipulation block py-1">
-                  Workshops & Preise
+                <Link href="/kurse-preise-sponk-keramik" className="hover:text-amber-400 transition-colors touch-manipulation block py-1">
+                  {t("nav.workshops")}
                 </Link>
               </li>
               <li>
-                <Link href="/atelier" className="hover:text-amber-400 transition-colors touch-manipulation block py-1">
-                  Galerie Atelier
+                <Link href="/atelier-bilder-sponk-keramik-dusseldorf" className="hover:text-amber-400 transition-colors touch-manipulation block py-1">
+                  {t("nav.galleryAtelier")}
                 </Link>
               </li>
               <li>
                 <Link href="/galerie-kurswerke" className="hover:text-amber-400 transition-colors touch-manipulation block py-1">
-                  Galerie Kurswerke
+                  {t("nav.galleryCourseWorks")}
                 </Link>
               </li>
               <li>
-                <Link href="/oeffnungszeiten" className="hover:text-amber-400 transition-colors touch-manipulation block py-1">
-                  Öffnungszeiten
+                <Link href="/kurse-atelier-zeiten" className="hover:text-amber-400 transition-colors touch-manipulation block py-1">
+                  {t("nav.openingHours")}
                 </Link>
               </li>
               <li>
-                <Link href="/anfahrt" className="hover:text-amber-400 transition-colors touch-manipulation block py-1">
-                  Anfahrt
+                <Link href="/anfahrt-sponk-keramik-und-kurse-dusseldorf" className="hover:text-amber-400 transition-colors touch-manipulation block py-1">
+                  {t("nav.directions")}
                 </Link>
               </li>
               <li>
-                <Link href="/kontakt" className="hover:text-amber-400 transition-colors touch-manipulation block py-1">
-                  Kontakt
+                <Link href="/kontakt-sponk-keramik" className="hover:text-amber-400 transition-colors touch-manipulation block py-1">
+                  {t("nav.contact")}
                 </Link>
               </li>
             </ul>
@@ -116,19 +118,19 @@ export default function Footer() {
 
           {/* Impressum */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">Rechtliches</h3>
+            <h3 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">{t("legal")}</h3>
             <p className="text-sm text-gray-300 leading-relaxed">
-              Umsatzsteuer-ID: {contactInfo.vatId}
+              {t("vatId")}: {contactInfo.vatId}
               <br />
               <br />
               <Link href="/impressum" className="text-amber-400 hover:text-amber-300 transition-colors touch-manipulation inline-block">
-                Impressum
+                {t("imprint")}
               </Link>
             </p>
             
             {/* Social Media */}
             <div className="mt-6">
-              <h3 className="text-base sm:text-lg font-bold mb-3">Folgen Sie uns</h3>
+              <h3 className="text-base sm:text-lg font-bold mb-3">{t("followUs")}</h3>
               <a
                 href="https://www.instagram.com/sponkkeramik/"
                 target="_blank"
@@ -144,14 +146,14 @@ export default function Footer() {
                 >
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                 </svg>
-                <span className="text-sm sm:text-base">Instagram</span>
+                <span className="text-sm sm:text-base">{t("instagram")}</span>
               </a>
             </div>
           </div>
         </div>
 
         <div className="border-t border-gray-700 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400 text-xs sm:text-sm">
-          <p>&copy; {new Date().getFullYear()} Sponk Keramik. Alle Rechte vorbehalten.</p>
+          <p>&copy; {new Date().getFullYear()} Sponk Keramik. {t("copyright")}</p>
         </div>
       </div>
     </footer>

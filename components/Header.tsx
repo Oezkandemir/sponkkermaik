@@ -1,9 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const kurswerkeImages = [
   "image00001.jpeg",
@@ -52,6 +54,7 @@ export default function Header() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuBackgroundImage, setMenuBackgroundImage] = useState<string>("");
+  const t = useTranslations("nav");
 
   const handleMenuToggle = () => {
     if (!isMenuOpen) {
@@ -67,14 +70,14 @@ export default function Header() {
   };
 
   const navItems = [
-    { href: "/", label: "Startseite" },
-    { href: "/kurse-preise-sponk-keramik", label: "Workshops" },
-    { href: "/atelier-bilder-sponk-keramik-dusseldorf", label: "Galerie Atelier" },
-    { href: "/galerie-kurswerke", label: "Galerie Kurswerke" },
-    { href: "/ueber-uns", label: "Info Ablauf" },
-    { href: "/kurse-atelier-zeiten", label: "Öffnungszeiten" },
-    { href: "/anfahrt-sponk-keramik-und-kurse-dusseldorf", label: "Anfahrt" },
-    { href: "/kontakt-sponk-keramik", label: "Kontakt" },
+    { href: "/", label: t("home") },
+    { href: "/kurse-preise-sponk-keramik", label: t("workshops") },
+    { href: "/atelier-bilder-sponk-keramik-dusseldorf", label: t("galleryAtelier") },
+    { href: "/galerie-kurswerke", label: t("galleryCourseWorks") },
+    { href: "/ueber-uns", label: t("infoProcess") },
+    { href: "/kurse-atelier-zeiten", label: t("openingHours") },
+    { href: "/anfahrt-sponk-keramik-und-kurse-dusseldorf", label: t("directions") },
+    { href: "/kontakt-sponk-keramik", label: t("contact") },
   ];
 
   return (
@@ -84,24 +87,27 @@ export default function Header() {
       >
         <nav className="w-full px-[15px] py-6 md:py-4">
           <div className="flex items-center justify-between leading-none">
-            <Link
-              href="/"
-              className="flex items-center gap-[1px] group"
-            >
-              <Image
-                src="/images/logo.png"
-                alt="Sponk Keramik Logo"
-                width={80}
-                height={20}
-                priority
-                className="block m-0 p-0 w-20 h-auto transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:animate-bounce"
-                style={{ display: 'block' }}
-                quality={85}
-              />
-              <span className="text-orange-400 font-bold text-[25px] mb-0.5 leading-none transition-colors group-hover:text-amber-600">
-                KERAMIK
-              </span>
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                href="/"
+                className="flex items-center gap-[1px] group"
+              >
+                <Image
+                  src="/images/logo.png"
+                  alt="Sponk Keramik Logo"
+                  width={80}
+                  height={20}
+                  priority
+                  className="block m-0 p-0 w-20 h-auto transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:animate-bounce"
+                  style={{ display: 'block' }}
+                  quality={85}
+                />
+                <span className="text-orange-400 font-bold text-[25px] mb-0.5 leading-none transition-colors group-hover:text-amber-600">
+                  KERAMIK
+                </span>
+              </Link>
+              <LanguageSwitcher />
+            </div>
 
             <div className="hidden lg:flex items-center gap-1">
               {navItems.map((item) => (
@@ -109,7 +115,7 @@ export default function Header() {
                   key={item.href}
                   href={item.href}
                   className={`px-3 py-1 rounded text-sm font-medium transition-colors whitespace-nowrap ${
-                    pathname === item.href
+                    pathname === item.href || pathname.includes(item.href)
                       ? "text-amber-800 bg-amber-50"
                       : "text-gray-700 hover:text-amber-800 hover:bg-amber-50/50"
                   }`}
@@ -119,12 +125,13 @@ export default function Header() {
               ))}
             </div>
 
-            <button
-              className="lg:hidden p-1 text-gray-700 hover:bg-gray-100 rounded transition-colors z-50 relative"
-              onClick={handleMenuToggle}
-              aria-label={isMenuOpen ? "Menü schließen" : "Menü öffnen"}
-              aria-expanded={isMenuOpen}
-            >
+            <div className="lg:hidden flex items-center gap-2">
+              <button
+                className="p-1 text-gray-700 hover:bg-gray-100 rounded transition-colors z-50 relative"
+                onClick={handleMenuToggle}
+                aria-label={isMenuOpen ? t("menuClose") : t("menuOpen")}
+                aria-expanded={isMenuOpen}
+              >
               <svg
                 className="w-6 h-6"
                 fill="none"
@@ -140,7 +147,8 @@ export default function Header() {
                   <path d="M4 6h16M4 12h16M4 18h16" />
                 )}
               </svg>
-            </button>
+              </button>
+            </div>
           </div>
         </nav>
       </header>
@@ -187,7 +195,7 @@ export default function Header() {
           <button
             className="absolute top-6 right-6 p-3 text-white hover:bg-white/20 rounded-full transition-colors z-20 backdrop-blur-sm bg-black/30"
             onClick={handleMenuToggle}
-            aria-label="Menü schließen"
+            aria-label={t("menuClose")}
           >
             <svg
               className="w-8 h-8"
