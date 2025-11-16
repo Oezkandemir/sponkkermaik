@@ -70,7 +70,7 @@ export default function Home() {
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight drop-shadow-lg">
               Sponk Keramik & Kurse Düsseldorf
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-white/95 mb-6 sm:mb-8 leading-relaxed px-2 drop-shadow-md">
+            <p className="text-base sm:text-lg md:text-xl text-white/95 mb-6 sm:mb-8 leading-relaxed px-2 drop-shadow-md font-bold">
               Entdecken Sie die Kunst des Keramik bemalens und Töpferns in unserem
               Atelier. Handgefertigte Keramikkunst und kreative Workshops für
               Anfänger und Fortgeschrittene.

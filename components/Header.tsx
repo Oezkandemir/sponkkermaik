@@ -71,7 +71,7 @@ export default function Header() {
     { href: "/kurse-preise-sponk-keramik", label: "Workshops" },
     { href: "/atelier-bilder-sponk-keramik-dusseldorf", label: "Galerie Atelier" },
     { href: "/galerie-kurswerke", label: "Galerie Kurswerke" },
-    { href: "/ueber-uns", label: "Über uns" },
+    { href: "/ueber-uns", label: "Info Ablauf" },
     { href: "/kurse-atelier-zeiten", label: "Öffnungszeiten" },
     { href: "/anfahrt-sponk-keramik-und-kurse-dusseldorf", label: "Anfahrt" },
     { href: "/kontakt-sponk-keramik", label: "Kontakt" },
@@ -82,11 +82,11 @@ export default function Header() {
       <header
         className="bg-white/80 backdrop-blur-md shadow-sm fixed top-0 left-0 right-0 z-50 border-b border-gray-100/50"
       >
-        <nav className="container mx-auto px-4 py-6 md:py-4">
+        <nav className="w-full px-[15px] py-6 md:py-4">
           <div className="flex items-center justify-between leading-none">
             <Link
               href="/"
-              className="flex items-center gap-1.5 group"
+              className="flex items-center gap-[1px] group"
             >
               <Image
                 src="/images/logo.png"
@@ -98,7 +98,7 @@ export default function Header() {
                 style={{ display: 'block' }}
                 quality={85}
               />
-              <span className="text-black font-bold text-[24px] mb-0.5 leading-none transition-colors group-hover:text-amber-600">
+              <span className="text-orange-400 font-bold text-[25px] mb-0.5 leading-none transition-colors group-hover:text-amber-600">
                 KERAMIK
               </span>
             </Link>
