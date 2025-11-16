@@ -52,48 +52,11 @@ const kurswerkeImages = [
   "image00040.jpeg",
 ];
 
-const kurswerkeVideos = [
-  "1dbd3fac70494a1fb5dfbfce1d4d856f.mp4",
-  "8b9a59bd-6c0b-454d-bef7-028f812da68c.mp4",
-  "305e57c1c4774766bb08e14ac1371f98.mp4",
-  "62062e33-1b34-44ca-9984-bbf77f6819a9.mp4",
-  "copy_6FDF1ADC-0C7A-4E3E-AC86-7B7B4FF4B066.mov",
-  "copy_61B88F50-5CFC-4F6F-A179-558AA2548DA2.mov",
-  "copy_94DEF0A7-FBD5-4BB9-8E70-94B43C3E36A0.mov",
-  "copy_F38EC451-2A41-4D5E-9C36-7B2FAB0CE4D3.mov",
-  "IMG_7793.mov",
-  "IMG_7922.mov",
-];
+// Nur Bilder für die Galerie verwenden (Videos werden nicht mehr geladen)
+const galleryImages = kurswerkeImages.map((img) => ({ type: "image" as const, src: img }));
 
-const VIDEO_BASE_URL = "https://sponkkeramik.de/videos-kurse";
-
-// Kombinierte Liste für Header (Bilder und Videos gemischt)
-const headerMedia = [
-  ...kurswerkeImages.map((img) => ({ type: "image" as const, src: img })),
-  ...kurswerkeVideos.map((vid) => ({ type: "video" as const, src: vid })),
-];
-
-// Feste gemischte Galerie: abwechselnd Bilder und Videos
-function createMixedGallery(): Array<{ type: "image" | "video"; src: string }> {
-  const mixed: Array<{ type: "image" | "video"; src: string }> = [];
-  const images = kurswerkeImages.map((img) => ({ type: "image" as const, src: img }));
-  const videos = kurswerkeVideos.map((vid) => ({ type: "video" as const, src: vid }));
-  
-  const maxLength = Math.max(images.length, videos.length);
-  
-  for (let i = 0; i < maxLength; i++) {
-    if (i < images.length) {
-      mixed.push(images[i]);
-    }
-    if (i < videos.length) {
-      mixed.push(videos[i]);
-    }
-  }
-  
-  return mixed;
-}
-
-const mixedGallery = createMixedGallery();
+// Kombinierte Liste für Header (nur Bilder, da Videos nicht funktionieren)
+const headerMedia = kurswerkeImages.map((img) => ({ type: "image" as const, src: img }));
 
 export default function GalerieKurswerkePage() {
   const [randomHeaderMedia, setRandomHeaderMedia] = useState<{
@@ -110,31 +73,20 @@ export default function GalerieKurswerkePage() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Header mit zufälligem Hintergrundbild oder Video */}
+      {/* Header mit zufälligem Hintergrundbild */}
       <section className="relative h-[20vh] sm:h-[25vh] md:h-[30vh] flex items-center justify-center overflow-hidden">
         {randomHeaderMedia && (
           <>
             <div className="absolute inset-0 z-0">
-              {randomHeaderMedia.type === "image" ? (
-                <Image
-                  src={`/images/kurswerke/${randomHeaderMedia.src}`}
-                  alt="Galerie Kurswerke"
-                  fill
-                  priority
-                  className="object-cover"
-                  quality={90}
-                  sizes="100vw"
-                />
-              ) : (
-                <video
-                  src={`${VIDEO_BASE_URL}/${randomHeaderMedia.src}`}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-full object-cover"
-                />
-              )}
+              <Image
+                src={`/images/kurswerke/${randomHeaderMedia.src}`}
+                alt="Galerie Kurswerke"
+                fill
+                priority
+                className="object-cover"
+                quality={90}
+                sizes="100vw"
+              />
               {/* Overlay für bessere Textlesbarkeit */}
               <div className="absolute inset-0 bg-gradient-to-r from-amber-700/40 via-amber-600/30 to-orange-700/40"></div>
             </div>
@@ -160,43 +112,30 @@ export default function GalerieKurswerkePage() {
             </h2>
             <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
               Hier sehen Sie eine Auswahl der wunderschönen Werke, die unsere
-              Kursteilnehmer in unseren Workshops und Kursen geschaffen haben. Jedes
+              Kursteilnehmende in unseren Workshops und Kursen geschaffen haben. Jedes
               Stück ist einzigartig und zeigt die Kreativität und das Talent unserer
-              Teilnehmer.
+              Teilnehmende.
             </p>
           </div>
 
-          {/* Gemischte Galerie - Bilder und Videos */}
+          {/* Bilder Galerie */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-6 sm:mb-8">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
               Werke unserer Kursteilnehmende
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {mixedGallery.map((item, index) => (
+              {galleryImages.map((item, index) => (
                 <div
-                  key={`${item.type}-${item.src}-${index}`}
-                  className={`relative aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 group ${
-                    item.type === "video" ? "bg-black" : ""
-                  }`}
+                  key={`${item.src}-${index}`}
+                  className="relative aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 group"
                 >
-                  {item.type === "image" ? (
-                    <Image
-                      src={`/images/kurswerke/${item.src}`}
-                      alt={`Kurswerk Bild ${index + 1}`}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                  ) : (
-                    <video
-                      src={`${VIDEO_BASE_URL}/${item.src}`}
-                      controls
-                      className="w-full h-full object-cover"
-                      preload="metadata"
-                    >
-                      Ihr Browser unterstützt das Video-Element nicht.
-                    </video>
-                  )}
+                  <Image
+                    src={`/images/kurswerke/${item.src}`}
+                    alt={`Kurswerk Bild ${index + 1}`}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
                 </div>
               ))}
             </div>
