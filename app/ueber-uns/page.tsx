@@ -33,7 +33,7 @@ export default function UeberUnsPage() {
           {/* Top Angebot Banner */}
           <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl p-6 sm:p-8 mb-8 text-center">
             <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
-              sponk keramik & kurse duesseldorf
+              Sponk Keramik & Kurse Düsseldorf
             </h2>
             <Link
               href="/workshops"
