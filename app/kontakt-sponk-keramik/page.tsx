@@ -3,7 +3,7 @@
 import { contactInfo } from "@/lib/data";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Atelier Bilder für Header
 const atelierImages = [
@@ -26,10 +26,14 @@ const atelierImages = [
  * Kontaktinformationen und Kontaktformular
  */
 export default function KontaktPage() {
-  // Lazy initializer - berechnet nur einmal beim Mount
-  const [randomHeaderImage] = useState<string>(() => {
-    return atelierImages[Math.floor(Math.random() * atelierImages.length)];
-  });
+  const [randomHeaderImage, setRandomHeaderImage] = useState<string>("");
+
+  // Setze zufälliges Bild nach dem Mount (verhindert Hydration Mismatch)
+  useEffect(() => {
+    setRandomHeaderImage(
+      atelierImages[Math.floor(Math.random() * atelierImages.length)]
+    );
+  }, []);
 
   return (
     <div className="bg-gradient-to-br from-gray-50 via-white to-amber-50 min-h-screen">

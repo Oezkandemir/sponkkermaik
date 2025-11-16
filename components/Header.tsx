@@ -88,11 +88,15 @@ export default function Header() {
               href="/"
               className="flex items-center gap-1.5 group"
             >
-              <img
-                src="/images/logo.png?v=2"
+              <Image
+                src="/images/logo.png"
                 alt="Sponk Keramik Logo"
+                width={80}
+                height={20}
+                priority
                 className="block m-0 p-0 w-20 h-auto transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:animate-bounce"
                 style={{ display: 'block' }}
+                quality={90}
               />
               <span className="text-black font-bold text-xl leading-none transition-colors group-hover:text-amber-600">
                 Keramik

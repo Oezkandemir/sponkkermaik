@@ -55,8 +55,9 @@ export default function Home() {
             alt="Sponk Keramik Atelier - Handgefertigte Keramikkunst"
             fill
             priority
+            fetchPriority="high"
             className="object-cover"
-            quality={90}
+            quality={85}
             sizes="100vw"
           />
           {/* Overlay für bessere Textlesbarkeit */}
@@ -192,6 +193,7 @@ export default function Home() {
                     fill
                     className="object-contain"
                     sizes="(max-width: 768px) 100vw, 50vw"
+                    quality={75}
                   />
                 </div>
 
