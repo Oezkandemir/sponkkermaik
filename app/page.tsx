@@ -77,13 +77,13 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
               <Link
                 href="/workshops"
-                className="bg-amber-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:bg-amber-700 active:bg-amber-800 transition-all duration-200 shadow-lg hover:shadow-xl touch-manipulation min-h-[48px] flex items-center justify-center backdrop-blur-sm"
+                className="bg-amber-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:bg-amber-800 active:bg-amber-900 transition-all duration-200 shadow-lg hover:shadow-xl touch-manipulation min-h-[48px] flex items-center justify-center backdrop-blur-sm"
               >
                 Workshops entdecken
               </Link>
               <Link
                 href="/kontakt"
-                className="bg-white/95 text-amber-600 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg border-2 border-white/50 hover:bg-white active:bg-white/90 transition-all duration-200 shadow-lg hover:shadow-xl touch-manipulation min-h-[48px] flex items-center justify-center backdrop-blur-sm"
+                className="bg-white/95 text-amber-800 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg border-2 border-white/50 hover:bg-white active:bg-white/90 transition-all duration-200 shadow-lg hover:shadow-xl touch-manipulation min-h-[48px] flex items-center justify-center backdrop-blur-sm"
               >
                 Jetzt buchen
               </Link>
@@ -198,7 +198,7 @@ export default function Home() {
                 <div className="text-center mt-auto">
                   <Link
                     href="/workshops"
-                    className="block w-full bg-amber-600 text-white px-6 py-3 sm:py-4 rounded-lg font-bold text-base hover:bg-amber-700 active:bg-amber-800 transition-all duration-200 shadow-md hover:shadow-lg"
+                    className="block w-full bg-amber-700 text-white px-6 py-3 sm:py-4 rounded-lg font-bold text-base hover:bg-amber-800 active:bg-amber-900 transition-all duration-200 shadow-md hover:shadow-lg"
                   >
                     Workshop jetzt buchen
                   </Link>
@@ -209,7 +209,7 @@ export default function Home() {
           <div className="text-center mt-6 sm:mt-8">
             <Link
               href="/workshops"
-              className="inline-block text-amber-600 font-bold text-base sm:text-lg hover:text-amber-700 active:text-amber-800 transition-colors touch-manipulation py-2 px-4 rounded-lg hover:bg-amber-50"
+              className="inline-block text-amber-700 font-bold text-base sm:text-lg hover:text-amber-800 active:text-amber-900 transition-colors touch-manipulation py-2 px-4 rounded-lg hover:bg-amber-50"
             >
               Alle Workshops ansehen →
             </Link>
@@ -221,25 +221,25 @@ export default function Home() {
       </section>
 
       {/* CTA Section - Mobile-first */}
-      <section className="py-12 sm:py-16 bg-amber-600 text-white">
+      <section className="py-12 sm:py-16 bg-amber-700 text-white">
         <div className="container mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-2">
             Bereit für Ihr kreatives Abenteuer?
           </h2>
-          <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 text-amber-100 px-2 leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 text-white px-2 leading-relaxed">
             Besuchen Sie uns im Atelier oder kontaktieren Sie uns für eine
             individuelle Beratung.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
             <Link
               href="/oeffnungszeiten"
-              className="bg-white text-amber-600 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:bg-amber-50 active:bg-amber-100 transition-all duration-200 shadow-lg hover:shadow-xl touch-manipulation min-h-[48px] flex items-center justify-center"
+              className="bg-white text-amber-800 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:bg-amber-50 active:bg-amber-100 transition-all duration-200 shadow-lg hover:shadow-xl touch-manipulation min-h-[48px] flex items-center justify-center"
             >
               Öffnungszeiten
             </Link>
             <Link
               href="/kontakt"
-              className="bg-amber-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:bg-amber-800 active:bg-amber-900 transition-all duration-200 shadow-lg hover:shadow-xl touch-manipulation min-h-[48px] flex items-center justify-center"
+              className="bg-amber-800 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover:bg-amber-900 active:bg-black transition-all duration-200 shadow-lg hover:shadow-xl touch-manipulation min-h-[48px] flex items-center justify-center"
             >
               Kontakt aufnehmen
             </Link>
