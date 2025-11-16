@@ -68,13 +68,13 @@ export default function Header() {
 
   const navItems = [
     { href: "/", label: "Startseite" },
-    { href: "/workshops", label: "Workshops" },
-    { href: "/atelier", label: "Galerie Atelier" },
+    { href: "/kurse-preise-sponk-keramik", label: "Workshops" },
+    { href: "/atelier-bilder-sponk-keramik-dusseldorf", label: "Galerie Atelier" },
     { href: "/galerie-kurswerke", label: "Galerie Kurswerke" },
     { href: "/ueber-uns", label: "Über uns" },
-    { href: "/oeffnungszeiten", label: "Öffnungszeiten" },
-    { href: "/anfahrt", label: "Anfahrt" },
-    { href: "/kontakt", label: "Kontakt" },
+    { href: "/kurse-atelier-zeiten", label: "Öffnungszeiten" },
+    { href: "/anfahrt-sponk-keramik-und-kurse-dusseldorf", label: "Anfahrt" },
+    { href: "/kontakt-sponk-keramik", label: "Kontakt" },
   ];
 
   return (
