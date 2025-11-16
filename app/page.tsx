@@ -71,7 +71,7 @@ export default function Home() {
               Keramik bemalen
             </h3>
             <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-              Bemalen Sie vorgefertigte Keramikstücke nach Ihren Wünschen. Eine
+              bemalen Sie vorgefertigte Keramikstücke nach Ihren Wünschen. Eine
               große Auswahl an Formen und Farben steht Ihnen zur Verfügung.
             </p>
           </div>

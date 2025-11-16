@@ -26,7 +26,7 @@ export default function UeberUnsPage() {
               Im Dezember: jeden Sonntag Keramik bemalen.
             </p>
             <p className="text-base sm:text-lg font-semibold text-gray-900">
-              Keramik Bemalen – W O R K S H O P S – jeden ersten Sonntag! (keine eigenen Werke)
+              Keramik bemalen – W O R K S H O P S – jeden ersten Sonntag! (keine eigenen Werke)
             </p>
           </div>
 
@@ -45,7 +45,7 @@ export default function UeberUnsPage() {
               zum TOP Angebot
             </p>
             <p className="text-white text-xl sm:text-2xl font-bold mt-2">
-              Keramik Bemalen 39 €
+              Keramik bemalen 39 €
             </p>
           </div>
 
@@ -310,7 +310,7 @@ export default function UeberUnsPage() {
               Sponk Keramik & Kurse Düsseldorf bietet dir nicht nur Kurse und Workshops, sondern auch eine Möglichkeit, dem stressigen Alltag zu entfliehen. Hier kannst du entspannen, kreativ werden und handgefertigte Kunstwerke erschaffen, die deine Persönlichkeit widerspiegeln.
             </p>
             <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
-              Ob du dich für das Bemalen von Keramik oder das Töpfern entscheidest – wir haben alles, was du brauchst, um deine Vision Wirklichkeit werden zu lassen. Unser erfahrenes Team steht dir bei jedem Schritt zur Seite und sorgt dafür, dass du eine unvergessliche Zeit bei uns hast.
+              Ob du dich für das bemalen von Keramik oder das Töpfern entscheidest – wir haben alles, was du brauchst, um deine Vision Wirklichkeit werden zu lassen. Unser erfahrenes Team steht dir bei jedem Schritt zur Seite und sorgt dafür, dass du eine unvergessliche Zeit bei uns hast.
             </p>
           </div>
 

@@ -75,7 +75,7 @@ export const workshops: Workshop[] = [
     title: "Aufbau-Workshop 1",
     description:
       "Unterschiedliche Aufbautechniken, 3 Stunden Werke herstellen, nach dem ersten Brennen kommst du nochmal ca. 90 Minuten zum bemalen. 3 Werke (Müsslischale, Tasse usw.) möglich. Pro Person, 87,-€ + 18,-€ pro Kg für bemalen und Brennen. Die fertigen Werke werden gewogen.",
-    duration: "3 Stunden + 90 Minuten Bemalen",
+    duration: "3 Stunden + 90 Minuten bemalen",
     price: "87 € pro Person + 18 € pro Kg",
     bookingLink: "https://cal.com/sponkkeramik.de/aufbau-workshop-1?overlayCalendar=true",
     topOffer: true,
@@ -87,7 +87,7 @@ export const workshops: Workshop[] = [
   },
   {
     id: "keramik-bemalen-sonntag",
-    title: "Keramik Bemalen – Kreativer Sonntags-Workshop",
+    title: "Keramik bemalen – Kreativer Sonntags-Workshop",
     description:
       "Gestalte 1.5 Stunden deine eigene Keramik mit Farben, Mustern und Ideen! In entspannter Atelieratmosphäre bemalst du vorgefertigte Rohlinge – Tassen, Schalen oder Teller – ganz nach deinem Stil. Alle Materialien, Glasur und Brand sind inklusive. Perfekt für Einsteiger, Freund*innen oder einen kreativen Sonntag!",
     duration: "1.5 Stunden",
