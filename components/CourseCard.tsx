@@ -64,7 +64,6 @@ export default function CourseCard({ workshop }: CourseCardProps) {
     };
   }, [isModalOpen]);
   const hasBadgeText = workshop.badgeText !== undefined && workshop.badgeText !== "";
-  const hasTopOffer = workshop.topOffer === true && !hasBadgeText;
   const isFirstWorkshop = workshop.id === "workshop-nur-keramik-bemalen-glasieren";
   const useObjectContain = workshop.id === "workshop-nur-keramik-bemalen-glasieren" || workshop.id === "aufbau-workshop-2" || workshop.id === "einsteiger-kurse-topferscheibe" || workshop.id === "gruppen-events-workshops";
   
@@ -82,12 +81,6 @@ export default function CourseCard({ workshop }: CourseCardProps) {
             <span className="uppercase tracking-wide">{workshop.badgeText}</span>
             <span className="text-2xl sm:text-3xl">⭐</span>
           </div>
-        </div>
-      )}
-      {/* Badge für "TOP ANGEBOT" */}
-      {hasTopOffer && (
-        <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-center py-3 px-6 font-bold text-base sm:text-lg shadow-md border-b-2 border-amber-700">
-          ⭐ TOP ANGEBOT ⭐
         </div>
       )}
       

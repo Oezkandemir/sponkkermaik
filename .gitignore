@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -10,10 +11,12 @@
 !.yarn/releases
 !.yarn/versions
 .pnpm-store/
+.pnpm-store
 pnpm-lock.yaml
 bun.lock
 bun.lockb
 .bun
+.bun/
 
 # testing
 /coverage

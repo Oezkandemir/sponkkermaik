@@ -108,6 +108,59 @@ export default function Home() {
             {featuredWorkshops.map((workshop) => (
               <CourseCard key={workshop.id} workshop={workshop} />
             ))}
+            
+            {/* Wichtige Termine Card */}
+            <div className="bg-gradient-to-br from-amber-50 via-white to-amber-50 rounded-xl shadow-md overflow-hidden border-2 border-amber-200 flex flex-col h-full">
+              <div className="p-6 sm:p-8 flex-grow flex flex-col">
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-amber-100 rounded-full mb-4">
+                    <span className="text-3xl sm:text-4xl">📅</span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
+                    Keramik Mal Workshop
+                  </h3>
+                </div>
+                
+                <div className="space-y-4 mb-6 flex-grow">
+                  <div className="flex items-start gap-3 bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex-shrink-0 w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                      <span className="text-xl">🎨</span>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-gray-900 text-base mb-1">
+                        Jeden ersten Sonntag im Monat
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        Keramik Mal Workshop
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 bg-amber-50 rounded-lg p-4 shadow-sm border border-amber-200">
+                    <div className="flex-shrink-0 w-10 h-10 bg-amber-200 rounded-full flex items-center justify-center">
+                      <span className="text-xl">🎄</span>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-amber-900 text-base mb-1">
+                        Im Dezember jeden Sonntag geöffnet
+                      </h4>
+                      <p className="text-sm text-amber-800">
+                        Besonderes Angebot zur Weihnachtszeit
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center mt-auto">
+                  <Link
+                    href="/workshops"
+                    className="block w-full bg-amber-600 text-white px-6 py-3 sm:py-4 rounded-lg font-bold text-base hover:bg-amber-700 active:bg-amber-800 transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    Workshop jetzt buchen
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
           <div className="text-center mt-6 sm:mt-8">
             <Link
