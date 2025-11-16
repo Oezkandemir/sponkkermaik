@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import StructuredData from "@/components/StructuredData";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
+import ChatbaseWidget from "@/components/ChatbaseWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -106,6 +107,7 @@ export default function RootLayout({
         <main className="grow pt-8 md:pt-12">{children}</main>
         <Footer />
         <ScrollToTopButton />
+        <ChatbaseWidget />
       </body>
     </html>
   );

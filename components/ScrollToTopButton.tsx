@@ -40,7 +40,7 @@ export default function ScrollToTopButton() {
       {isVisible && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 z-50 bg-amber-700 hover:bg-amber-800 active:bg-amber-900 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 group"
+          className="fixed bottom-20 right-[15px] z-50 bg-amber-700 hover:bg-amber-800 active:bg-amber-900 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 group"
           aria-label="Zurück nach oben"
         >
           {/* Pfeil nach oben Icon */}
