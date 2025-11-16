@@ -86,7 +86,7 @@ export default function Home() {
                 href="/kontakt"
                 className="bg-white/95 text-amber-800 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg border-2 border-white/50 hover:bg-white active:bg-white/90 transition-all duration-200 shadow-lg hover:shadow-xl touch-manipulation min-h-[48px] flex items-center justify-center backdrop-blur-sm"
               >
-                Jetzt buchen
+                Kontakt
               </Link>
             </div>
           </div>

@@ -99,7 +99,7 @@ export default function Header() {
                 quality={85}
               />
               <span className="text-black font-bold text-[24px] mb-0.5 leading-none transition-colors group-hover:text-amber-600">
-                Keramik
+                KERAMIK
               </span>
             </Link>
 
