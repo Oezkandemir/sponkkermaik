@@ -85,6 +85,16 @@ export default function WorkshopsPage() {
       <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="max-w-6xl mx-auto">
 
+          {/* Info-Banner */}
+          <div className="bg-amber-100 border-l-4 border-amber-600 rounded-lg p-4 sm:p-5 mb-6 sm:mb-8">
+            <p className="text-base sm:text-lg md:text-xl text-gray-800 leading-relaxed">
+              <strong>Hinweis:</strong> Wenn Ihr Wunschtermin bei der Buchung nicht verfügbar ist, bitte eine E-Mail an{" "}
+              <a href="mailto:info@sponkkeramik.de" className="text-amber-700 hover:text-amber-800 font-semibold underline">
+                info@sponkkeramik.de
+              </a>
+            </p>
+          </div>
+
           {/* Alle Workshops Grid - Mobile-first */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 mb-8 sm:mb-12">
             {workshops.map((workshop) => (
