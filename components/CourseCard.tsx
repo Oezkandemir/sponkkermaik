@@ -201,7 +201,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
         {workshop.bookingLink ? (
           <button
             onClick={() => setIsModalOpen(true)}
-            className="block w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg text-center text-sm sm:text-base transition-colors duration-200 shadow-md hover:shadow-lg active:bg-amber-800 touch-manipulation"
+            className="block w-full bg-amber-700 hover:bg-amber-800 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg text-center text-sm sm:text-base transition-colors duration-200 shadow-md hover:shadow-lg active:bg-amber-900 touch-manipulation"
           >
             Jetzt buchen →
           </button>

@@ -149,7 +149,7 @@ export default function KontaktPage() {
               </p>
               <Link
                 href="/oeffnungszeiten"
-                className="inline-block bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+                className="inline-block bg-amber-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-800 transition-colors"
               >
                 Öffnungszeiten ansehen
               </Link>

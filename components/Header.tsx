@@ -96,7 +96,7 @@ export default function Header() {
                 priority
                 className="block m-0 p-0 w-20 h-auto transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:animate-bounce"
                 style={{ display: 'block' }}
-                quality={90}
+                quality={85}
               />
               <span className="text-black font-bold text-xl leading-none transition-colors group-hover:text-amber-600">
                 Keramik
@@ -173,7 +173,7 @@ export default function Header() {
                 href={item.href}
                 className={`px-8 py-5 text-2xl font-semibold transition-colors w-full text-center rounded-lg backdrop-blur-sm ${
                   pathname === item.href
-                    ? "text-white bg-amber-600/80 shadow-lg"
+                    ? "text-white bg-amber-700/90 shadow-lg"
                     : "text-white bg-white/20 hover:bg-white/30 shadow-md"
                 }`}
                 onClick={handleMenuToggle}

@@ -57,7 +57,7 @@ export default function Home() {
             priority
             fetchPriority="high"
             className="object-cover"
-            quality={85}
+            quality={80}
             sizes="100vw"
           />
           {/* Overlay für bessere Textlesbarkeit */}
@@ -193,7 +193,7 @@ export default function Home() {
                     fill
                     className="object-contain"
                     sizes="(max-width: 768px) 100vw, 50vw"
-                    quality={75}
+                    quality={70}
                   />
                 </div>
 
