@@ -50,6 +50,7 @@ export const workshops: Workshop[] = [
     price: "39 € pro Person",
     bookingLink: "https://cal.com/sponkkeramik.de/workshop-nur-keramik-bemalen-glasieren?overlayCalendar=true",
     badgeText: "Best preis garantie in düsseldorf",
+    featured: true,
     images: [
       "/images/workshops/IMG_4035-738x1024.webp",
     ],
@@ -93,7 +94,6 @@ export const workshops: Workshop[] = [
     price: "39 € pro Person",
     day: "Sonntag",
     bookingLink: "https://cal.com/sponkkeramik.de/sonntags-workshop?overlayCalendar=true&month=2025-12",
-    featured: true,
     topOffer: true,
     images: [
       "/images/workshops/IMG_3997-300x252.webp",
