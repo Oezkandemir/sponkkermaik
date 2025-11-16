@@ -8,6 +8,8 @@ import Footer from "@/components/Footer";
 import StructuredData from "@/components/StructuredData";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import ChatbaseWidget from "@/components/ChatbaseWidget";
+import SnowfallEffect from "@/components/Snowfall";
+import SantaAnimation from "@/components/SantaAnimation";
 import { locales } from '@/i18n';
 
 const geistSans = Geist({
@@ -52,6 +54,8 @@ export default async function LocaleLayout({
         style={{ marginTop: '0', paddingTop: '0' }}
       >
         <NextIntlClientProvider messages={messages}>
+          <SnowfallEffect />
+          <SantaAnimation />
           <Header />
           <main className="grow pt-20 md:pt-16">{children}</main>
           <Footer />

@@ -113,6 +113,30 @@ export default async function Home({
         </div>
       </section>
 
+      {/* Weihnachtsgruß Section */}
+      <section className="py-6 sm:py-8 bg-gradient-to-br from-red-50/30 via-white to-green-50/30">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="max-w-3xl mx-auto text-center bg-white/80 backdrop-blur-sm rounded-xl shadow-md p-4 sm:p-5 md:p-6 border border-red-100">
+            <div className="mb-2 sm:mb-3">
+              <span className="text-2xl sm:text-3xl">🎄</span>
+            </div>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">
+              {t("home.christmasGreeting.title")}
+            </h2>
+            <p className="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4 leading-relaxed">
+              {t("home.christmasGreeting.message")}
+            </p>
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+              <span className="text-lg sm:text-xl">🎉</span>
+              <p className="text-sm sm:text-base font-semibold text-amber-700">
+                {t("home.christmasGreeting.newYear")}
+              </p>
+              <span className="text-lg sm:text-xl">🎉</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Angebote Section - Mobile-first */}
       <section className="py-12 sm:py-16 container mx-auto px-4 sm:px-6">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 mb-8 sm:mb-12">

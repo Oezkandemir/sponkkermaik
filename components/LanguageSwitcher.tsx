@@ -15,6 +15,11 @@ const localeNames: Record<Locale, string> = {
   en: 'English'
 };
 
+const localeLabels: Record<Locale, string> = {
+  de: 'Sprache',
+  en: 'Language'
+};
+
 export default function LanguageSwitcher() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -41,13 +46,18 @@ export default function LanguageSwitcher() {
     <button
       onClick={switchLocale}
       disabled={isPending}
-      className={`p-2 rounded-lg text-2xl transition-all hover:scale-110 hover:bg-amber-50 ${
-        isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+      className={`px-3 py-1 rounded text-xs font-medium transition-colors whitespace-nowrap ${
+        isPending 
+          ? 'opacity-50 cursor-not-allowed text-gray-500' 
+          : 'text-gray-700 hover:text-amber-800 hover:bg-amber-50 cursor-pointer'
       }`}
       aria-label={`Switch to ${localeNames[targetLocale]}`}
       title={`Switch to ${localeNames[targetLocale]}`}
     >
-      {localeFlags[targetLocale]}
+      <span className="flex items-center gap-1.5">
+        <span className="text-base">{localeFlags[currentLocale]}</span>
+        <span>{localeLabels[currentLocale]}</span>
+      </span>
     </button>
   );
 }

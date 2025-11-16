@@ -21,6 +21,11 @@
     "buyGiftCard": "Buy Gift Card Now",
     "discoverWorkshops": "Discover Workshops",
     "contact": "Contact",
+    "christmasGreeting": {
+      "title": "Merry Christmas! 🎄",
+      "message": "We wish you and your family a wonderful Christmas full of joy, creativity, and special moments.",
+      "newYear": "A happy and successful New Year 2026! 🎉"
+    },
     "ourOffers": "Our Offers",
     "ceramicPainting": {
       "title": "Ceramic Painting",

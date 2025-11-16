@@ -21,6 +21,11 @@
     "buyGiftCard": "Jetzt Gutschein kaufen",
     "discoverWorkshops": "Workshops entdecken",
     "contact": "Kontakt",
+    "christmasGreeting": {
+      "title": "Frohe Weihnachten! 🎄",
+      "message": "Wir wünschen Ihnen und Ihrer Familie ein wundervolles Weihnachtsfest voller Freude, Kreativität und besonderer Momente.",
+      "newYear": "Ein glückliches und erfolgreiches neues Jahr 2026! 🎉"
+    },
     "ourOffers": "Unsere Angebote",
     "ceramicPainting": {
       "title": "Keramik bemalen",
