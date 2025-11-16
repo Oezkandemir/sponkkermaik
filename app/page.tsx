@@ -121,7 +121,7 @@ export default function Home() {
                   </h3>
                 </div>
                 
-                <div className="space-y-4 mb-6 flex-grow">
+                <div className="space-y-4 mb-6">
                   <div className="flex items-start gap-3 bg-white rounded-lg p-4 shadow-sm">
                     <div className="flex-shrink-0 w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
                       <span className="text-xl">🎨</span>
@@ -149,6 +149,17 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
+                </div>
+
+                {/* Bild "toll selbst hergestellt" */}
+                <div className="relative w-full h-64 sm:h-80 mb-6 rounded-lg overflow-hidden bg-white">
+                  <Image
+                    src="/images/kurswerke/IMG_4081.jpeg"
+                    alt="Toll selbst hergestellt - Keramik Workshop"
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
                 </div>
 
                 <div className="text-center mt-auto">
