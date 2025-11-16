@@ -11,6 +11,15 @@
 - [ ] Styling und Design implementieren
 - [ ] PLANNING.md und TASK.md erstellen
 
+### 2025-11-16 - SEO Optimierung
+- [x] Root Layout Metadata mit Open Graph und Twitter Cards optimieren
+- [x] Individuelle Metadata für alle Seiten hinzufügen
+- [x] Sitemap.xml erstellen
+- [x] Robots.txt erstellen
+- [x] JSON-LD strukturierte Daten hinzufügen
+- [x] Canonical URLs für alle Seiten setzen
+- [x] Keywords für bessere Auffindbarkeit optimieren
+
 ## Abgeschlossene Aufgaben
 
 ### 2024-12-19

@@ -3,6 +3,39 @@ import Image from "next/image";
 import { workshops } from "@/lib/data";
 import CourseCard from "@/components/CourseCard";
 import TrustIndexWidget from "@/components/TrustIndexWidget";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Sponk Keramik - Keramik bemalen & Töpferkurse in Düsseldorf",
+  description:
+    "Entdecken Sie die Kunst des Keramik bemalens und Töpferns in Düsseldorf. Handgefertigte Keramikkunst und kreative Workshops für Anfänger und Fortgeschrittene. Jetzt online buchen!",
+  keywords: [
+    "Keramik bemalen Düsseldorf",
+    "Töpferkurs Düsseldorf",
+    "Keramik Workshop",
+    "Pottery Düsseldorf",
+    "Kreativkurs",
+    "Handgemachte Keramik",
+    "Keramik Atelier Düsseldorf",
+  ],
+  openGraph: {
+    title: "Sponk Keramik - Keramik bemalen & Töpferkurse in Düsseldorf",
+    description:
+      "Entdecken Sie die Kunst des Keramik bemalens und Töpferns in unserem Atelier. Handgefertigte Keramikkunst und kreative Workshops für Anfänger und Fortgeschrittene.",
+    url: "https://www.sponkkeramik.de",
+    images: [
+      {
+        url: "/images/sponkkeramik.webp",
+        width: 1200,
+        height: 630,
+        alt: "Sponk Keramik Atelier - Handgefertigte Keramikkunst",
+      },
+    ],
+  },
+  alternates: {
+    canonical: "https://www.sponkkeramik.de",
+  },
+};
 
 /**
  * Homepage

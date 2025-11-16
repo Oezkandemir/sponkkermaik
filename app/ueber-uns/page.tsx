@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 // Atelier Bilder für Header
 const atelierImages = [
@@ -25,13 +25,10 @@ const atelierImages = [
  * Komplette Informationen über Sponk Keramik & Kurse Düsseldorf
  */
 export default function UeberUnsPage() {
-  const [randomHeaderImage, setRandomHeaderImage] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Zufälliges Bild für Header bei jedem Page Load
-    const randomImage = atelierImages[Math.floor(Math.random() * atelierImages.length)];
-    setRandomHeaderImage(randomImage);
-  }, []);
+  // Lazy initializer - berechnet nur einmal beim Mount
+  const [randomHeaderImage] = useState<string>(() => {
+    return atelierImages[Math.floor(Math.random() * atelierImages.length)];
+  });
 
   return (
     <div className="bg-gradient-to-br from-gray-50 via-white to-amber-50 min-h-screen">
