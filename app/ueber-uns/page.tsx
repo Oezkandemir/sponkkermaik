@@ -70,7 +70,7 @@ export default function UeberUnsPage() {
               </svg>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg">
-              Über uns
+              Info Ablauf
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-white/95 max-w-2xl mx-auto">
               Sponk Keramik & Kurse Düsseldorf
