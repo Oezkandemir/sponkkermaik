@@ -71,6 +71,7 @@ export default function Header() {
     { href: "/workshops", label: "Workshops" },
     { href: "/atelier", label: "Galerie Atelier" },
     { href: "/galerie-kurswerke", label: "Galerie Kurswerke" },
+    { href: "/ueber-uns", label: "Über uns" },
     { href: "/oeffnungszeiten", label: "Öffnungszeiten" },
     { href: "/anfahrt", label: "Anfahrt" },
     { href: "/kontakt", label: "Kontakt" },

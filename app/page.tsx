@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { workshops } from "@/lib/data";
 import CourseCard from "@/components/CourseCard";
+import TrustIndexWidget from "@/components/TrustIndexWidget";
 
 /**
  * Homepage
@@ -116,6 +117,9 @@ export default function Home() {
               Alle Workshops ansehen →
             </Link>
           </div>
+
+          {/* TrustIndex Reviews */}
+          <TrustIndexWidget />
         </div>
       </section>
 

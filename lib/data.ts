@@ -45,10 +45,9 @@ export const workshops: Workshop[] = [
     id: "workshop-nur-keramik-bemalen-glasieren",
     title: "Workshop nur Keramik Bemalen-Glasieren",
     description:
-      "Sonntag keine Eigenen Werke malen! Glasieren (Keramik bemalen) an einem Rohling – pro Person 39 Euro Rohling (Kaffeetasse, Müslischale und Teller). Für Erfahrene, 17 Euro Pauschale + Glasur/Brand 7 Euro + Rohling, 45 Minuten – inkl. Glasur und Brennen. Bei weiterem Rohling wird 5 Euro für Glasur + Brennen dazu kommen. Bei Gruppen ab 8 Personen zuzüglich 19% MwSt.",
-    duration: "45 Minuten",
-    price: "39 € pro Person (17 € für Erfahrene + 7 € Glasur/Brand + Rohling)",
-    day: "Sonntag",
+      "Sonntag keine Eigenen Werke malen! Glasieren (Keramik bemalen) an einem Rohling – pro Person 39 Euro. Wähle aus verschiedenen Rohlingsformen wie Kaffeetassen, Müslischalen usw. ",
+    duration: "90 Minuten",
+    price: "39 € pro Person",
     bookingLink: "https://cal.com/sponkkeramik.de/workshop-nur-keramik-bemalen-glasieren?overlayCalendar=true",
     badgeText: "Best preis garantie in düsseldorf",
     images: [
@@ -65,8 +64,8 @@ export const workshops: Workshop[] = [
     bookingLink: "https://cal.com/sponkkeramik.de/topferscheibe-testen?overlayCalendar=true",
     topOffer: true,
     images: [
-      "/images/workshops/IMG_3994-300x151.webp",
-      "/images/workshops/IMG_3995-300x225.webp",
+      "/images/workshops/IMG_4079.jpeg",
+      "/images/workshops/IMG_4080.jpeg",
       "/images/workshops/IMG_3996-1-615x1024.webp",
     ],
   },

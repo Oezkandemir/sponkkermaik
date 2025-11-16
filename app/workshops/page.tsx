@@ -20,7 +20,7 @@ export default function WorkshopsPage() {
           </p>
 
           {/* Alle Workshops Grid - Mobile-first */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-8 sm:mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 mb-8 sm:mb-12">
             {workshops.map((workshop) => (
               <CourseCard key={workshop.id} workshop={workshop} />
             ))}
