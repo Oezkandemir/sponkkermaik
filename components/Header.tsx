@@ -86,15 +86,15 @@ export default function Header() {
           <div className="flex items-center justify-between leading-none">
             <Link
               href="/"
-              className="flex items-center gap-1.5 hover:opacity-90 transition-opacity"
+              className="flex items-center gap-1.5 group"
             >
               <img
                 src="/images/logo.png?v=2"
                 alt="Sponk Keramik Logo"
-                className="block m-0 p-0 w-20 h-auto"
+                className="block m-0 p-0 w-20 h-auto transition-transform duration-300 ease-in-out group-hover:scale-110 group-hover:animate-bounce"
                 style={{ display: 'block' }}
               />
-              <span className="text-black font-bold text-xl leading-none">
+              <span className="text-black font-bold text-xl leading-none transition-colors group-hover:text-amber-600">
                 Keramik
               </span>
             </Link>
