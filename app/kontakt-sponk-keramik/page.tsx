@@ -1,22 +1,87 @@
+"use client";
+
 import { contactInfo } from "@/lib/data";
 import Link from "next/link";
 import Image from "next/image";
+import { useState, useEffect } from "react";
+
+// Atelier Bilder für Header
+const atelierImages = [
+  "IMG_5264-1152x1536.webp",
+  "IMG_5345-1152x1536.webp",
+  "IMG_6970-1536x2048.webp",
+  "IMG_6971-1536x2048.webp",
+  "IMG_6986-1024x939.webp",
+  "IMG_6987-1536x2048.webp",
+  "IMG_6988-1012x1024.webp",
+  "IMG_6989-1152x1536.webp",
+  "IMG_6990-1152x1536.webp",
+  "IMG_6991-1152x1536.webp",
+  "IMG_6992-1152x1536.webp",
+  "MG_0176-1-1024x683.webp",
+];
 
 /**
  * Kontakt Seite
  * Kontaktinformationen und Kontaktformular
  */
 export default function KontaktPage() {
+  const [randomHeaderImage, setRandomHeaderImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Zufälliges Bild für Header bei jedem Page Load
+    const randomImage = atelierImages[Math.floor(Math.random() * atelierImages.length)];
+    setRandomHeaderImage(randomImage);
+  }, []);
+
   return (
-    <div className="bg-gray-50 min-h-screen py-12">
-      <div className="container mx-auto px-4">
+    <div className="bg-gradient-to-br from-gray-50 via-white to-amber-50 min-h-screen">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 h-[20vh] sm:h-[25vh] md:h-[30vh] flex items-center justify-center overflow-hidden">
+        {randomHeaderImage && (
+          <div className="absolute inset-0 z-0">
+            <Image
+              src={`/images/atelier/${randomHeaderImage}`}
+              alt="Sponk Keramik Atelier"
+              fill
+              priority
+              className="object-cover"
+              quality={90}
+              sizes="100vw"
+            />
+            {/* Overlay für bessere Textlesbarkeit */}
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-700/60 via-amber-600/50 to-orange-700/60"></div>
+          </div>
+        )}
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Mail Icon */}
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-white/20 rounded-full mb-4 backdrop-blur-sm">
+              <svg
+                className="w-8 h-8 sm:w-10 sm:h-10 text-white"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg">
+              Kontakt
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl text-white/95 max-w-2xl mx-auto">
+              Wir freuen uns auf Ihre Nachricht
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Content */}
+      <div className="container mx-auto px-4 py-8 sm:py-12">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4 text-center">
-            Kontakt
-          </h1>
-          <p className="text-xl text-gray-600 mb-12 text-center">
-            Wir freuen uns auf Ihre Nachricht
-          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             {/* Kontaktinformationen */}

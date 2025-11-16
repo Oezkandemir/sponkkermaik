@@ -144,21 +144,21 @@ export const openingHours = {
   atelier: [
     {
       days: "Dienstag, Mittwoch, Freitag",
-      times: "11-16 & 17:30-19:30",
+      times: "11:00 - 16:00 Uhr & 17:30 - 19:30 Uhr",
     },
     {
       days: "Samstag",
-      times: "11-15 & 16:30-19:30",
+      times: "11:00 - 15:00 Uhr & 16:30 - 19:30 Uhr",
     },
   ],
   courses: [
     {
       days: "Dienstag, Mittwoch, Freitag",
-      times: "13-16 & 18-21",
+      times: "13:00 - 16:00 Uhr & 18:00 - 21:00 Uhr",
     },
     {
       days: "Samstag",
-      times: "12-15 & 17-20",
+      times: "12:00 - 15:00 Uhr & 17:00 - 20:00 Uhr",
     },
   ],
 };
