@@ -104,7 +104,7 @@ export default function RootLayout({
         style={{ marginTop: '0', paddingTop: '0' }}
       >
         <Header />
-        <main className="grow pt-8 md:pt-12">{children}</main>
+        <main className="grow pt-20 md:pt-16">{children}</main>
         <Footer />
         <ScrollToTopButton />
         <ChatbaseWidget />

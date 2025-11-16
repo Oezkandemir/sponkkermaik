@@ -39,7 +39,7 @@ export default function WorkshopsPage() {
   return (
     <div className="bg-gradient-to-br from-gray-50 via-white to-amber-50 min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 h-[20vh] sm:h-[25vh] md:h-[30vh] flex items-center justify-center overflow-hidden">
+      <section className="relative bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 min-h-[20vh] sm:min-h-[25vh] md:min-h-[30vh] flex items-center justify-center overflow-hidden pt-4 pb-4">
         {randomHeaderImage && (
           <div className="absolute inset-0 z-0">
             <Image
