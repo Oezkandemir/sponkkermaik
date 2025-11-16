@@ -27,7 +27,7 @@ export default function Home() {
             sizes="100vw"
           />
           {/* Overlay für bessere Textlesbarkeit */}
-          <div className="absolute inset-0 bg-gradient-to-r from-amber-900/70 via-amber-800/60 to-orange-900/70"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-amber-700/40 via-amber-600/30 to-orange-700/40"></div>
         </div>
         
         {/* Content */}

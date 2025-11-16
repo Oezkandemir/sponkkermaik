@@ -136,7 +136,7 @@ export default function GalerieKurswerkePage() {
                 />
               )}
               {/* Overlay für bessere Textlesbarkeit */}
-              <div className="absolute inset-0 bg-gradient-to-r from-amber-900/70 via-amber-800/60 to-orange-900/70"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-700/40 via-amber-600/30 to-orange-700/40"></div>
             </div>
             <div className="relative z-10 container mx-auto px-4 sm:px-6 text-center">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 leading-tight drop-shadow-lg">

@@ -1,0 +1,57 @@
+# Cursor-spezifische Ignore-Datei
+# Diese Dateien werden von Cursor/VS Code ignoriert
+
+# Node modules und dependencies
+node_modules/
+.pnpm-store/
+.yarn/
+.bun/
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+
+# Lock files
+pnpm-lock.yaml
+bun.lock
+bun.lockb
+package-lock.json
+yarn.lock
+
+# Environment variables
+.env
+.env*.local
+.env.development
+.env.production
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Vercel
+.vercel/
+
+# TypeScript
+*.tsbuildinfo
+
