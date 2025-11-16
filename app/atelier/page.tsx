@@ -38,7 +38,7 @@ export default function AtelierPage() {
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Header mit zufälligem Hintergrundbild */}
-      <section className="relative h-[40vh] sm:h-[50vh] md:h-[60vh] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[20vh] sm:h-[25vh] md:h-[30vh] flex items-center justify-center overflow-hidden">
         {randomHeaderImage && (
           <>
             <div className="absolute inset-0 z-0">
