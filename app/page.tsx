@@ -67,6 +67,21 @@ export default function Home() {
         {/* Content */}
         <div className="relative z-10 container mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20 lg:py-24">
           <div className="max-w-3xl mx-auto text-center">
+            {/* Gutschein Aktions-Banner */}
+            <div className="mb-6 sm:mb-8 animate-pulse">
+              <Link
+                href="/kontakt"
+                className="inline-block bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg md:text-xl shadow-2xl hover:shadow-amber-500/50 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm border-2 border-white/30 relative overflow-hidden group"
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  🎁 Jetzt Gutschein Kaufen
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              </Link>
+            </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight drop-shadow-lg">
               Sponk Keramik & Kurse Düsseldorf
             </h1>
