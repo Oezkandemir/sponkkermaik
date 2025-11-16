@@ -54,7 +54,7 @@ export default async function Home({
   return (
     <div className="bg-gray-50" style={{ marginTop: '0', paddingTop: '0' }}>
       {/* Hero Section - Mobile-first mit Hintergrundbild - 100vh */}
-      <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden" style={{ marginTop: '0', paddingTop: '0' }}>
+      <section className="relative min-h-screen w-full flex items-start justify-center overflow-hidden pt-12 md:pt-16" style={{ marginTop: '0' }}>
         {/* Hintergrundbild */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -72,7 +72,7 @@ export default async function Home({
         </div>
         
         {/* Content */}
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20 lg:py-24">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 py-2 sm:py-4 md:py-6 lg:py-8">
           <div className="max-w-3xl mx-auto text-center">
             {/* Gutschein Aktions-Banner */}
             <div className="mb-6 sm:mb-8 animate-pulse">
