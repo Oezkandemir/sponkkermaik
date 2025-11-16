@@ -112,7 +112,7 @@ export default function Home() {
           <div className="bg-white p-5 sm:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow text-center">
             <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">⚱️</div>
             <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">
-              Töpferkurse
+              Töpferkurse / + Aufbau
             </h3>
             <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
               Lernen Sie die traditionelle Kunst des Töpferns an der Drehscheibe.
