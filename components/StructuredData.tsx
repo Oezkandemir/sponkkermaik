@@ -100,7 +100,7 @@ export default function StructuredData() {
               "itemOffered": {
                 "@type": "Service",
                 "name": "Töpferkurs",
-                "description": "Lernen Sie die traditionelle Kunst des Töpferns an der Drehscheibe"
+                "description": "Lernen Sie die traditionelle Kunst des Töpferns an der Drehscheibe / Werkbank"
               }
             }
           ]

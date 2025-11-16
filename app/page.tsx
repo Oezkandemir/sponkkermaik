@@ -115,7 +115,7 @@ export default function Home() {
               Töpferkurse / + Aufbau
             </h3>
             <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-              Lernen Sie die traditionelle Kunst des Töpferns an der Drehscheibe.
+              Lernen Sie die traditionelle Kunst des Töpferns an der Drehscheibe / Werkbank.
               Unter fachkundiger Anleitung erstellen Sie Ihr eigenes Kunstwerk.
             </p>
           </div>
