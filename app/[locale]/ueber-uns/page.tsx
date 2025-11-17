@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 // Atelier Bilder für Header
 const atelierImages = [
@@ -26,6 +27,7 @@ const atelierImages = [
  */
 export default function UeberUnsPage() {
   const [randomHeaderImage, setRandomHeaderImage] = useState<string>("");
+  const t = useTranslations("about");
 
   // Setze zufälliges Bild nach dem Mount (verhindert Hydration Mismatch)
   useEffect(() => {
@@ -70,10 +72,10 @@ export default function UeberUnsPage() {
               </svg>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg">
-              Info Ablauf
+              {t("title")}
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-white/95 max-w-2xl mx-auto">
-              Sponk Keramik & Kurse Düsseldorf
+              {t("subtitle")}
             </p>
           </div>
         </div>
@@ -86,53 +88,53 @@ export default function UeberUnsPage() {
           {/* Im Dezember: jeden Sonntag Keramik bemalen */}
           <div className="bg-amber-50 rounded-xl p-5 sm:p-6 md:p-8 mb-8">
             <p className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
-              Im Dezember: jeden Sonntag Keramik bemalen.
+              {t("decemberSunday")}
             </p>
             <p className="text-base sm:text-lg font-semibold text-gray-900">
-              Keramik bemalen – W O R K S H O P S – jeden ersten Sonntag! (keine eigenen Werke)
+              {t("workshopNotice")}
             </p>
           </div>
 
           {/* Top Angebot Banner */}
           <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl p-6 sm:p-8 mb-8 text-center">
             <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
-              Sponk Keramik & Kurse Düsseldorf
+              {t("topOfferBannerTitle")}
             </h2>
             <Link
               href="/workshops"
               className="inline-block bg-white text-amber-600 px-6 py-3 rounded-lg font-bold text-sm sm:text-base hover:bg-gray-100 transition-colors mt-4"
             >
-              HIER KLICKEN
+              {t("topOfferBannerButton")}
             </Link>
             <p className="text-white font-semibold mt-4 text-lg">
-              zum TOP Angebot
+              {t("topOfferBannerText")}
             </p>
             <p className="text-white text-xl sm:text-2xl font-bold mt-2">
-              Keramik bemalen 39 €
+              {t("topOfferBannerPrice")}
             </p>
           </div>
 
           {/* Hauptinhalt */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-              Sponk Keramik & Kurse Düsseldorf – Herzlich willkommen, liebe Keramikfans!
+              {t("welcomeTitle")}
             </h2>
             <p className="text-base sm:text-lg text-gray-700 mb-6 leading-relaxed">
-              Entdecke die kreative Welt der Sponk Keramik & Kurse Düsseldorf! Ob Keramik bemalen, töpfern oder einzigartige handgefertigte Stücke kaufen – bei uns findest du alles, was das Herz eines Keramikliebhabers begehrt. Tauche ein in eine entspannte Atmosphäre und lass deiner Fantasie freien Lauf.
+              {t("welcomeText")}
             </p>
 
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 mt-8">
-              Keramik bemalen in Düsseldorf – jeden ersten Sonntag!
+              {t("paintingSundayTitle")}
             </h3>
             <p className="text-base sm:text-lg text-gray-700 mb-6 leading-relaxed">
-              Gestalte deine eigenen Keramikkunstwerke! In unseren Workshops bei Sponk Keramik & Kurse Düsseldorf kannst du vorgefertigte Keramikrohlinge bemalen und so einzigartige Designs kreieren. Perfekt für Familien, Kindergeburtstage oder eine kreative Zeit mit Freunden.
+              {t("paintingSundayText")}
             </p>
           </div>
 
           {/* Google Bewertungen */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-8">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl font-bold text-gray-900">AUSGEZEICHNET</span>
+              <span className="text-2xl font-bold text-gray-900">{t("excellentRating")}</span>
               <div className="flex gap-1">
                 {[...Array(5)].map((_, i) => (
                   <svg key={i} className="w-6 h-6 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
@@ -142,10 +144,10 @@ export default function UeberUnsPage() {
               </div>
             </div>
             <p className="text-gray-600 mb-6">
-              GoogleGoogleGoogleGoogleGoogle
+              {t("googleRating")}
             </p>
             <p className="text-gray-700 mb-6">
-              Basierend auf 72 Bewertungen
+              {t("basedOnReviews")}
             </p>
 
             {/* Bewertungen */}
@@ -165,7 +167,7 @@ export default function UeberUnsPage() {
                     ))}
                   </div>
                 </div>
-                <p className="text-gray-700">Toller Ort zum Kreativ Sein! Eine angenehme Atmosphäre!</p>
+                <p className="text-gray-700">{t("review1")}</p>
               </div>
 
               <div className="border-b border-gray-200 pb-4">
@@ -183,7 +185,7 @@ export default function UeberUnsPage() {
                     ))}
                   </div>
                 </div>
-                <p className="text-gray-700">Sehr angenehme Atmosphäre. Total netter positiver Host. Es hat sehr viel Spaß gemacht!</p>
+                <p className="text-gray-700">{t("review2")}</p>
               </div>
 
               <div className="border-b border-gray-200 pb-4">
@@ -201,8 +203,8 @@ export default function UeberUnsPage() {
                     ))}
                   </div>
                 </div>
-                <p className="text-gray-700">Ich war mit meiner Tochter (15) zum Keramik bemalen im Sponk. Es war richtig schön und hat uns beiden sehr viel Spaß gemacht! Die Mitarbeiter waren super freundlich und haben uns mit Rat und Tat zur Seite gestanden! Wir sind schon sehr gespannt auf das Ergebnis. Wir werden auf jeden Fall wiederkommen und in einer sehr schönen und entspannten Location einen weiteren Workshop besuchen! Danke für den schönen Nachmittag!! Tina</p>
-                <p className="text-gray-600 text-sm mt-2">Weiterlesen</p>
+                <p className="text-gray-700">{t("review3")}</p>
+                <p className="text-gray-600 text-sm mt-2">{t("readMore")}</p>
               </div>
 
               <div className="border-b border-gray-200 pb-4">
@@ -220,8 +222,8 @@ export default function UeberUnsPage() {
                     ))}
                   </div>
                 </div>
-                <p className="text-gray-700">Wir haben den JGA einer guten Freundin bei euch verbracht. Es war super schön, ihr habt alles sehr schön gestaltet und auch alles sehr gut erklärt. Wir haben uns sehr wohl gefühlt, wurden mit Getränken und Snacks versorgt. Wir kommen sicherlich sehr sehr gerne wieder mal vorbei. :)</p>
-                <p className="text-gray-600 text-sm mt-2">Weiterlesen</p>
+                <p className="text-gray-700">{t("review4")}</p>
+                <p className="text-gray-600 text-sm mt-2">{t("readMore")}</p>
               </div>
 
               <div className="border-b border-gray-200 pb-4">
@@ -239,8 +241,8 @@ export default function UeberUnsPage() {
                     ))}
                   </div>
                 </div>
-                <p className="text-gray-700">Sehr nettes und schönes Ambiente, mit freundlichen Mitarbeitern. Wir hatten das Angebot des glasieren (Keramik bemalen)an einem Rohling wahrgenommen und waren sehr zufrieden mit der Beratung und Hilfe während des Prozesses. Vielen Lieben Dank für diese wunderbare Erfahrung 🌻</p>
-                <p className="text-gray-600 text-sm mt-2">Weiterlesen</p>
+                <p className="text-gray-700">{t("review5")}</p>
+                <p className="text-gray-600 text-sm mt-2">{t("readMore")}</p>
               </div>
 
               <div className="border-b border-gray-200 pb-4">
@@ -258,8 +260,8 @@ export default function UeberUnsPage() {
                     ))}
                   </div>
                 </div>
-                <p className="text-gray-700">Zum Keramik bemalen da gewesen. Wundervolle Atmosphäre, super freundliche Mitarbeiter und einfach viel Platz richtig kreativ zu werden. Freue mich schon darauf, das Ergebnis bald abzuholen! Ganz klare Weiterempfehlung 👍🏼</p>
-                <p className="text-gray-600 text-sm mt-2">Weiterlesen</p>
+                <p className="text-gray-700">{t("review6")}</p>
+                <p className="text-gray-600 text-sm mt-2">{t("readMore")}</p>
               </div>
 
               <div className="pb-4">
@@ -277,8 +279,8 @@ export default function UeberUnsPage() {
                     ))}
                   </div>
                 </div>
-                <p className="text-gray-700">Haben Keramik bemalt, Preis Leistung super, die Farbauswahl war leider nicht so groß und die Farben an sich waren auch schwer zu verteilen im Vergleich zu anderen Workshops. Nette und hilfsbereite Mitarbeitende.</p>
-                <p className="text-gray-600 text-sm mt-2">Weiterlesen</p>
+                <p className="text-gray-700">{t("review7")}</p>
+                <p className="text-gray-600 text-sm mt-2">{t("readMore")}</p>
               </div>
             </div>
           </div>
@@ -286,14 +288,14 @@ export default function UeberUnsPage() {
           {/* Bernd Schwarzer Sektion */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-8">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-              Bernd Schwarzer, Joseph Beuys Schüler
+              {t("berndTitle")}
             </h3>
             
             {/* Bild von Bernd Schwarzer */}
             <div className="relative w-full h-64 sm:h-96 mb-6 rounded-lg overflow-hidden">
               <Image
                 src="/images/bernd.webp"
-                alt="Bernd Schwarzer und Bülent Tepe im Keramik Atelier"
+                alt={t("berndImageAlt")}
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -301,65 +303,65 @@ export default function UeberUnsPage() {
             </div>
 
             <p className="text-base sm:text-lg text-gray-700 mb-4 leading-relaxed">
-              Joseph Beuys Schüler Bernd Schwarzer ehrt mich in meinem Atelier, um sein Keramik Projekt zu verwirklichen und ich freue mich sehr meinem Mentor zur assistieren.
+              {t("berndText")}
             </p>
           </div>
 
           {/* Handgemachte Keramikkunst kaufen */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-8">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-              Handgemachte Keramikkunst kaufen
+              {t("handmadeTitle")}
             </h3>
             <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
-              In unserem Shop erwartet dich eine sorgfältig kuratierte Auswahl an handgemachten Keramiken. Jedes Stück ist ein Unikat, das mit Liebe zum Detail gefertigt wurde. Ob als Geschenk oder Dekoration – hier findest du Keramik, die begeistert.
+              {t("handmadeText")}
             </p>
           </div>
 
           {/* Standort */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-8">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-              Sponk Keramik Workshops Fürstenplatz 15 40215 Düsseldorf
+              {t("locationTitle")}
             </h3>
             <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
-              Warum Sponk Keramik & Kurse Düsseldorf?
+              {t("whyUs")}
             </h4>
             <ul className="list-disc list-inside text-base sm:text-lg text-gray-700 space-y-2 mb-6">
-              <li>Kreative Auszeit in einer inspirierenden Umgebung</li>
-              <li>Hochwertige Materialien und professionelles Equipment</li>
-              <li>Vielseitige Angebote für Anfänger und Fortgeschrittene</li>
-              <li>Exklusive handgefertigte Keramiken aus unserer Werkstatt</li>
+              <li>{t("whyUsItems.creative")}</li>
+              <li>{t("whyUsItems.materials")}</li>
+              <li>{t("whyUsItems.diverse")}</li>
+              <li>{t("whyUsItems.exclusive")}</li>
             </ul>
             <p className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
-              Melde dich jetzt an und erlebe die Magie von Sponk Keramik & Kurse Düsseldorf!
+              {t("registerNow")}
             </p>
             <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
-              bei Sponk Keramik kannst du mit unterschiedlichen Aufbautechniken viele kreative Werke erstellen, an der Töpferscheibe arbeiten oder an einem fertigen Rohling deine Glasur-Fertigkeiten ausprobieren. Bist du Einsteiger oder auch schon erfahren, komm vorbei und genieße die nette Atmosphäre, wo du absolut entschleunigt wirst.
+              {t("descriptionText")}
             </p>
             <p className="text-base sm:text-lg text-gray-700 mt-4 leading-relaxed">
-              Viele Geschenkideen für Ihr Liebsten, ob für Geburtstag, Muttertag oder einfach so.
+              {t("giftIdeas")}
             </p>
             <p className="text-base sm:text-lg text-gray-700 mt-4 leading-relaxed italic">
-              Der Ton ist ein wunderbares Naturprodukt, womit jeder ein einzigartiges Werk erstellen kann.
+              {t("quote")}
             </p>
             <p className="text-base sm:text-lg text-gray-700 mt-2 text-right">
-              – Bülent Tepe
+              {t("quoteAuthor")}
             </p>
           </div>
 
           {/* Ablauf-Fertigung */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-8">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-              Ablauf-Fertigung von Keramiken
+              {t("processTitle")}
             </h3>
             <div className="text-base sm:text-lg text-gray-700 space-y-4 leading-relaxed">
               <p>
-                Der Ton wird am Anfang ordentlich homogenisiert indem es mindestens drei Minuten, wie ein Pizzateig geknetet wird. Hierbei achten wir drauf, dass keine Lufteinschlüsse im Ton sich befinden, denn diese explodieren während des Schrühbrandes (Erstbrannd) und zerstört vielleicht auch andere Werke.
+                {t("processText1")}
               </p>
               <p>
-                Der vorbereiteter Ton kann jetzt mit unterschiedlichen Techniken (Töpfern, Aufbau am Tisch) geformt werden. Hierbei kennt die Kreativität keine Grenzen und wunderbare Werke entstehen jedesmal, die dann in Raumtemperatur mindestens 5-7 Tage trocknen müssen, bevor die bei ca. 900 Grad Schrüh gebrannt werden. Dauert gesamt ca. 48 Stunden mit der Abkühlphase, bevor die Werke aus dem Ofen wieder herausgeholt werden können. Jetzt sind die Werke bereit zum glasieren (bemalen). Unterschiedliche Techniken können je nach Ergebniswunsch angewendet werden, um spannende Ziele zu erreichen. Die Glasur arbeitet im Ofen bei über 1000 Grad und deswegen hat es ein Eigenleben, was immer wieder uns Keramiker überrascht. Daher gibt es beim Glasieren auch wichtige Punkte, die sehr beachtet werden müssen.
+                {t("processText2")}
               </p>
               <p className="font-semibold">
-                Jeder Keramikfans soll Glücklich sein, wenn er sich mit Ton beschäftigt und dafür steht Sponk Keramik & Kurse.
+                {t("processConclusion")}
               </p>
             </div>
           </div>
@@ -367,47 +369,47 @@ export default function UeberUnsPage() {
           {/* Mach mit */}
           <div className="bg-amber-50 rounded-xl p-5 sm:p-6 md:p-8 mb-8">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-              Mach mit – Kreativität ohne Grenzen bei Sponk Keramik & Kurse Düsseldorf
+              {t("creativeTitle")}
             </h3>
             <p className="text-base sm:text-lg text-gray-700 mb-4 leading-relaxed">
-              Sponk Keramik & Kurse Düsseldorf bietet dir nicht nur Kurse und Workshops, sondern auch eine Möglichkeit, dem stressigen Alltag zu entfliehen. Hier kannst du entspannen, kreativ werden und handgefertigte Kunstwerke erschaffen, die deine Persönlichkeit widerspiegeln.
+              {t("creativeText1")}
             </p>
             <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
-              Ob du dich für das bemalen von Keramik oder das Töpfern entscheidest – wir haben alles, was du brauchst, um deine Vision Wirklichkeit werden zu lassen. Unser erfahrenes Team steht dir bei jedem Schritt zur Seite und sorgt dafür, dass du eine unvergessliche Zeit bei uns hast.
+              {t("creativeText2")}
             </p>
           </div>
 
           {/* Angebote im Detail */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-8">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
-              Unsere Angebote im Detail
+              {t("offersTitle")}
             </h3>
             
             <div className="space-y-6">
               <div>
                 <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
-                  Workshops für Erwachsene
+                  {t("adultsTitle")}
                 </h4>
                 <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
-                  In unseren speziellen Kursen für Erwachsene kannst du in einer entspannten Atmosphäre deiner Kreativität freien Lauf lassen. Ideal, um nach der Arbeit abzuschalten oder neue Menschen mit ähnlichen Interessen kennenzulernen.
+                  {t("adultsText")}
                 </p>
               </div>
 
               <div>
                 <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
-                  Familienangebote
+                  {t("familyTitle")}
                 </h4>
                 <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
-                  Erlebe kreative Stunden mit deinen Kindern! Gemeinsam könnt ihr wunderschöne Keramik bemalen oder an einfachen Töpferprojekten arbeiten. Ein Erlebnis, das die ganze Familie zusammenschweißt.
+                  {t("familyText")}
                 </p>
               </div>
 
               <div>
                 <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
-                  Individuelle Events
+                  {t("eventsTitle")}
                 </h4>
                 <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
-                  Planst du eine besondere Feier? Ob Geburtstage, Junggesellenabschiede oder Firmenveranstaltungen – bei Sponk Keramik & Kurse Düsseldorf kannst du deine Events kreativ gestalten. Wir bieten dir maßgeschneiderte Pakete für unvergessliche Erlebnisse.
+                  {t("eventsText")}
                 </p>
               </div>
             </div>
@@ -416,44 +418,44 @@ export default function UeberUnsPage() {
           {/* Standort */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-8">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-              Unser Standort in Düsseldorf – leicht erreichbar
+              {t("locationSubTitle")}
             </h3>
             <p className="text-base sm:text-lg text-gray-700 mb-4 leading-relaxed">
-              Unser Studio befindet sich in einer zentralen Lage in Düsseldorf und ist einfach zu erreichen, ob mit dem Auto oder den öffentlichen Verkehrsmitteln. Wir laden dich ein, bei uns vorbeizukommen, die entspannte Atmosphäre zu genießen und dich inspirieren zu lassen.
+              {t("locationText1")}
             </p>
             <p className="text-base sm:text-lg font-semibold text-gray-900">
-              Sponk Keramik Workshops Fürstenplatz 15 Düsseldorf
+              {t("locationText2")}
             </p>
           </div>
 
           {/* FAQ */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-8">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
-              Häufige Fragen (FAQ)
+              {t("faqTitle")}
             </h3>
             <div className="space-y-4">
               <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                  Wie kann ich einen Kurs bei Sponk Keramik & Kurse Düsseldorf buchen?
+                  {t("faq1Question")}
                 </h4>
                 <p className="text-base text-gray-700 leading-relaxed">
-                  Ganz einfach! Besuche unsere Webseite und wähle deinen Wunschkurs aus. Du kannst direkt online buchen oder uns kontaktieren, falls du Fragen hast.
+                  {t("faq1Answer")}
                 </p>
               </div>
               <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                  Brauche ich Vorkenntnisse?
+                  {t("faq2Question")}
                 </h4>
                 <p className="text-base text-gray-700 leading-relaxed">
-                  Nein, unsere Kurse sind für alle Erfahrungsstufen geeignet – vom Anfänger bis zum Fortgeschrittenen.
+                  {t("faq2Answer")}
                 </p>
               </div>
               <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                  Welche Materialien werden verwendet?
+                  {t("faq3Question")}
                 </h4>
                 <p className="text-base text-gray-700 leading-relaxed">
-                  Wir stellen dir alle Materialien und Werkzeuge, die du brauchst, zur Verfügung. Du kannst dich voll und ganz auf dein kreatives Projekt konzentrieren.
+                  {t("faq3Answer")}
                 </p>
               </div>
             </div>
@@ -462,107 +464,107 @@ export default function UeberUnsPage() {
           {/* Bereit kreativ zu werden */}
           <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl p-5 sm:p-6 md:p-8 mb-8 text-center">
             <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">
-              Bereit, kreativ zu werden?
+              {t("readyTitle")}
             </h3>
             <p className="text-base sm:text-lg text-white mb-6">
-              Jetzt ist der perfekte Moment, um bei Sponk Keramik & Kurse Düsseldorf vorbeizuschauen. Buche deinen Workshop noch heute und entdecke die Freude an handgemachter Kunst!
+              {t("readyText1")}
             </p>
             <p className="text-base sm:text-lg text-white mb-4">
-              Hier findest du das optimale Geschenk für deine Liebsten, und mit 10 Tagen Vorlaufzeit kannst du sogar die Farben aussuchen.
+              {t("readyText2")}
             </p>
             <Link
               href="/workshops"
               className="inline-block bg-white text-amber-600 px-6 py-3 rounded-lg font-bold text-sm sm:text-base hover:bg-gray-100 transition-colors"
             >
-              Jetzt Workshop buchen
+              {t("bookNow")}
             </Link>
           </div>
 
           {/* Gruppen Events */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-8">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-              Gruppen Events
+              {t("groupEventsTitle")}
             </h3>
             <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
-              Hier können Personen eine schöne Zeit erleben, indem Sie ein Keramikrohling nur Glasieren(selber bemalen), oder selber Werke erstellen. Beim nur Glasieren von Rohlingen ein Besuch, beim Werke erstellen zwei Besuche im Atelier. In der Werkstatt produzierte Unikate, sowie Keramikrohlinge industriell Hergestellt stehen zur Auswahl. Die Dauer und die gastronomischen Punkte werden detailliert besprochen. Der Preis ist abhängig vom Umfang, daher bei Anfrage zu klären.
+              {t("groupEventsText")}
             </p>
           </div>
 
           {/* Kindergeburtstage */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-8">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-              Kindergeburtstage
+              {t("birthdaysTitle")}
             </h3>
             <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
-              Bis zu 12 Kinder können einen unvergesslichen Mal-Event erleben, wo die sehr kreativ sein können. Die Kinder haben die Möglichkeit eine Milchtasse, ein Teller oder eine Müslischale zu glasieren (bemalen). Zudem werden die Kinder im Atelier rumgeführt und sehen den großen Keramik Brennofen, was immer zur Begeisterung führt. Die Kinder haben ein wunderbares Andenken von diesem besonderen Tag, was die mit nach Hause nehmen können. Pro Kind 33,-€.
+              {t("birthdaysText")}
             </p>
           </div>
 
           {/* Willkommen */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-8">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-              Willkommen bei Sponk Keramik– Kreativität trifft Handwerk
+              {t("welcomeSection")}
             </h3>
             <p className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
-              Entdecke die Welt der Keramik: Bemalen, Töpfern und Kaufen!
+              {t("discoverTitle")}
             </p>
             <p className="text-base sm:text-lg text-gray-700 mb-6 leading-relaxed">
-              Möchtest du deiner Kreativität freien Lauf lassen? Bei Sponkkeramik bieten wir dir die Möglichkeit, einzigartige Keramikkunstwerke selbst zu gestalten oder kunstvolle Stücke für dein Zuhause zu erwerben. Egal, ob Anfänger oder erfahrener Künstler – bei uns findest du Inspiration und die perfekte Umgebung für deine Keramikprojekte.
+              {t("discoverText")}
             </p>
 
             <div className="space-y-6">
               <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                  Keramik bemalen
+                  {t("paintingTitle")}
                 </h4>
                 <p className="text-base text-gray-700 leading-relaxed">
-                  Verleihe deiner Fantasie Ausdruck! In unserer Werkstatt kannst du Keramikrohlinge nach Herzenslust bemalen. Wähle aus einer großen Auswahl an Formen und Farben und kreiere dein ganz persönliches Kunstwerk. Ideal für Familien, Kindergeburtstage oder entspannte Nachmittage mit Freunden.
+                  {t("paintingText")}
                 </p>
               </div>
 
               <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                  Töpferkurse für alle Niveaus
+                  {t("potteryTitle")}
                 </h4>
                 <p className="text-base text-gray-700 leading-relaxed">
-                  Wolltest du schon immer dein eigenes Geschirr oder Dekorationen aus Ton formen? Unsere Töpferkurse bieten dir die Möglichkeit, die Grundlagen zu erlernen oder deine Fähigkeiten zu vertiefen. Mit professioneller Anleitung und hochwertigem Material wirst du schnell erstaunliche Ergebnisse erzielen.
+                  {t("potteryText")}
                 </p>
               </div>
 
               <div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                  Keramik Unikate kaufen
+                  {t("buyTitle")}
                 </h4>
                 <p className="text-base text-gray-700 leading-relaxed">
-                  Suchst du nach handgefertigten Unikaten für dein Zuhause oder als Geschenk? In unserem Shop findest du liebevoll gestaltete Keramikwaren, die durch ihre Qualität und Einzigartigkeit begeistern. Jede Kreation ist ein Ausdruck von Handwerkskunst und Leidenschaft.
+                  {t("buyText")}
                 </p>
               </div>
             </div>
 
             <h4 className="text-lg font-semibold text-gray-900 mt-6 mb-4">
-              Warum Sponk Keramik
+              {t("whySponk")}
             </h4>
             <ul className="list-disc list-inside text-base text-gray-700 space-y-2 mb-6">
-              <li>Kreative Auszeit in entspannter Atmosphäre</li>
-              <li>Qualitativ hochwertige Materialien und Werkzeuge</li>
-              <li>Individuelle Betreuung und Inspiration für jedes Projekt</li>
-              <li>Große Auswahl an handgefertigten Keramikprodukten</li>
+              <li>{t("whySponkItems.creative")}</li>
+              <li>{t("whySponkItems.materials")}</li>
+              <li>{t("whySponkItems.support")}</li>
+              <li>{t("whySponkItems.selection")}</li>
             </ul>
             <p className="text-base text-gray-700 mb-4 leading-relaxed">
-              Besuche uns vor Ort oder online und lass dich inspirieren!
+              {t("visitOnline")}
             </p>
             <p className="text-base font-semibold text-gray-900">
-              Melde dich noch heute für einen Kurs an oder stöbere in unserem Shop. Gemeinsam schaffen wir Kunst, die begeistert.
+              {t("registerToday")}
             </p>
           </div>
 
           {/* Abholung */}
           <div className="bg-amber-50 rounded-xl p-5 sm:p-6 md:p-8">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-              Informationen zur Abholung
+              {t("pickupTitle")}
             </h3>
             <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
-              Bitte hole deine angefertigten oder fertig gebrannten Keramikstücke innerhalb von 6 Monaten nach dem Kurs ab. Nach Ablauf dieser Frist können wir keine Aufbewahrung garantieren und behalten uns vor, die Arbeiten zu entsorgen oder anderweitig zu verwenden. Vielen Dank für dein Verständnis und deine Wertschätzung unserer Werkstattarbeit!
+              {t("pickupText")}
             </p>
           </div>
         </div>

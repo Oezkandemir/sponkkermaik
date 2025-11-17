@@ -1,9 +1,11 @@
 "use client";
 
 import { artistInfo } from "@/lib/data";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 
 /**
  * Galerie Atelier Seite
@@ -27,6 +29,9 @@ const atelierImages = [
 
 export default function AtelierPage() {
   const [randomHeaderImage, setRandomHeaderImage] = useState<string>("");
+  const params = useParams();
+  const currentLocale = (params.locale as string) || "de";
+  const t = useTranslations("atelier");
 
   useEffect(() => {
     // Zufälliges Bild für Header bei jedem Page Load
@@ -36,7 +41,7 @@ export default function AtelierPage() {
   }, []);
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div key={currentLocale} className="bg-gray-50 min-h-screen">
       {/* Header mit zufälligem Hintergrundbild */}
       <section className="relative min-h-[20vh] sm:min-h-[25vh] md:min-h-[30vh] flex items-center justify-center overflow-hidden pt-4 pb-4">
         {randomHeaderImage && (
@@ -44,7 +49,7 @@ export default function AtelierPage() {
             <div className="absolute inset-0 z-0">
               <Image
                 src={`/images/atelier/${randomHeaderImage}`}
-                alt="Sponk Keramik Atelier"
+                alt={t("subtitle")}
                 fill
                 priority
                 className="object-cover"
@@ -56,10 +61,10 @@ export default function AtelierPage() {
             </div>
             <div className="relative z-10 container mx-auto px-4 sm:px-6 text-center">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 leading-tight drop-shadow-lg">
-                Galerie Atelier
+                {t("title")}
               </h1>
               <p className="text-base sm:text-lg md:text-xl text-white/95 leading-relaxed drop-shadow-md">
-                Handgefertigte Keramikkunstwerke von {artistInfo.name}
+                {t("subtitle")}
               </p>
             </div>
           </>
@@ -72,22 +77,20 @@ export default function AtelierPage() {
           {/* Künstler Info */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-6 sm:mb-8">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Über den Künstler
+              {t("aboutArtist")}
             </h2>
             <p className="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4 leading-relaxed">
-              {artistInfo.description}
+              {t("artistDescriptionFull")}
             </p>
             <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-              Jedes Stück wird mit höchster Sorgfalt und künstlerischem Anspruch
-              gefertigt. Die Keramikwerke spiegeln die jahrelange Erfahrung und
-              Leidenschaft für das Handwerk wider.
+              {t("artistDescription")}
             </p>
           </div>
 
           {/* Galerie */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-6 sm:mb-8">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
-              Galerie
+              {t("gallery")}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {atelierImages.map((image, index) => (
@@ -97,7 +100,7 @@ export default function AtelierPage() {
                 >
                   <Image
                     src={`/images/atelier/${image}`}
-                    alt={`Keramikkunstwerk ${index + 1}`}
+                    alt={`${t("gallery")} ${index + 1}`}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -106,32 +109,30 @@ export default function AtelierPage() {
               ))}
             </div>
             <p className="text-sm sm:text-base text-gray-600 mt-4 sm:mt-6 text-center">
-              Besuchen Sie unser Atelier, um die Werke persönlich zu betrachten
+              {t("visitAtelier")}
             </p>
           </div>
 
           {/* Preise und Verfügbarkeit */}
           <div className="bg-amber-50 rounded-xl p-5 sm:p-6 md:p-8">
             <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Verfügbarkeit und Preise
+              {t("availabilityTitle")}
             </h3>
             <p className="text-sm sm:text-base text-gray-700 mb-4 sm:mb-6 leading-relaxed">
-              Die Preise für unsere handgefertigten Keramikkunstwerke variieren je
-              nach Größe, Komplexität und Material. Besuchen Sie uns im Atelier,
-              um die aktuellen Werke zu sehen und individuelle Preise zu erfragen.
+              {t("availabilityDescription")}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Link
                 href="/oeffnungszeiten"
                 className="bg-amber-700 text-white px-6 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base hover:bg-amber-800 active:bg-amber-900 transition-all duration-200 text-center shadow-md hover:shadow-lg touch-manipulation min-h-[48px] flex items-center justify-center"
               >
-                Öffnungszeiten
+                {t("openingHours")}
               </Link>
               <Link
                 href="/kontakt"
                 className="bg-white text-amber-600 px-6 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base border-2 border-amber-600 hover:bg-amber-50 active:bg-amber-100 transition-all duration-200 text-center shadow-md hover:shadow-lg touch-manipulation min-h-[48px] flex items-center justify-center"
               >
-                Kontakt aufnehmen
+                {t("contact")}
               </Link>
             </div>
           </div>

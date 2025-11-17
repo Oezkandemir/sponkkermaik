@@ -9,6 +9,22 @@ interface CourseCardProps {
   workshop: Workshop;
 }
 
+/**
+ * Mapping-Funktion: Workshop-ID zu Übersetzungs-Key
+ */
+function getWorkshopTranslationKey(workshopId: string): string {
+  const mapping: Record<string, string> = {
+    "workshop-nur-keramik-bemalen-glasieren": "workshop1",
+    "topferscheibe-testen": "workshop2",
+    "aufbau-workshop-1": "workshop3",
+    "keramik-bemalen-sonntag": "workshop4",
+    "aufbau-workshop-2": "workshop5",
+    "einsteiger-kurse-topferscheibe": "workshop6",
+    "gruppen-events-workshops": "workshop7",
+  };
+  return mapping[workshopId] || "workshop1";
+}
+
 const atelierImages = [
   "IMG_5264-1152x1536.webp",
   "IMG_5345-1152x1536.webp",
@@ -33,6 +49,18 @@ export default function CourseCard({ workshop }: CourseCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [randomHeaderImage, setRandomHeaderImage] = useState<string>("");
   const t = useTranslations("courseCard");
+  const tWorkshops = useTranslations("workshopsData");
+  
+  // Workshop-Übersetzungs-Key basierend auf ID
+  const workshopKey = getWorkshopTranslationKey(workshop.id);
+  
+  // Übersetzte Workshop-Daten
+  const translatedTitle = tWorkshops(`${workshopKey}.title`);
+  const translatedDescription = tWorkshops(`${workshopKey}.description`);
+  const translatedDuration = tWorkshops(`${workshopKey}.duration`);
+  const translatedPrice = tWorkshops(`${workshopKey}.price`);
+  const translatedBadge = workshop.badgeText ? tWorkshops(`${workshopKey}.badge` as any) : undefined;
+  const translatedDay = workshop.day ? tWorkshops(`${workshopKey}.day` as any) : undefined;
 
   // Zufälliges Atelier-Bild beim Öffnen des Modals
   useEffect(() => {
@@ -65,7 +93,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
       document.body.style.overflow = "unset";
     };
   }, [isModalOpen]);
-  const hasBadgeText = workshop.badgeText !== undefined && workshop.badgeText !== "";
+  const hasBadgeText = translatedBadge !== undefined && translatedBadge !== "";
   const isFirstWorkshop = workshop.id === "workshop-nur-keramik-bemalen-glasieren";
   const useObjectContain = workshop.id === "workshop-nur-keramik-bemalen-glasieren" || workshop.id === "aufbau-workshop-2" || workshop.id === "einsteiger-kurse-topferscheibe" || workshop.id === "gruppen-events-workshops";
   
@@ -76,11 +104,11 @@ export default function CourseCard({ workshop }: CourseCardProps) {
         : "border-gray-100"
     }`}>
       {/* Badge für "Best preis garantie" */}
-      {hasBadgeText && (
+      {hasBadgeText && translatedBadge && (
         <div className="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 text-white text-center py-4 px-6 font-bold text-lg sm:text-xl md:text-2xl shadow-lg border-b-4 border-amber-700">
           <div className="flex items-center justify-center gap-2 sm:gap-3">
             <span className="text-2xl sm:text-3xl">⭐</span>
-            <span className="uppercase tracking-wide">{workshop.badgeText}</span>
+            <span className="uppercase tracking-wide">{translatedBadge}</span>
             <span className="text-2xl sm:text-3xl">⭐</span>
           </div>
         </div>
@@ -97,7 +125,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
             }`}>
               <Image
                 src={image}
-                alt={`${workshop.title} - Bild ${index + 1}`}
+                alt={`${translatedTitle} - Bild ${index + 1}`}
                 fill
                 className={useObjectContain ? "object-contain" : "object-cover"}
                 sizes="(max-width: 640px) 33vw, 16vw"
@@ -109,7 +137,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
       
       <div className="p-4 sm:p-6 flex-grow flex flex-col">
         <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
-          {workshop.title}
+          {translatedTitle}
         </h3>
         
         {/* Beschreibung mit besserer Formatierung */}
@@ -128,7 +156,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
                 <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                {workshop.description}
+                {translatedDescription}
               </p>
             </div>
           </div>
@@ -152,11 +180,11 @@ export default function CourseCard({ workshop }: CourseCardProps) {
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">{t("duration")}</p>
-              <p className="text-sm sm:text-base font-semibold text-gray-900">{workshop.duration}</p>
+              <p className="text-sm sm:text-base font-semibold text-gray-900">{translatedDuration}</p>
             </div>
           </div>
           
-          {workshop.day && (
+          {translatedDay && (
             <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-200">
               <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                 <svg
@@ -173,7 +201,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
               </div>
               <div>
                 <p className="text-xs text-gray-500 font-medium">{t("day")}</p>
-                <p className="text-sm sm:text-base font-semibold text-gray-900">{workshop.day}</p>
+                <p className="text-sm sm:text-base font-semibold text-gray-900">{translatedDay}</p>
               </div>
             </div>
           )}
@@ -194,7 +222,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
             </div>
             <div>
               <p className="text-xs text-gray-600 font-medium">{t("price")}</p>
-              <p className="text-sm sm:text-base font-bold text-amber-700">{workshop.price}</p>
+              <p className="text-sm sm:text-base font-bold text-amber-700">{translatedPrice}</p>
             </div>
           </div>
         </div>
@@ -247,7 +275,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
               {/* Header Content */}
               <div className="relative z-10 flex items-center justify-between p-3 sm:p-4 h-full">
                 <h3 className="text-base sm:text-lg font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] leading-tight pr-2">
-                  {workshop.title} - {t("bookingTitle")}
+                  {translatedTitle} - {t("bookingTitle")}
                 </h3>
                 <button
                   onClick={() => setIsModalOpen(false)}
@@ -274,7 +302,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
               <iframe
                 src={workshop.bookingLink}
                 className="w-full h-full border-0"
-                title={`Buchung für ${workshop.title}`}
+                title={`Buchung für ${translatedTitle}`}
                 allow="camera; microphone; geolocation"
                 loading="lazy"
               />

@@ -78,10 +78,10 @@ export default function WorkshopsPage() {
               </svg>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg">
-              Workshops & Preise
+              {t("title")}
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-white/95 max-w-2xl mx-auto">
-              Entdecken Sie unsere vielfältigen Angebote für Keramik bemalen und Töpferkurse
+              {t("subtitle")}
             </p>
           </div>
         </div>
@@ -124,25 +124,23 @@ export default function WorkshopsPage() {
           {/* Buchungsinformationen - Mobile optimiert */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-6 sm:mb-8">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Buchungsinformationen
+              {t("bookingInfo")}
             </h2>
             <p className="text-sm sm:text-base text-gray-700 mb-4 sm:mb-6 leading-relaxed">
-              Die meisten Workshops können Sie direkt über die Buchungslinks oben
-              buchen. Alternativ kontaktieren Sie uns per E-Mail oder besuchen Sie
-              uns während unserer Öffnungszeiten im Atelier.
+              {t("bookingDescription")}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Link
                 href="/kontakt"
                 className="bg-amber-700 text-white px-6 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base hover:bg-amber-800 active:bg-amber-900 transition-all duration-200 text-center shadow-md hover:shadow-lg touch-manipulation min-h-[48px] flex items-center justify-center"
               >
-                Kontakt aufnehmen
+                {t("contactUs")}
               </Link>
               <Link
                 href="/oeffnungszeiten"
                 className="bg-gray-100 text-gray-800 px-6 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base hover:bg-gray-200 active:bg-gray-300 transition-all duration-200 text-center shadow-md hover:shadow-lg touch-manipulation min-h-[48px] flex items-center justify-center"
               >
-                Öffnungszeiten ansehen
+                {t("viewOpeningHours")}
               </Link>
             </div>
           </div>
@@ -150,15 +148,15 @@ export default function WorkshopsPage() {
           {/* Zusätzliche Informationen - Mobile optimiert */}
           <div className="bg-amber-50 rounded-xl p-5 sm:p-6 md:p-8">
             <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Was Sie erwartet
+              {t("whatToExpect")}
             </h3>
             <ul className="list-disc list-inside text-sm sm:text-base text-gray-700 space-y-2 sm:space-y-3 leading-relaxed">
-              <li>Fachkundige Anleitung durch erfahrene Keramiker</li>
-              <li>Alle Materialien sind im Preis enthalten</li>
-              <li>Ihre Werke können Sie nach dem Brennen abholen</li>
-              <li>Perfekt für Anfänger und Fortgeschrittene</li>
-              <li>Gruppenkurse und individuelle Betreuung möglich</li>
-              <li>Direkte Online-Buchung über cal.com möglich</li>
+              <li>{t("expectations.expertGuidance")}</li>
+              <li>{t("expectations.materialsIncluded")}</li>
+              <li>{t("expectations.pickupAfterFiring")}</li>
+              <li>{t("expectations.allLevels")}</li>
+              <li>{t("expectations.groupCourses")}</li>
+              <li>{t("expectations.onlineBooking")}</li>
             </ul>
           </div>
         </div>

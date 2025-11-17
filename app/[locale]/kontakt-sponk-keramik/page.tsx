@@ -4,6 +4,7 @@ import { contactInfo } from "@/lib/data";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 // Atelier Bilder für Header
 const atelierImages = [
@@ -27,6 +28,7 @@ const atelierImages = [
  */
 export default function KontaktPage() {
   const [randomHeaderImage, setRandomHeaderImage] = useState<string>("");
+  const t = useTranslations("contact");
 
   // Setze zufälliges Bild nach dem Mount (verhindert Hydration Mismatch)
   useEffect(() => {
@@ -71,10 +73,10 @@ export default function KontaktPage() {
               </svg>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg">
-              Kontakt
+              {t("title")}
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-white/95 max-w-2xl mx-auto">
-              Wir freuen uns auf Ihre Nachricht
+              {t("subtitle")}
             </p>
           </div>
         </div>
@@ -88,7 +90,7 @@ export default function KontaktPage() {
             {/* Kontaktinformationen */}
             <div className="bg-white rounded-lg shadow-md p-8">
               <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-                Kontaktinformationen
+                {t("contactInfo")}
               </h2>
               <div className="space-y-4">
                 <div className="flex items-start">
@@ -105,7 +107,7 @@ export default function KontaktPage() {
                     <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   <div>
-                    <p className="font-medium text-gray-800">Adresse</p>
+                    <p className="font-medium text-gray-800">{t("address")}</p>
                     <p className="text-gray-700">
                       {contactInfo.address}
                       <br />
@@ -126,7 +128,7 @@ export default function KontaktPage() {
                     <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                   <div>
-                    <p className="font-medium text-gray-800">E-Mail</p>
+                    <p className="font-medium text-gray-800">{t("email")}</p>
                     <a
                       href={`mailto:${contactInfo.email}`}
                       className="text-amber-600 hover:text-amber-700"
@@ -141,17 +143,16 @@ export default function KontaktPage() {
             {/* Öffnungszeiten Quick Info */}
             <div className="bg-white rounded-lg shadow-md p-8">
               <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-                Besuchen Sie uns
+                {t("visitUs")}
               </h2>
               <p className="text-gray-700 mb-4">
-                Besuchen Sie uns während unserer Öffnungszeiten im Atelier. Wir
-                freuen uns auf Ihren Besuch!
+                {t("visitDescription")}
               </p>
               <Link
                 href="/oeffnungszeiten"
                 className="inline-block bg-amber-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-amber-800 transition-colors"
               >
-                Öffnungszeiten ansehen
+                {t("viewOpeningHours")}
               </Link>
             </div>
           </div>
@@ -159,10 +160,10 @@ export default function KontaktPage() {
           {/* Anfahrt Text und Karte/Bild */}
           <div className="bg-white rounded-lg shadow-md p-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-              So findest du uns ganz einfach!
+              {t("findUs")}
             </h2>
             <p className="text-gray-700 mb-6 leading-relaxed">
-              Das Atelier von Sponk Keramik & Kurse Düsseldorf liegt zentral in Düsseldorf und ist sowohl mit dem Auto als auch mit den öffentlichen Verkehrsmitteln bequem zu erreichen. Unsere Lage bietet dir die Möglichkeit, stressfrei zu uns zu kommen und deine kreative Reise zu starten.
+              {t("findUsDescription")}
             </p>
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
               <a
@@ -171,7 +172,7 @@ export default function KontaktPage() {
                 rel="noopener noreferrer"
                 className="text-amber-600 hover:text-amber-700 transition-colors"
               >
-                Anfahrt Sponk Keramik
+                {t("directionsLink")}
               </a>
             </h3>
             <div className="overflow-hidden rounded-lg">

@@ -1,9 +1,11 @@
 "use client";
 
-import { directions, contactInfo } from "@/lib/data";
-import Link from "next/link";
+import { contactInfo } from "@/lib/data";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 
 // Atelier Bilder für Header
 const atelierImages = [
@@ -27,6 +29,9 @@ const atelierImages = [
  */
 export default function AnfahrtPage() {
   const [randomHeaderImage, setRandomHeaderImage] = useState<string>("");
+  const params = useParams();
+  const currentLocale = (params.locale as string) || "de";
+  const t = useTranslations("directions");
 
   // Setze zufälliges Bild nach dem Mount (verhindert Hydration Mismatch)
   useEffect(() => {
@@ -36,14 +41,14 @@ export default function AnfahrtPage() {
   }, []);
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 via-white to-amber-50 min-h-screen">
+    <div key={currentLocale} className="bg-gradient-to-br from-gray-50 via-white to-amber-50 min-h-screen">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 min-h-[20vh] sm:min-h-[25vh] md:min-h-[30vh] flex items-center justify-center overflow-hidden pt-4 pb-4">
         {randomHeaderImage && (
           <div className="absolute inset-0 z-0">
             <Image
               src={`/images/atelier/${randomHeaderImage}`}
-              alt="Sponk Keramik Atelier"
+              alt={t("atelierImageAlt")}
               fill
               priority
               className="object-cover"
@@ -72,10 +77,10 @@ export default function AnfahrtPage() {
               </svg>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg">
-              Anfahrt
+              {t("title")}
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-white/95 max-w-2xl mx-auto">
-              So finden Sie uns im Herzen von Düsseldorf
+              {t("subtitle")}
             </p>
           </div>
         </div>
@@ -104,10 +109,10 @@ export default function AnfahrtPage() {
               </div>
               <div>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
-                  Unsere Adresse
+                  {t("ourAddress")}
                 </h2>
                 <p className="text-sm sm:text-base text-gray-600 mt-1">
-                  Mitten in Düsseldorf
+                  {t("inDusseldorf")}
                 </p>
               </div>
             </div>
@@ -157,10 +162,10 @@ export default function AnfahrtPage() {
               </div>
               <div>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
-                  Parkmöglichkeiten
+                  {t("parking")}
                 </h2>
                 <p className="text-sm sm:text-base text-gray-600 mt-1">
-                  Parkhaus in der Nähe
+                  {t("parkingNearby")}
                 </p>
               </div>
             </div>
@@ -182,13 +187,13 @@ export default function AnfahrtPage() {
                 </div>
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-                    {directions.parking.name}
+                    {t("parkingName")}
                   </h3>
                   <p className="text-base sm:text-lg text-gray-700 mb-2">
-                    {directions.parking.address}
+                    {t("parkingAddress")}
                   </p>
                   <p className="text-sm sm:text-base text-gray-600">
-                    {directions.parking.description}
+                    {t("parkingDescription")}
                   </p>
                 </div>
               </div>
@@ -207,7 +212,7 @@ export default function AnfahrtPage() {
                 <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <p className="text-sm sm:text-base text-gray-700">
-                Weitere Parkmöglichkeiten finden Sie in der Umgebung. Bitte beachten Sie die Parkgebühren und Beschränkungen.
+                {t("parkingNote")}
               </p>
             </div>
           </div>
@@ -230,10 +235,10 @@ export default function AnfahrtPage() {
               </div>
               <div>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
-                  Öffentliche Verkehrsmittel
+                  {t("publicTransport")}
                 </h2>
                 <p className="text-sm sm:text-base text-gray-600 mt-1">
-                  Gut erreichbar mit Bus & Bahn
+                  {t("publicTransportSubtitle")}
                 </p>
               </div>
             </div>
@@ -255,10 +260,10 @@ export default function AnfahrtPage() {
                 </div>
                 <div>
                   <p className="text-base sm:text-lg text-gray-700 mb-4">
-                    {directions.publicTransport.description}
+                    {t("publicTransportDescription")}
                   </p>
                   <p className="text-sm sm:text-base text-gray-600">
-                    Die nächsten Haltestellen befinden sich in unmittelbarer Nähe zum Atelier. Planen Sie Ihre Anreise mit den Verkehrsbetrieben Düsseldorf (Rheinbahn).
+                    {t("publicTransportNote")}
                   </p>
                 </div>
               </div>
@@ -283,10 +288,10 @@ export default function AnfahrtPage() {
               </div>
               <div>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
-                  Interaktive Karte
+                  {t("interactiveMap")}
                 </h2>
                 <p className="text-sm sm:text-base text-gray-600 mt-1">
-                  Route zu uns planen
+                  {t("planRoute")}
                 </p>
               </div>
             </div>
@@ -298,7 +303,7 @@ export default function AnfahrtPage() {
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Google Maps - Sponk Keramik"
+                title={t("googleMapsTitle")}
               />
             </div>
           </div>
@@ -321,10 +326,10 @@ export default function AnfahrtPage() {
               </div>
               <div className="flex-1">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-                  Fragen zur Anfahrt?
+                  {t("questionsTitle")}
                 </h3>
                 <p className="text-sm sm:text-base text-gray-700 mb-4">
-                  Bei Fragen zur Anfahrt oder wenn Sie Hilfe benötigen, kontaktieren Sie uns gerne.
+                  {t("questionsText")}
                 </p>
                 <Link
                   href="/kontakt-sponk-keramik"
@@ -342,7 +347,7 @@ export default function AnfahrtPage() {
                     >
                       <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    Kontakt aufnehmen
+                    {t("contactButton")}
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 </Link>

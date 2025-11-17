@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "./LanguageSwitcher";
+import UserMenu from "./UserMenu";
 
 const kurswerkeImages = [
   "image00001.jpeg",
@@ -123,9 +124,15 @@ export default function Header() {
                   {item.label}
                 </Link>
               ))}
+              <div className="ml-2 hidden">
+                <UserMenu />
+              </div>
             </div>
 
             <div className="lg:hidden flex items-center gap-2">
+              <div className="hidden">
+                <UserMenu />
+              </div>
               <button
                 className="p-1 text-gray-700 hover:bg-gray-100 rounded transition-colors z-50 relative"
                 onClick={handleMenuToggle}

@@ -3,6 +3,8 @@
 import { contactInfo } from "@/lib/data";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 
 // Atelier Bilder für Header
 const atelierImages = [
@@ -26,6 +28,9 @@ const atelierImages = [
  */
 export default function ImpressumPage() {
   const [randomHeaderImage, setRandomHeaderImage] = useState<string>("");
+  const params = useParams();
+  const currentLocale = (params.locale as string) || "de";
+  const t = useTranslations("imprint");
 
   // Setze zufälliges Bild nach dem Mount (verhindert Hydration Mismatch)
   useEffect(() => {
@@ -35,14 +40,14 @@ export default function ImpressumPage() {
   }, []);
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 via-white to-amber-50 min-h-screen">
+    <div key={currentLocale} className="bg-gradient-to-br from-gray-50 via-white to-amber-50 min-h-screen">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 min-h-[20vh] sm:min-h-[25vh] md:min-h-[30vh] flex items-center justify-center overflow-hidden pt-4 pb-4">
         {randomHeaderImage && (
           <div className="absolute inset-0 z-0">
             <Image
               src={`/images/atelier/${randomHeaderImage}`}
-              alt="Sponk Keramik Atelier"
+              alt={t("atelierImageAlt")}
               fill
               priority
               className="object-cover"
@@ -70,10 +75,10 @@ export default function ImpressumPage() {
               </svg>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg">
-              Impressum
+              {t("title")}
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-white/95 max-w-2xl mx-auto">
-              Rechtliche Angaben gemäß § 5 TMG
+              {t("subtitle")}
             </p>
           </div>
         </div>
@@ -85,10 +90,10 @@ export default function ImpressumPage() {
           <div className="bg-white rounded-xl shadow-md p-6 sm:p-8 space-y-6 sm:space-y-8">
             <section>
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                Angaben gemäß § 5 TMG
+                {t("tmgTitle")}
               </h2>
               <div className="text-gray-700 space-y-2">
-                <p className="font-medium">Sponk Keramik</p>
+                <p className="font-medium">{t("companyName")}</p>
                 <p>
                   {contactInfo.address}
                   <br />
@@ -99,11 +104,11 @@ export default function ImpressumPage() {
 
             <section>
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                Kontakt
+                {t("contactTitle")}
               </h2>
               <div className="text-gray-700 space-y-2">
                 <p>
-                  E-Mail:{" "}
+                  {t("email")}:{" "}
                   <a
                     href={`mailto:${contactInfo.email}`}
                     className="text-amber-600 hover:text-amber-700"
@@ -116,11 +121,10 @@ export default function ImpressumPage() {
 
             <section>
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                Umsatzsteuer-ID
+                {t("vatIdTitle")}
               </h2>
               <p className="text-gray-700">
-                Umsatzsteuer-Identifikationsnummer gemäß § 27 a
-                Umsatzsteuergesetz:
+                {t("vatIdDescription")}
                 <br />
                 <strong>{contactInfo.vatId}</strong>
               </p>
@@ -128,10 +132,10 @@ export default function ImpressumPage() {
 
             <section>
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV
+                {t("responsibleTitle")}
               </h2>
               <div className="text-gray-700 space-y-2">
-                <p className="font-medium">Sponk Keramik</p>
+                <p className="font-medium">{t("companyName")}</p>
                 <p>
                   {contactInfo.address}
                   <br />
@@ -142,37 +146,25 @@ export default function ImpressumPage() {
 
             <section>
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                Haftungsausschluss
+                {t("disclaimerTitle")}
               </h2>
               <div className="text-gray-700 space-y-4">
                 <div>
-                  <h3 className="font-semibold mb-2">Haftung für Inhalte</h3>
+                  <h3 className="font-semibold mb-2">{t("contentLiabilityTitle")}</h3>
                   <p className="text-sm">
-                    Die Inhalte unserer Seiten wurden mit größter Sorgfalt erstellt.
-                    Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte
-                    können wir jedoch keine Gewähr übernehmen. Als Diensteanbieter
-                    sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen
-                    Seiten nach den allgemeinen Gesetzen verantwortlich.
+                    {t("contentLiabilityText")}
                   </p>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-2">Haftung für Links</h3>
+                  <h3 className="font-semibold mb-2">{t("linkLiabilityTitle")}</h3>
                   <p className="text-sm">
-                    Unser Angebot enthält Links zu externen Webseiten Dritter, auf
-                    deren Inhalte wir keinen Einfluss haben. Deshalb können wir für
-                    diese fremden Inhalte auch keine Gewähr übernehmen. Für die
-                    Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter
-                    oder Betreiber der Seiten verantwortlich.
+                    {t("linkLiabilityText")}
                   </p>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-2">Urheberrecht</h3>
+                  <h3 className="font-semibold mb-2">{t("copyrightTitle")}</h3>
                   <p className="text-sm">
-                    Die durch die Seitenbetreiber erstellten Inhalte und Werke auf
-                    diesen Seiten unterliegen dem deutschen Urheberrecht. Die
-                    Vervielfältigung, Bearbeitung, Verbreitung und jede Art der
-                    Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der
-                    schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.
+                    {t("copyrightText")}
                   </p>
                 </div>
               </div>

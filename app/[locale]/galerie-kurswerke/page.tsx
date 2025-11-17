@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 /**
  * Galerie Kurswerke Seite
@@ -63,6 +64,7 @@ export default function GalerieKurswerkePage() {
     type: "image" | "video";
     src: string;
   } | null>(null);
+  const t = useTranslations("gallery");
 
   useEffect(() => {
     // Zufälliges Bild oder Video für Header bei jedem Page Load
@@ -92,10 +94,10 @@ export default function GalerieKurswerkePage() {
             </div>
             <div className="relative z-10 container mx-auto px-4 sm:px-6 text-center">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 leading-tight drop-shadow-lg">
-                Galerie Kurswerke
+                {t("title")}
               </h1>
               <p className="text-base sm:text-lg md:text-xl text-white/95 leading-relaxed drop-shadow-md">
-                Entdecken Sie die kreativen Werke unserer Kursteilnehmende
+                {t("subtitle")}
               </p>
             </div>
           </>
@@ -108,20 +110,17 @@ export default function GalerieKurswerkePage() {
           {/* Einführung */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-6 sm:mb-8">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Kurswerke Galerie
+              {t("introduction")}
             </h2>
             <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-              Hier sehen Sie eine Auswahl der wunderschönen Werke, die unsere
-              Kursteilnehmende in unseren Workshops und Kursen geschaffen haben. Jedes
-              Stück ist einzigartig und zeigt die Kreativität und das Talent unserer
-              Teilnehmende.
+              {t("introductionText")}
             </p>
           </div>
 
           {/* Bilder Galerie */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-6 sm:mb-8">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
-              Werke unserer Kursteilnehmende
+              {t("worksTitle")}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {galleryImages.map((item, index) => (
@@ -140,33 +139,30 @@ export default function GalerieKurswerkePage() {
               ))}
             </div>
             <p className="text-sm sm:text-base text-gray-600 mt-4 sm:mt-6 text-center">
-              Möchten Sie auch Ihr eigenes Kunstwerk schaffen? Besuchen Sie einen
-              unserer Workshops!
+              {t("inspire")}
             </p>
           </div>
 
           {/* CTA */}
           <div className="bg-amber-50 rounded-xl p-5 sm:p-6 md:p-8">
             <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Werden Sie kreativ!
+              {t("becomeCreative")}
             </h3>
             <p className="text-sm sm:text-base text-gray-700 mb-4 sm:mb-6 leading-relaxed">
-              Lassen Sie sich von diesen wunderbaren Werken inspirieren und melden
-              Sie sich für einen unserer Workshops an. Wir freuen uns darauf, Ihnen
-              zu helfen, Ihr eigenes Kunstwerk zu schaffen.
+              {t("ctaDescription")}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <Link
                 href="/workshops"
                 className="bg-amber-700 text-white px-6 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base hover:bg-amber-800 active:bg-amber-900 transition-all duration-200 text-center shadow-md hover:shadow-lg touch-manipulation min-h-[48px] flex items-center justify-center"
               >
-                Workshops ansehen
+                {t("viewWorkshops")}
               </Link>
               <Link
                 href="/kontakt"
                 className="bg-white text-amber-600 px-6 py-3 sm:py-4 rounded-xl font-bold text-sm sm:text-base border-2 border-amber-600 hover:bg-amber-50 active:bg-amber-100 transition-all duration-200 text-center shadow-md hover:shadow-lg touch-manipulation min-h-[48px] flex items-center justify-center"
               >
-                Kontakt aufnehmen
+                {t("contact")}
               </Link>
             </div>
           </div>

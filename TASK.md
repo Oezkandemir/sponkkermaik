@@ -36,6 +36,37 @@
 - [ ] Metadata für beide Sprachen aktualisieren
 - [ ] Sitemap und Robots für Locale-Support aktualisieren
 
+### 2025-11-16 - Benutzerauthentifizierung mit Supabase
+- [x] @supabase/ssr und @supabase/supabase-js Pakete installiert
+- [x] Supabase Client-Utilities für Server- und Client-Komponenten erstellt
+- [x] Authentifizierungs-Übersetzungen zu de.json und en.json hinzugefügt
+- [x] Anmeldeseite (/auth/signin) erstellt
+- [x] Registrierungsseite (/auth/signup) erstellt
+- [x] Auth-Callback Route Handler erstellt
+- [x] Middleware für Auth-Session-Updates aktualisiert
+- [x] Benutzer-Icon zum Header mit Dropdown-Menü hinzugefügt
+- [x] UserMenu-Komponente für authentifizierte Benutzer erstellt
+- [ ] Supabase-Projekt konfigurieren (URL und Anon Key in .env.local hinzufügen)
+- [ ] Profilseite erstellen
+- [ ] Buchungsseite erstellen
+- [ ] Einstellungsseite erstellen
+
+### 2025-11-16 - PayPal Checkout Integration
+- [x] @paypal/paypal-server-sdk Paket installiert
+- [x] PayPal Client-Konfiguration erstellt (lib/paypal/client.ts)
+- [x] PayPal TypeScript-Typen definiert (lib/paypal/types.ts)
+- [x] API Route für PayPal Order Creation erstellt (app/api/paypal/create-order/route.ts)
+- [x] API Route für PayPal Order Capture erstellt (app/api/paypal/capture-order/route.ts)
+- [x] VoucherPurchaseModal mit PayPal-Integration aktualisiert
+- [x] PayPal-Übersetzungen bereits vorhanden in de.json und en.json
+- [ ] PayPal-Umgebungsvariablen in .env.local hinzufügen:
+  - NEXT_PUBLIC_PAYPAL_CLIENT_ID (Client ID from PayPal Dashboard)
+  - PAYPAL_CLIENT_SECRET (Secret from PayPal Dashboard)
+  - PAYPAL_ENVIRONMENT ('sandbox' for testing, 'live' for production)
+- [ ] PayPal-Callback-Handler für Return/Cancel URLs implementieren
+- [ ] Gutschein-Generierung und Speicherung in Datenbank implementieren
+- [ ] E-Mail-Versand für Gutschein-Bestätigungen implementieren
+
 ## Abgeschlossene Aufgaben
 
 ### 2024-12-19

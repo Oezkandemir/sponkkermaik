@@ -4,6 +4,7 @@ import { openingHours } from "@/lib/data";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 // Atelier Bilder für Header
 const atelierImages = [
@@ -27,6 +28,7 @@ const atelierImages = [
  */
 export default function OeffnungszeitenPage() {
   const [randomHeaderImage, setRandomHeaderImage] = useState<string>("");
+  const t = useTranslations("openingHours");
 
   // Setze zufälliges Bild nach dem Mount (verhindert Hydration Mismatch)
   useEffect(() => {
@@ -71,10 +73,10 @@ export default function OeffnungszeitenPage() {
               </svg>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg">
-              Öffnungszeiten
+              {t("title")}
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-white/95 max-w-2xl mx-auto">
-              Besuchen Sie uns zu den folgenden Zeiten oder vereinbaren Sie einen individuellen Termin
+              {t("subtitle")}
             </p>
           </div>
         </div>
@@ -102,10 +104,10 @@ export default function OeffnungszeitenPage() {
               </div>
               <div>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
-                  Atelier Öffnungszeiten
+                  {t("atelier")}
                 </h2>
                 <p className="text-sm sm:text-base text-gray-600 mt-1">
-                  Freies Arbeiten & Besuch
+                  {t("atelierSubtitle")}
                 </p>
               </div>
             </div>
@@ -175,10 +177,10 @@ export default function OeffnungszeitenPage() {
               </div>
               <div>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
-                  Kurszeiten
+                  {t("courses")}
                 </h2>
                 <p className="text-sm sm:text-base text-gray-600 mt-1">
-                  Workshops & angeleitete Kurse
+                  {t("coursesSubtitle")}
                 </p>
               </div>
             </div>
@@ -248,12 +250,12 @@ export default function OeffnungszeitenPage() {
               </div>
               <div>
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-                  Geschlossen
+                  {t("closed")}
                 </h3>
                 <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                  Montag, Donnerstag und Sonntag
+                  {t("closedDays")}
                   <span className="block text-sm text-gray-600 mt-1">
-                    (Ausnahme: Spezielle Workshops nach Vereinbarung)
+                    {t("closedException")}
                   </span>
                 </p>
               </div>
@@ -277,7 +279,7 @@ export default function OeffnungszeitenPage() {
                 </svg>
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
-                Wichtige Hinweise
+                {t("importantNotes")}
               </h3>
             </div>
             <div className="space-y-3 sm:space-y-4 ml-0 sm:ml-16">
@@ -294,7 +296,7 @@ export default function OeffnungszeitenPage() {
                   />
                 </svg>
                 <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                  <span className="font-semibold">Anmeldung empfohlen:</span> Reservieren Sie Ihren Platz, um garantiert dabei zu sein
+                  <span className="font-semibold">{t("registrationRecommended")}:</span> {t("registrationText")}
                 </p>
               </div>
               <div className="flex items-start gap-3">
@@ -310,7 +312,7 @@ export default function OeffnungszeitenPage() {
                   />
                 </svg>
                 <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                  <span className="font-semibold">Freies Arbeiten:</span> Während der Kurszeiten eingeschränkt verfügbar
+                  <span className="font-semibold">{t("freeWork")}:</span> {t("freeWorkText")}
                 </p>
               </div>
               <div className="flex items-start gap-3">
@@ -326,7 +328,7 @@ export default function OeffnungszeitenPage() {
                   />
                 </svg>
                 <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                  <span className="font-semibold">Gruppenbuchungen:</span> Für individuelle Termine oder Events bitte vorab kontaktieren
+                  <span className="font-semibold">{t("groupBookings")}:</span> {t("groupBookingsText")}
                 </p>
               </div>
               <div className="flex items-start gap-3">
@@ -342,7 +344,7 @@ export default function OeffnungszeitenPage() {
                   />
                 </svg>
                 <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                  <span className="font-semibold">Feiertage:</span> Abweichende Öffnungszeiten möglich - bitte vorher anfragen
+                  <span className="font-semibold">{t("holidays")}:</span> {t("holidaysText")}
                 </p>
               </div>
             </div>
@@ -366,7 +368,7 @@ export default function OeffnungszeitenPage() {
                 >
                   <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                Termin vereinbaren
+                {t("makeAppointment")}
               </span>
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
             </Link>
@@ -386,7 +388,7 @@ export default function OeffnungszeitenPage() {
               >
                 <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
-              Workshops ansehen
+              {t("viewWorkshops")}
             </Link>
           </div>
         </div>
