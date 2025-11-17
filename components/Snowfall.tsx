@@ -52,7 +52,7 @@ export default function SnowfallEffect() {
 
   return (
     <SnowfallLib
-      snowflakeCount={150}
+      snowflakeCount={80}
       speed={[0.3, 1.5]}
       wind={[-0.3, 0.8]}
       radius={[15, 35]}
