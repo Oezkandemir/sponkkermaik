@@ -1,7 +1,7 @@
 /**
- * Middleware for handling i18n and Supabase authentication
+ * Proxy for handling i18n and Supabase authentication
  * 
- * This middleware:
+ * This proxy:
  * 1. Updates Supabase session cookies
  * 2. Handles internationalization with next-intl
  */
@@ -14,7 +14,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // Create i18n middleware
 const intlMiddleware = createMiddleware(routing);
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Reason: Update Supabase session before handling i18n
   const response = await updateSession(request);
   
