@@ -11,6 +11,7 @@ import ScrollToTopButton from "@/components/ScrollToTopButton";
 import ChatbaseWidget from "@/components/ChatbaseWidget";
 import SnowfallEffect from "@/components/Snowfall";
 import SantaAnimation from "@/components/SantaAnimation";
+import FloatingLanguageSwitcher from "@/components/FloatingLanguageSwitcher";
 import { locales } from '@/i18n';
 
 const geistSans = Geist({
@@ -72,6 +73,7 @@ export default async function LocaleLayout({
           <SnowfallEffect />
           <SantaAnimation />
           <Header />
+          <FloatingLanguageSwitcher />
           <main className="grow pt-20 md:pt-16">{children}</main>
           <Footer />
           <ScrollToTopButton />

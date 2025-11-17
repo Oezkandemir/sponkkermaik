@@ -5,7 +5,6 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import LanguageSwitcher from "./LanguageSwitcher";
 import UserMenu from "./UserMenu";
 
 const kurswerkeImages = [
@@ -107,10 +106,9 @@ export default function Header() {
                   KERAMIK
                 </span>
               </Link>
-              <LanguageSwitcher />
             </div>
 
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden min-[1150px]:flex items-center gap-1">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
@@ -129,7 +127,7 @@ export default function Header() {
               </div>
             </div>
 
-            <div className="lg:hidden flex items-center gap-2">
+            <div className="max-[1149px]:flex min-[1150px]:hidden items-center gap-2">
               <UserMenu />
               <button
                 className="p-1 text-gray-700 hover:bg-gray-100 rounded transition-colors z-50 relative"
@@ -160,7 +158,7 @@ export default function Header() {
 
       {/* Fullscreen Mobile Menu */}
       {isMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden">
+        <div className="max-[1149px]:block min-[1150px]:hidden fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden">
           {/* Hintergrundbild */}
           {menuBackgroundImage && (
             <div className="absolute inset-0 z-0">
