@@ -1,0 +1,37 @@
+# Ignore files that don't need to be uploaded to Vercel
+# This speeds up deployment
+
+# Documentation files
+*.md
+!README.md
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# Development files
+.env.example
+.env.local
+.env.development
+
+# Migration files (already applied)
+supabase/migrations/*.sql
+
+# Temporary files
+*.log
+*.tmp
+.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts (will be regenerated)
+.next/
+out/
+dist/
+
