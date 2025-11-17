@@ -25,6 +25,9 @@ export const metadata: Metadata = {
     description:
       "Entdecken Sie die Kunst des Keramik bemalens und Töpferns in unserem Atelier. Handgefertigte Keramikkunst und kreative Workshops für Anfänger und Fortgeschrittene.",
     url: "https://www.sponkkeramik.de",
+    siteName: "Sponk Keramik",
+    locale: "de_DE",
+    type: "website",
     images: [
       {
         url: "/images/sponkkeramik.webp",
@@ -33,6 +36,12 @@ export const metadata: Metadata = {
         alt: "Sponk Keramik Atelier - Handgefertigte Keramikkunst",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sponk Keramik - Keramik bemalen & Töpferkurse in Düsseldorf",
+    description: "Entdecken Sie die Kunst des Keramik bemalens und Töpferns in unserem Atelier.",
+    images: ["/images/sponkkeramik.webp"],
   },
   alternates: {
     canonical: "https://www.sponkkeramik.de",
