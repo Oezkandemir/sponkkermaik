@@ -18,7 +18,7 @@ export default function HeroSection() {
   return (
     <>
       {/* Hero Section - Mobile-first mit Hintergrundbild - 100vh */}
-      <section className="relative min-h-screen w-full flex items-start justify-center overflow-hidden pt-12 md:pt-16" style={{ marginTop: '0' }}>
+      <section className="relative min-h-screen w-full flex items-start justify-center overflow-hidden pt-24 min-[780px]:pt-[99px]" style={{ marginTop: '0' }}>
         {/* Hintergrundbild */}
         <div className="absolute inset-0 z-0">
           <Image

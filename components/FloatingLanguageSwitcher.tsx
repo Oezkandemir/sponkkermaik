@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from 'next/navigation';
-import { useTransition } from 'react';
+import { useTransition, useEffect } from 'react';
 import { useRouter, usePathname } from '@/i18n/navigation';
 import { type Locale } from '@/i18n';
 
@@ -38,6 +38,10 @@ export default function FloatingLanguageSwitcher() {
   const targetLocale: Locale = currentLocale === 'de' ? 'en' : 'de';
 
   const switchLocale = () => {
+    // Speichere die aktuelle Scroll-Position
+    const scrollY = window.scrollY;
+    sessionStorage.setItem('scrollY', scrollY.toString());
+    
     startTransition(() => {
       router.replace(
         // @ts-expect-error -- TypeScript will validate that only known `params`
@@ -49,12 +53,29 @@ export default function FloatingLanguageSwitcher() {
     });
   };
 
+  // Stelle die Scroll-Position nach dem Locale-Wechsel wieder her
+  useEffect(() => {
+    const savedScrollY = sessionStorage.getItem('scrollY');
+    if (savedScrollY) {
+      const scrollY = parseInt(savedScrollY, 10);
+      // Verwende requestAnimationFrame für zuverlässige Wiederherstellung
+      requestAnimationFrame(() => {
+        window.scrollTo(0, scrollY);
+        // Zusätzlicher Fallback mit kurzem Delay
+        setTimeout(() => {
+          window.scrollTo(0, scrollY);
+        }, 10);
+      });
+      sessionStorage.removeItem('scrollY');
+    }
+  }, [currentLocale]);
+
   return (
-    <div className="fixed top-[100px] md:top-[90px] left-0 right-0 z-40 flex justify-center pointer-events-none">
+    <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center pointer-events-none">
       <button
         onClick={switchLocale}
         disabled={isPending}
-        className={`pointer-events-auto px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-lg backdrop-blur-md border border-white/20 ${
+        className={`pointer-events-auto px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 shadow-lg backdrop-blur-md border border-white/20 ${
           isPending 
             ? 'opacity-50 cursor-not-allowed bg-gray-100/80 text-gray-500' 
             : 'bg-white/90 text-gray-700 hover:text-amber-800 hover:bg-amber-50/90 hover:shadow-xl hover:scale-105 cursor-pointer'
@@ -62,7 +83,7 @@ export default function FloatingLanguageSwitcher() {
         aria-label={`Switch to ${localeNames[targetLocale]}`}
         title={`Switch to ${localeNames[targetLocale]}`}
       >
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-1.5">
           <span className="text-lg">{localeFlags[currentLocale]}</span>
           <span className="font-semibold">{localeLabels[currentLocale]}</span>
           <span className="text-xs opacity-70">→</span>

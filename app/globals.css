@@ -79,3 +79,32 @@ html {
 .animate-slideUp {
   animation: slideUp 0.3s ease-out;
 }
+
+/* Chatbase Widget - Schwarzen Hintergrund entfernen */
+#chatbase-widget,
+[data-chatbase-widget],
+iframe[src*="chatbase"] {
+  background: transparent !important;
+}
+
+/* Chatbase Button - Schwarzen Hintergrund entfernen */
+#chatbase-widget button,
+[data-chatbase-widget] button,
+.chatbase-button {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Chatbase Container - Schwarzen Hintergrund entfernen */
+#chatbase-widget *,
+[data-chatbase-widget] * {
+  background: transparent !important;
+}
+
+/* Spezifisch für Chatbase Logo/Icon */
+#chatbase-widget img,
+[data-chatbase-widget] img,
+.chatbase-icon {
+  background: transparent !important;
+  background-color: transparent !important;
+}
