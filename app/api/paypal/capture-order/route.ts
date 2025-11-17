@@ -10,6 +10,14 @@ import { createClient } from "@/lib/supabase/server";
 export async function POST(request: Request) {
   try {
     const { orderID, userId } = await request.json();
+    
+    // Get user from session if userId not provided
+    let finalUserId = userId;
+    if (!finalUserId) {
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      finalUserId = user?.id || null;
+    }
 
     if (!orderID) {
       return NextResponse.json(
@@ -67,18 +75,18 @@ export async function POST(request: Request) {
 
     // Save voucher to database if user is logged in
     let voucher = null;
-    if (userId) {
+    if (finalUserId) {
       const supabase = await createClient();
       
-      console.log('💾 Saving voucher to database for user:', userId);
+      console.log('💾 Saving voucher to database for user:', finalUserId);
       
       const { data, error } = await supabase
         .from("vouchers")
         .insert({
-          user_id: userId,
+          user_id: finalUserId,
           code: voucherCode,
           value: amount,
-          status: "active",
+          status: "active", // PayPal payments are immediately active
           paypal_order_id: paypalOrderId,
           valid_until: expiryDate.toISOString(),
         })

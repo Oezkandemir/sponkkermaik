@@ -391,12 +391,30 @@
         "workshops": "For all workshops"
       },
       "payment": {
-        "title": "Pay with PayPal",
-        "subtitle": "Secure and easy payment",
+        "title": "Select Payment Method",
+        "subtitle": "Choose your preferred payment method",
+        "selectMethod": "Select payment method",
+        "paypal": "PayPal",
+        "paypalDescription": "Instant payment - Voucher activated immediately",
+        "bankTransfer": "Bank Transfer",
+        "bankTransferDescription": "Voucher activated after payment received",
         "processing": "Processing payment...",
         "back": "Back",
         "payWithPayPal": "Pay with PayPal",
-        "securePayment": "Secure payment via PayPal"
+        "payWithBankTransfer": "Pay with Bank Transfer",
+        "securePayment": "Secure payment via PayPal",
+        "bankTransferInfo": "After completing your order, you will receive bank details via email. The voucher will be activated once payment is received.",
+        "bankTransferDetails": "Bank details will be shown after order",
+        "bankDetails": {
+          "title": "Bank Details",
+          "bankName": "Commerzbank",
+          "accountHolder": "Sponk Keramik",
+          "iban": "DE89 3704 0044 0532 0130 00",
+          "bic": "COBADEFFXXX",
+          "reference": "Reference",
+          "referenceNote": "Please include the voucher code as the payment reference when making the transfer.",
+          "importantNote": "Important: Please include the voucher code as the payment reference when making the transfer. The voucher will be activated once payment is received."
+        }
       },
       "confirmation": {
         "title": "Thank you for your purchase!",

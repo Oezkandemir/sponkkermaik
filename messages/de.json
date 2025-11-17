@@ -391,12 +391,30 @@
         "workshops": "Für alle Workshops"
       },
       "payment": {
-        "title": "Mit PayPal bezahlen",
-        "subtitle": "Sicher und einfach bezahlen",
+        "title": "Zahlungsmethode wählen",
+        "subtitle": "Wählen Sie Ihre bevorzugte Zahlungsmethode",
+        "selectMethod": "Zahlungsmethode auswählen",
+        "paypal": "PayPal",
+        "paypalDescription": "Sofortige Zahlung - Gutschein wird sofort aktiviert",
+        "bankTransfer": "Überweisung",
+        "bankTransferDescription": "Gutschein wird nach Zahlungseingang aktiviert",
         "processing": "Zahlung wird verarbeitet...",
         "back": "Zurück",
         "payWithPayPal": "Mit PayPal bezahlen",
-        "securePayment": "Sichere Zahlung über PayPal"
+        "payWithBankTransfer": "Mit Überweisung bezahlen",
+        "securePayment": "Sichere Zahlung über PayPal",
+        "bankTransferInfo": "Nach Abschluss der Bestellung erhalten Sie die Bankverbindung per E-Mail. Der Gutschein wird nach Zahlungseingang aktiviert.",
+        "bankTransferDetails": "Bankverbindung wird nach Bestellung angezeigt",
+        "bankDetails": {
+          "title": "Bankverbindung",
+          "bankName": "Commerzbank",
+          "accountHolder": "Sponk Keramik",
+          "iban": "DE89 3704 0044 0532 0130 00",
+          "bic": "COBADEFFXXX",
+          "reference": "Verwendungszweck",
+          "referenceNote": "Bitte geben Sie bei der Überweisung den Gutschein-Code als Verwendungszweck an.",
+          "importantNote": "Wichtig: Bitte geben Sie den Gutschein-Code als Verwendungszweck bei der Überweisung an. Der Gutschein wird nach Zahlungseingang aktiviert."
+        }
       },
       "confirmation": {
         "title": "Vielen Dank für Ihren Kauf!",

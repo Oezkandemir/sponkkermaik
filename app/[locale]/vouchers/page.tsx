@@ -66,12 +66,12 @@ export default function VouchersPage() {
    *   userId (string): User ID to load vouchers for
    */
   const loadVouchers = async (userId: string) => {
-    // Load active vouchers
+    // Load active and pending vouchers (pending vouchers are waiting for payment)
     const { data: active, error: activeError } = await supabase
       .from("vouchers")
       .select("*")
       .eq("user_id", userId)
-      .eq("status", "active")
+      .in("status", ["active", "pending"])
       .gt("valid_until", new Date().toISOString())
       .order("created_at", { ascending: false });
 
@@ -325,6 +325,18 @@ function VoucherCard({
           </div>
         </div>
 
+        {/* Status Badge */}
+        {voucher.status === "pending" && (
+          <div className="mb-3">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-200 text-amber-800">
+              <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {t("purchase.confirmation.pending")}
+            </span>
+          </div>
+        )}
+
         {/* Validity / Usage Date */}
         <div className="text-sm opacity-90">
           {isUsed ? (
@@ -339,10 +351,19 @@ function VoucherCard({
         </div>
 
         {/* Redeem Button */}
-        {!isUsed && (
+        {!isUsed && voucher.status === "active" && (
           <button className="mt-4 w-full px-4 py-2 bg-white text-amber-600 rounded-lg hover:bg-amber-50 transition-colors font-medium">
             {t("redeem")}
           </button>
+        )}
+
+        {/* Pending Notice */}
+        {voucher.status === "pending" && (
+          <div className="mt-4 p-3 bg-white/20 backdrop-blur-sm rounded-lg">
+            <p className="text-xs text-white/90">
+              {t("purchase.payment.bankTransferInfo")}
+            </p>
+          </div>
         )}
       </div>
     </div>

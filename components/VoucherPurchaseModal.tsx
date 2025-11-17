@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 /**
  * VoucherPurchaseModal Component
@@ -20,15 +21,28 @@ interface VoucherPurchaseModalProps {
 }
 
 type Step = "amount" | "payment" | "confirmation";
+type PaymentMethod = "paypal" | "bank_transfer" | null;
 
 export default function VoucherPurchaseModal({ isOpen, onClose }: VoucherPurchaseModalProps) {
   const t = useTranslations("vouchers.purchase");
   const [step, setStep] = useState<Step>("amount");
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(null);
   const [orderID, setOrderID] = useState<string>("");
   const [voucherCode, setVoucherCode] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const supabase = createClient();
+
+  // Reason: Get current user ID
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    getUser();
+  }, [supabase.auth]);
 
   // Reason: Close modal on Escape key press
   useEffect(() => {
@@ -60,7 +74,63 @@ export default function VoucherPurchaseModal({ isOpen, onClose }: VoucherPurchas
    */
   const handleSelectAmount = (amount: number) => {
     setSelectedAmount(amount);
+    setPaymentMethod(null); // Reset payment method
     setStep("payment");
+  };
+
+  /**
+   * Handles selecting payment method
+   * 
+   * Args:
+   *   method (PaymentMethod): The payment method selected
+   */
+  const handleSelectPaymentMethod = (method: PaymentMethod) => {
+    setPaymentMethod(method);
+    setError(null);
+  };
+
+  /**
+   * Handles bank transfer payment process
+   */
+  const handleBankTransferPayment = async () => {
+    if (!userId) {
+      setError("Bitte melden Sie sich an, um einen Gutschein zu kaufen");
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/vouchers/create-bank-transfer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: selectedAmount,
+          userId: userId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create voucher');
+      }
+
+      const data = await response.json();
+      setVoucherCode(data.voucherCode);
+      setOrderID(data.voucher?.id || `BT-${Date.now()}`);
+      setStep("confirmation");
+      
+      // Reload vouchers page to show the new voucher
+      // The modal will be closed and vouchers will be reloaded via useEffect in VouchersPage
+    } catch (err) {
+      console.error('Bank transfer voucher creation error:', err);
+      setError(err instanceof Error ? err.message : 'Voucher creation failed');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   /**
@@ -169,6 +239,7 @@ export default function VoucherPurchaseModal({ isOpen, onClose }: VoucherPurchas
     setTimeout(() => {
       setStep("amount");
       setSelectedAmount(null);
+      setPaymentMethod(null);
       setOrderID("");
       setVoucherCode("");
       setError(null);
@@ -289,14 +360,17 @@ export default function VoucherPurchaseModal({ isOpen, onClose }: VoucherPurchas
           </>
         )}
 
-        {/* Step 2: PayPal Payment */}
+        {/* Step 2: Payment Method Selection */}
         {step === "payment" && (
           <PaymentScreen
             amount={selectedAmount!}
+            paymentMethod={paymentMethod}
             isProcessing={isProcessing}
             error={error}
             onBack={handleBack}
+            onSelectPaymentMethod={handleSelectPaymentMethod}
             onPayWithPayPal={handlePayPalPayment}
+            onPayWithBankTransfer={handleBankTransferPayment}
             t={t}
           />
         )}
@@ -307,6 +381,7 @@ export default function VoucherPurchaseModal({ isOpen, onClose }: VoucherPurchas
             amount={selectedAmount!}
             orderID={orderID}
             voucherCode={voucherCode}
+            paymentMethod={paymentMethod}
             onClose={handleClose}
             t={t}
           />
@@ -385,21 +460,27 @@ function VoucherCard({
 /**
  * PaymentScreen Component
  * 
- * Shows PayPal payment interface
+ * Shows payment method selection interface
  */
 function PaymentScreen({
   amount,
+  paymentMethod,
   isProcessing,
   error,
   onBack,
+  onSelectPaymentMethod,
   onPayWithPayPal,
+  onPayWithBankTransfer,
   t,
 }: {
   amount: number;
+  paymentMethod: "paypal" | "bank_transfer" | null;
   isProcessing: boolean;
   error: string | null;
   onBack: () => void;
+  onSelectPaymentMethod: (method: "paypal" | "bank_transfer" | null) => void;
   onPayWithPayPal: () => void;
+  onPayWithBankTransfer: () => void;
   t: any;
 }) {
   return (
@@ -429,42 +510,184 @@ function PaymentScreen({
             </div>
           )}
 
-          {/* PayPal Button */}
-          <div className="mb-8">
+          {/* Payment Method Selection */}
+          <div className="mb-8 space-y-4">
+            {/* PayPal Option */}
             <button
-              onClick={onPayWithPayPal}
+              onClick={() => onSelectPaymentMethod("paypal")}
               disabled={isProcessing}
-              className="w-full py-4 px-6 bg-[#0070ba] hover:bg-[#003087] text-white rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
+              className={`w-full p-6 rounded-xl border-2 transition-all text-left ${
+                paymentMethod === "paypal"
+                  ? "border-amber-600 bg-amber-50"
+                  : "border-gray-200 hover:border-amber-300 hover:bg-amber-50/50"
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              {isProcessing ? (
-                <>
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  {t("payment.processing")}
-                </>
-              ) : (
-                <>
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.479a.77.77 0 0 1 .762-.64h8.68a5.622 5.622 0 0 1 3.764 1.348 4.944 4.944 0 0 1 1.535 3.826 8.254 8.254 0 0 1-.827 3.609 6.807 6.807 0 0 1-2.283 2.597 6.198 6.198 0 0 1-3.395.998H10.76a.77.77 0 0 0-.762.64l-.545 3.48a.641.641 0 0 1-.633.64zm.633-2.09a.641.641 0 0 1-.633-.74l.545-3.48a.77.77 0 0 1 .762-.64h2.42a5.176 5.176 0 0 0 2.836-.831 5.673 5.673 0 0 0 1.904-2.165 6.881 6.881 0 0 0 .69-3.01c0-2.156-1.406-3.206-4.218-3.206H7.696a.641.641 0 0 0-.634.64L5.116 18.933a.641.641 0 0 0 .633.74h1.96z"/>
-                    <path d="M19.314 7.576a5.173 5.173 0 0 1-.332 1.865 5.673 5.673 0 0 1-1.904 2.165 5.176 5.176 0 0 1-2.836.831H12.18a.641.641 0 0 0-.634.64l-.545 3.48a.641.641 0 0 0 .633.74h3.093a.77.77 0 0 0 .762-.64l.367-2.327a.77.77 0 0 1 .762-.64h.473a4.21 4.21 0 0 0 2.303-.671 4.612 4.612 0 0 0 1.547-1.757 5.58 5.58 0 0 0 .56-2.447c0-1.694-1.134-2.52-3.404-2.52"/>
-                  </svg>
-                  {t("payment.payWithPayPal")}
-                </>
-              )}
+              <div className="flex items-center gap-4">
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                  paymentMethod === "paypal" ? "border-amber-600 bg-amber-600" : "border-gray-300"
+                }`}>
+                  {paymentMethod === "paypal" && (
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <svg className="w-8 h-8 text-[#0070ba]" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.479a.77.77 0 0 1 .762-.64h8.68a5.622 5.622 0 0 1 3.764 1.348 4.944 4.944 0 0 1 1.535 3.826 8.254 8.254 0 0 1-.827 3.609 6.807 6.807 0 0 1-2.283 2.597 6.198 6.198 0 0 1-3.395.998H10.76a.77.77 0 0 0-.762.64l-.545 3.48a.641.641 0 0 1-.633.64zm.633-2.09a.641.641 0 0 1-.633-.74l.545-3.48a.77.77 0 0 1 .762-.64h2.42a5.176 5.176 0 0 0 2.836-.831 5.673 5.673 0 0 0 1.904-2.165 6.881 6.881 0 0 0 .69-3.01c0-2.156-1.406-3.206-4.218-3.206H7.696a.641.641 0 0 0-.634.64L5.116 18.933a.641.641 0 0 0 .633.74h1.96z"/>
+                      <path d="M19.314 7.576a5.173 5.173 0 0 1-.332 1.865 5.673 5.673 0 0 1-1.904 2.165 5.176 5.176 0 0 1-2.836.831H12.18a.641.641 0 0 0-.634.64l-.545 3.48a.641.641 0 0 0 .633.74h3.093a.77.77 0 0 0 .762-.64l.367-2.327a.77.77 0 0 1 .762-.64h.473a4.21 4.21 0 0 0 2.303-.671 4.612 4.612 0 0 0 1.547-1.757 5.58 5.58 0 0 0 .56-2.447c0-1.694-1.134-2.52-3.404-2.52"/>
+                    </svg>
+                    <h3 className="text-xl font-semibold text-gray-900">{t("payment.paypal")}</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">{t("payment.paypalDescription")}</p>
+                </div>
+              </div>
+            </button>
+
+            {/* Bank Transfer Option */}
+            <button
+              onClick={() => onSelectPaymentMethod("bank_transfer")}
+              disabled={isProcessing}
+              className={`w-full p-6 rounded-xl border-2 transition-all text-left ${
+                paymentMethod === "bank_transfer"
+                  ? "border-amber-600 bg-amber-50"
+                  : "border-gray-200 hover:border-amber-300 hover:bg-amber-50/50"
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              <div className="flex items-center gap-4">
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                  paymentMethod === "bank_transfer" ? "border-amber-600 bg-amber-600" : "border-gray-300"
+                }`}>
+                  {paymentMethod === "bank_transfer" && (
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <svg className="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                    <h3 className="text-xl font-semibold text-gray-900">{t("payment.bankTransfer")}</h3>
+                  </div>
+                  <p className="text-sm text-gray-600">{t("payment.bankTransferDescription")}</p>
+                </div>
+              </div>
             </button>
           </div>
 
+          {/* Payment Buttons */}
+          {paymentMethod && (
+            <div className="mb-6">
+              {paymentMethod === "paypal" ? (
+                <button
+                  onClick={onPayWithPayPal}
+                  disabled={isProcessing}
+                  className="w-full py-4 px-6 bg-[#0070ba] hover:bg-[#003087] text-white rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
+                >
+                  {isProcessing ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      {t("payment.processing")}
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.479a.77.77 0 0 1 .762-.64h8.68a5.622 5.622 0 0 1 3.764 1.348 4.944 4.944 0 0 1 1.535 3.826 8.254 8.254 0 0 1-.827 3.609 6.807 6.807 0 0 1-2.283 2.597 6.198 6.198 0 0 1-3.395.998H10.76a.77.77 0 0 0-.762.64l-.545 3.48a.641.641 0 0 1-.633.64zm.633-2.09a.641.641 0 0 1-.633-.74l.545-3.48a.77.77 0 0 1 .762-.64h2.42a5.176 5.176 0 0 0 2.836-.831 5.673 5.673 0 0 0 1.904-2.165 6.881 6.881 0 0 0 .69-3.01c0-2.156-1.406-3.206-4.218-3.206H7.696a.641.641 0 0 0-.634.64L5.116 18.933a.641.641 0 0 0 .633.74h1.96z"/>
+                        <path d="M19.314 7.576a5.173 5.173 0 0 1-.332 1.865 5.673 5.673 0 0 1-1.904 2.165 5.176 5.176 0 0 1-2.836.831H12.18a.641.641 0 0 0-.634.64l-.545 3.48a.641.641 0 0 0 .633.74h3.093a.77.77 0 0 0 .762-.64l.367-2.327a.77.77 0 0 1 .762-.64h.473a4.21 4.21 0 0 0 2.303-.671 4.612 4.612 0 0 0 1.547-1.757 5.58 5.58 0 0 0 .56-2.447c0-1.694-1.134-2.52-3.404-2.52"/>
+                      </svg>
+                      {t("payment.payWithPayPal")}
+                    </>
+                  )}
+                </button>
+              ) : (
+                <>
+                  {/* Bank Details */}
+                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl p-6 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                      {t("payment.bankDetails.title")}
+                    </h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="font-medium text-gray-700">{t("payment.bankDetails.bankName")}:</span>
+                        <span className="text-gray-900 font-semibold">{t("payment.bankDetails.bankName")}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-gray-700">{t("payment.bankDetails.accountHolder")}:</span>
+                        <span className="text-gray-900 font-semibold">{t("payment.bankDetails.accountHolder")}</span>
+                      </div>
+                      <div className="flex justify-between items-start">
+                        <span className="font-medium text-gray-700">IBAN:</span>
+                        <span className="text-gray-900 font-mono font-semibold text-right">{t("payment.bankDetails.iban")}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-gray-700">BIC:</span>
+                        <span className="text-gray-900 font-mono font-semibold">{t("payment.bankDetails.bic")}</span>
+                      </div>
+                      <div className="pt-3 border-t border-amber-200">
+                        <p className="text-xs text-gray-600 mb-2">{t("payment.bankDetails.referenceNote")}</p>
+                        <div className="bg-white rounded-lg p-3 border border-amber-200">
+                          <span className="text-xs font-medium text-gray-700">{t("payment.bankDetails.reference")}:</span>
+                          <span className="text-xs text-gray-500 ml-2 italic">[Voucher code will be shown after order]</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={onPayWithBankTransfer}
+                    disabled={isProcessing}
+                    className="w-full py-4 px-6 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-3 mb-4"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        {t("payment.processing")}
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                        {t("payment.payWithBankTransfer")}
+                      </>
+                    )}
+                  </button>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p className="text-sm text-blue-800 flex items-start gap-2">
+                      <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      {t("payment.bankTransferInfo")}
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
           {/* Secure Payment Notice */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-blue-800 flex items-center justify-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              {t("payment.securePayment")}
-            </p>
-          </div>
+          {paymentMethod === "paypal" && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <p className="text-sm text-blue-800 flex items-center justify-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                {t("payment.securePayment")}
+              </p>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex gap-4">
@@ -491,12 +714,14 @@ function ConfirmationScreen({
   amount,
   orderID,
   voucherCode,
+  paymentMethod,
   onClose,
   t,
 }: {
   amount: number;
   orderID: string;
   voucherCode: string;
+  paymentMethod: "paypal" | "bank_transfer" | null;
   onClose: () => void;
   t: any;
 }) {
@@ -565,7 +790,11 @@ function ConfirmationScreen({
             </div>
             <div className="flex justify-between">
               <span className="font-medium text-gray-700">{t("confirmation.status")}:</span>
-              <span className="font-bold text-green-600">{t("confirmation.paid")}</span>
+              <span className={`font-bold ${
+                paymentMethod === "paypal" ? "text-green-600" : "text-amber-600"
+              }`}>
+                {paymentMethod === "paypal" ? t("confirmation.paid") : t("confirmation.pending")}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="font-medium text-gray-700">{t("confirmation.validUntil")}:</span>
@@ -573,6 +802,48 @@ function ConfirmationScreen({
             </div>
           </div>
         </div>
+
+        {/* Bank Details for Bank Transfer */}
+        {paymentMethod === "bank_transfer" && (
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl p-6 mb-6 text-left">
+            <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+              <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+              {t("payment.bankDetails.title")}
+            </h3>
+            <div className="space-y-3 text-sm mb-4">
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-700">{t("payment.bankDetails.bankName")}:</span>
+                <span className="text-gray-900 font-semibold">{t("payment.bankDetails.bankName")}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-700">{t("payment.bankDetails.accountHolder")}:</span>
+                <span className="text-gray-900 font-semibold">{t("payment.bankDetails.accountHolder")}</span>
+              </div>
+              <div className="flex justify-between items-start">
+                <span className="font-medium text-gray-700">IBAN:</span>
+                <span className="text-gray-900 font-mono font-semibold text-right">{t("payment.bankDetails.iban")}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-700">BIC:</span>
+                <span className="text-gray-900 font-mono font-semibold">{t("payment.bankDetails.bic")}</span>
+              </div>
+              <div className="pt-3 border-t border-amber-200">
+                <p className="text-xs text-gray-600 mb-2">{t("payment.bankDetails.referenceNote")}</p>
+                <div className="bg-white rounded-lg p-3 border border-amber-200">
+                  <span className="text-xs font-medium text-gray-700">{t("payment.bankDetails.reference")}:</span>
+                  <span className="text-xs text-gray-900 font-mono font-semibold ml-2">{voucherCode}</span>
+                </div>
+              </div>
+            </div>
+            <div className="bg-amber-100 border border-amber-300 rounded-lg p-3">
+              <p className="text-xs text-amber-800">
+                {t("payment.bankDetails.importantNote")}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* How to Use */}
         <div className="bg-white border-2 border-amber-200 rounded-xl p-6 mb-6 text-left">

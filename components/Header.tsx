@@ -124,15 +124,13 @@ export default function Header() {
                   {item.label}
                 </Link>
               ))}
-              <div className="ml-2 hidden">
+              <div className="ml-2">
                 <UserMenu />
               </div>
             </div>
 
             <div className="lg:hidden flex items-center gap-2">
-              <div className="hidden">
-                <UserMenu />
-              </div>
+              <UserMenu />
               <button
                 className="p-1 text-gray-700 hover:bg-gray-100 rounded transition-colors z-50 relative"
                 onClick={handleMenuToggle}
