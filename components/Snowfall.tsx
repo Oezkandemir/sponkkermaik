@@ -1,14 +1,16 @@
 "use client";
 
 import SnowfallLib from "react-snowfall";
-import { useMemo, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * Snowfall Component
- * Displays orange snowflakes across the page using custom SVG images
+ * Displays orange snowflakes across the page using custom SVG images.
+ * Flakes gradually "melt" over time, reducing the total count.
  */
 export default function SnowfallEffect() {
   const [snowflakeImages, setSnowflakeImages] = useState<HTMLImageElement[]>([]);
+  const [snowflakeCount, setSnowflakeCount] = useState(40); // Start with fewer flakes
 
   // Create orange snowflake SVG and convert to Image element
   useEffect(() => {
@@ -46,13 +48,26 @@ export default function SnowfallEffect() {
     img.src = dataUrl;
   }, []);
 
+  // Gradually reduce snowflake count over time (melting effect)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSnowflakeCount((prevCount) => {
+        // Reduce by 1-2 flakes every 8-12 seconds, but never go below 15
+        const reduction = Math.random() < 0.5 ? 1 : 2;
+        return Math.max(15, prevCount - reduction);
+      });
+    }, 10000); // Check every 10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   if (snowflakeImages.length === 0) {
     return null;
   }
 
   return (
     <SnowfallLib
-      snowflakeCount={80}
+      snowflakeCount={snowflakeCount}
       speed={[0.3, 1.5]}
       wind={[-0.3, 0.8]}
       radius={[15, 35]}
