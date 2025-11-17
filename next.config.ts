@@ -8,7 +8,6 @@ const nextConfig: NextConfig = {
     qualities: [70, 75, 90],
   },
   // Build optimizations
-  swcMinify: true, // Use SWC minification (faster than Terser)
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? {
       exclude: ['error', 'warn'],
