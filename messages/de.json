@@ -402,6 +402,7 @@
         "back": "Zurück",
         "payWithPayPal": "Mit PayPal bezahlen",
         "payWithBankTransfer": "Mit Überweisung bezahlen",
+        "loginRequired": "Bitte melden Sie sich an, um einen Gutschein zu kaufen",
         "securePayment": "Sichere Zahlung über PayPal",
         "bankTransferInfo": "Nach Abschluss der Bestellung erhalten Sie die Bankverbindung per E-Mail. Der Gutschein wird nach Zahlungseingang aktiviert.",
         "bankTransferDetails": "Bankverbindung wird nach Bestellung angezeigt",
@@ -431,6 +432,19 @@
         "emailConfirmation": "Eine Bestätigungs-E-Mail mit Ihren Gutschein-Details wurde versendet.",
         "copyCode": "Code kopieren",
         "close": "Schließen"
+      },
+      "success": {
+        "title": "Zahlung erfolgreich!",
+        "subtitle": "Vielen Dank für deinen Kauf! Dein Gutschein wurde erstellt.",
+        "details": "Bestelldetails",
+        "orderNumber": "Bestellnummer",
+        "voucherCode": "Gutschein-Code",
+        "amount": "Betrag",
+        "info": "Dein Gutschein findest du in deinem Konto unter 'Meine Gutscheine'.",
+        "viewVouchers": "Zu meinen Gutscheinen",
+        "backToHome": "Zur Startseite",
+        "redirecting": "Weiterleitung in",
+        "seconds": "Sekunden"
       }
     }
   },

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 /**
@@ -25,6 +26,7 @@ type PaymentMethod = "paypal" | "bank_transfer" | null;
 
 export default function VoucherPurchaseModal({ isOpen, onClose }: VoucherPurchaseModalProps) {
   const t = useTranslations("vouchers.purchase");
+  const router = useRouter();
   const [step, setStep] = useState<Step>("amount");
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(null);
@@ -35,14 +37,19 @@ export default function VoucherPurchaseModal({ isOpen, onClose }: VoucherPurchas
   const [userId, setUserId] = useState<string | null>(null);
   const supabase = createClient();
 
-  // Reason: Get current user ID
+  // Reason: Get current user ID when modal opens (but don't redirect - let user browse first)
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      // Just set the userId - don't redirect here
+      // User can browse vouchers and will be prompted to login when trying to pay
       setUserId(user?.id || null);
     };
-    getUser();
-  }, [supabase.auth]);
+    
+    if (isOpen) {
+      getUser();
+    }
+  }, [isOpen, supabase.auth]);
 
   // Reason: Close modal on Escape key press
   useEffect(() => {
@@ -73,6 +80,7 @@ export default function VoucherPurchaseModal({ isOpen, onClose }: VoucherPurchas
    *   amount (number): The voucher amount selected
    */
   const handleSelectAmount = (amount: number) => {
+    // Allow user to select amount without login - they'll be prompted when trying to pay
     setSelectedAmount(amount);
     setPaymentMethod(null); // Reset payment method
     setStep("payment");
@@ -93,8 +101,14 @@ export default function VoucherPurchaseModal({ isOpen, onClose }: VoucherPurchas
    * Handles bank transfer payment process
    */
   const handleBankTransferPayment = async () => {
+    // Check if user is logged in - show error immediately
     if (!userId) {
-      setError("Bitte melden Sie sich an, um einen Gutschein zu kaufen");
+      setError(t("payment.loginRequired"));
+      // Wait a moment to show the error, then redirect
+      setTimeout(() => {
+        onClose();
+        router.push("/auth/signin");
+      }, 2000);
       return;
     }
 
@@ -189,6 +203,17 @@ export default function VoucherPurchaseModal({ isOpen, onClose }: VoucherPurchas
    * Handles PayPal payment process
    */
   const handlePayPalPayment = async () => {
+    // Check if user is logged in - show error immediately
+    if (!userId) {
+      setError(t("payment.loginRequired"));
+      // Wait a moment to show the error, then redirect
+      setTimeout(() => {
+        onClose();
+        router.push("/auth/signin");
+      }, 2000);
+      return;
+    }
+
     setIsProcessing(true);
     setError(null);
 
@@ -367,6 +392,7 @@ export default function VoucherPurchaseModal({ isOpen, onClose }: VoucherPurchas
             paymentMethod={paymentMethod}
             isProcessing={isProcessing}
             error={error}
+            userId={userId}
             onBack={handleBack}
             onSelectPaymentMethod={handleSelectPaymentMethod}
             onPayWithPayPal={handlePayPalPayment}
@@ -467,6 +493,7 @@ function PaymentScreen({
   paymentMethod,
   isProcessing,
   error,
+  userId,
   onBack,
   onSelectPaymentMethod,
   onPayWithPayPal,
@@ -477,6 +504,7 @@ function PaymentScreen({
   paymentMethod: "paypal" | "bank_transfer" | null;
   isProcessing: boolean;
   error: string | null;
+  userId: string | null;
   onBack: () => void;
   onSelectPaymentMethod: (method: "paypal" | "bank_transfer" | null) => void;
   onPayWithPayPal: () => void;
@@ -582,11 +610,22 @@ function PaymentScreen({
           {paymentMethod && (
             <div className="mb-6">
               {paymentMethod === "paypal" ? (
-                <button
-                  onClick={onPayWithPayPal}
-                  disabled={isProcessing}
-                  className="w-full py-4 px-6 bg-[#0070ba] hover:bg-[#003087] text-white rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
-                >
+                <>
+                  {!userId && (
+                    <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+                      <p className="text-sm text-red-800 flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {t("payment.loginRequired")}
+                      </p>
+                    </div>
+                  )}
+                  <button
+                    onClick={onPayWithPayPal}
+                    disabled={isProcessing || !userId}
+                    className="w-full py-4 px-6 bg-[#0070ba] hover:bg-[#003087] text-white rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
+                  >
                   {isProcessing ? (
                     <>
                       <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -604,9 +643,20 @@ function PaymentScreen({
                       {t("payment.payWithPayPal")}
                     </>
                   )}
-                </button>
+                  </button>
+                </>
               ) : (
                 <>
+                  {!userId && (
+                    <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+                      <p className="text-sm text-red-800 flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {t("payment.loginRequired")}
+                      </p>
+                    </div>
+                  )}
                   {/* Bank Details */}
                   <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl p-6 mb-4">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -644,7 +694,7 @@ function PaymentScreen({
 
                   <button
                     onClick={onPayWithBankTransfer}
-                    disabled={isProcessing}
+                    disabled={isProcessing || !userId}
                     className="w-full py-4 px-6 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-3 mb-4"
                   >
                     {isProcessing ? (

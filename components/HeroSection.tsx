@@ -22,7 +22,7 @@ export default function HeroSection() {
         {/* Hintergrundbild */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/sponkkeramik.webp"
+            src="/images/IMG_8374.jpg"
             alt="Sponk Keramik Atelier - Handgefertigte Keramikkunst"
             fill
             priority

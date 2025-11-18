@@ -40,9 +40,11 @@ export default function VouchersPage() {
       await loadVouchers(user.id);
       setLoading(false);
       
-      // Check for success message from PayPal
+      // Check for success/error messages from PayPal
       const searchParams = new URLSearchParams(window.location.search);
-      if (searchParams.get('payment') === 'success') {
+      const paymentStatus = searchParams.get('payment');
+      
+      if (paymentStatus === 'success') {
         setSuccessMessage('✅ Zahlung erfolgreich! Dein Gutschein wurde erstellt.');
         // Remove the query parameter
         window.history.replaceState({}, '', window.location.pathname);
@@ -50,7 +52,23 @@ export default function VouchersPage() {
         setTimeout(() => {
           loadVouchers(user.id);
         }, 1000);
-      } else if (searchParams.get('payment') === 'cancelled') {
+      } else if (paymentStatus === 'error') {
+        const errorMsg = searchParams.get('error') || 'Unbekannter Fehler';
+        const errorDetails = searchParams.get('details') || '';
+        setSuccessMessage(`❌ Fehler bei der Zahlung: ${errorMsg}${errorDetails ? ` (${errorDetails})` : ''}. Bitte kontaktiere den Support.`);
+        window.history.replaceState({}, '', window.location.pathname);
+        // Still reload vouchers to check if voucher was created despite error
+        setTimeout(() => {
+          loadVouchers(user.id);
+        }, 1000);
+      } else if (paymentStatus === 'warning') {
+        const warningMsg = searchParams.get('message') || 'Warnung';
+        setSuccessMessage(`⚠️ ${warningMsg}. Bitte überprüfe deine Gutscheine.`);
+        window.history.replaceState({}, '', window.location.pathname);
+        setTimeout(() => {
+          loadVouchers(user.id);
+        }, 1000);
+      } else if (paymentStatus === 'cancelled') {
         setSuccessMessage('⚠️ Zahlung abgebrochen.');
         window.history.replaceState({}, '', window.location.pathname);
       }

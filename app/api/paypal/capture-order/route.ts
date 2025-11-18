@@ -11,17 +11,33 @@ export async function POST(request: Request) {
   try {
     const { orderID, userId } = await request.json();
     
+    console.log('📥 Capture order request received:', { orderID, userId });
+    
     // Get user from session if userId not provided
     let finalUserId = userId;
     if (!finalUserId) {
+      console.log('⚠️ No userId provided, trying to get from session...');
       const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error('❌ Failed to get user from session:', userError);
+      }
       finalUserId = user?.id || null;
+      console.log('👤 User from session:', finalUserId);
     }
 
     if (!orderID) {
+      console.error('❌ Order ID is required');
       return NextResponse.json(
         { error: "Order ID is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!finalUserId) {
+      console.error('❌ User ID is required');
+      return NextResponse.json(
+        { error: "User ID is required" },
         { status: 400 }
       );
     }
@@ -73,45 +89,51 @@ export async function POST(request: Request) {
     console.log('💳 Payment successful! Amount:', amount, 'EUR');
     console.log('🎫 Generating voucher code...');
 
-    // Save voucher to database if user is logged in
-    let voucher = null;
-    if (finalUserId) {
-      const supabase = await createClient();
-      
-      console.log('💾 Saving voucher to database for user:', finalUserId);
-      
-      const { data, error } = await supabase
-        .from("vouchers")
-        .insert({
-          user_id: finalUserId,
-          code: voucherCode,
-          value: amount,
-          status: "active", // PayPal payments are immediately active
-          paypal_order_id: paypalOrderId,
-          valid_until: expiryDate.toISOString(),
-        })
-        .select()
-        .single();
+    // Save voucher to database
+    const supabase = await createClient();
+    
+    console.log('💾 Saving voucher to database for user:', finalUserId);
+    console.log('📝 Voucher details:', {
+      code: voucherCode,
+      value: amount,
+      paypalOrderId,
+      validUntil: expiryDate.toISOString()
+    });
+    
+    const { data, error } = await supabase
+      .from("vouchers")
+      .insert({
+        user_id: finalUserId,
+        code: voucherCode,
+        value: amount,
+        status: "active", // PayPal payments are immediately active
+        paypal_order_id: paypalOrderId,
+        valid_until: expiryDate.toISOString(),
+      })
+      .select()
+      .single();
 
-      if (error) {
-        console.error("❌ Failed to save voucher to database:", error);
-        // Payment was successful but voucher creation failed
-        return NextResponse.json(
-          { 
-            error: "Voucher creation failed",
-            details: error.message,
-            paypalOrderId,
-            voucherCode // Return code so user can still use it
-          },
-          { status: 500 }
-        );
-      }
-
-      voucher = data;
-      console.log('✅ Voucher saved successfully!');
-    } else {
-      console.log('⚠️  No userId provided - voucher not saved to database');
+    if (error) {
+      console.error("❌ Failed to save voucher to database:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
+      console.error("Error details:", JSON.stringify(error, null, 2));
+      
+      // Payment was successful but voucher creation failed
+      return NextResponse.json(
+        { 
+          error: "Voucher creation failed",
+          details: error.message,
+          code: error.code,
+          paypalOrderId,
+          voucherCode // Return code so user can still use it
+        },
+        { status: 500 }
+      );
     }
+
+    const voucher = data;
+    console.log('✅ Voucher saved successfully!', voucher);
 
     return NextResponse.json({
       success: true,
@@ -119,7 +141,7 @@ export async function POST(request: Request) {
       amount,
       orderNumber: paypalOrderId,
       validUntil: expiryDate.toISOString(),
-      voucher,
+      voucher: voucher, // Ensure voucher is always included
     });
   } catch (error) {
     console.error("PayPal capture order error:", error);

@@ -402,6 +402,7 @@
         "back": "Back",
         "payWithPayPal": "Pay with PayPal",
         "payWithBankTransfer": "Pay with Bank Transfer",
+        "loginRequired": "Please sign in to purchase a voucher",
         "securePayment": "Secure payment via PayPal",
         "bankTransferInfo": "After completing your order, you will receive bank details via email. The voucher will be activated once payment is received.",
         "bankTransferDetails": "Bank details will be shown after order",
@@ -431,6 +432,19 @@
         "emailConfirmation": "A confirmation email has been sent with your voucher details.",
         "copyCode": "Copy code",
         "close": "Close"
+      },
+      "success": {
+        "title": "Payment successful!",
+        "subtitle": "Thank you for your purchase! Your voucher has been created.",
+        "details": "Order Details",
+        "orderNumber": "Order Number",
+        "voucherCode": "Voucher Code",
+        "amount": "Amount",
+        "info": "You can find your voucher in your account under 'My Vouchers'.",
+        "viewVouchers": "View My Vouchers",
+        "backToHome": "Back to Home",
+        "redirecting": "Redirecting in",
+        "seconds": "seconds"
       }
     }
   },
