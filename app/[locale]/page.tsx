@@ -90,6 +90,27 @@ export default async function Home({
         </div>
       </section>
 
+      {/* Spezielle Öffnungszeiten Hinweis */}
+      <section className="py-6 sm:py-8 container mx-auto px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl shadow-md p-4 sm:p-6">
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-amber-200 rounded-full flex items-center justify-center">
+                <span className="text-xl sm:text-2xl">⏰</span>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">
+                  {t("home.specialOpeningHours.title")}
+                </h3>
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                  {t("home.specialOpeningHours.message")}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Angebote Section - Mobile-first */}
       <section className="py-12 sm:py-16 container mx-auto px-4 sm:px-6">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 mb-8 sm:mb-12">

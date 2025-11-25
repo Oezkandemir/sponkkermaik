@@ -39,6 +39,10 @@
       "title": "Handcrafted Ceramic Art",
       "description": "Discover unique ceramic artworks by Bülent Tepe. Each piece is unique and crafted with attention to detail."
     },
+    "specialOpeningHours": {
+      "title": "Special Opening Hours",
+      "message": "On December 25th, 26th, and 30th, we are only open from 12 PM to 6 PM."
+    },
     "popularWorkshops": "Popular Workshops",
     "ceramicPaintingWorkshop": {
       "title": "Ceramic Painting Workshop",

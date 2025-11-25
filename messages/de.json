@@ -39,6 +39,10 @@
       "title": "Handgefertigte Keramikkunst",
       "description": "Entdecken Sie einzigartige Keramikkunstwerke von Bülent Tepe. Jedes Stück ist ein Unikat und mit Liebe zum Detail gefertigt."
     },
+    "specialOpeningHours": {
+      "title": "Spezielle Öffnungszeiten",
+      "message": "Am 25., 26. und 30. Dezember sind wir nur von 12 bis 18 Uhr geöffnet."
+    },
     "popularWorkshops": "Beliebte Workshops",
     "ceramicPaintingWorkshop": {
       "title": "Keramik Mal Workshop",
