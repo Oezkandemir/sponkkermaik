@@ -361,6 +361,13 @@
     "cancel": "Stornieren",
     "viewDetails": "Details anzeigen"
   },
+  "bookingSuccess": {
+    "title": "Vielen Dank für Ihre Buchung!",
+    "confirmed": "Buchung bestätigt",
+    "message": "Ihre Buchung wurde erfolgreich bestätigt. Wir freuen uns auf Ihren Besuch!",
+    "emailInfo": "Sie erhalten in Kürze eine Bestätigungs-E-Mail mit allen Details zu Ihrer Buchung.",
+    "backToHome": "Zur Startseite"
+  },
   "vouchers": {
     "title": "Meine Gutscheine",
     "subtitle": "Verwalten Sie Ihre Geschenkgutscheine",
@@ -407,6 +414,8 @@
         "payWithPayPal": "Mit PayPal bezahlen",
         "payWithBankTransfer": "Mit Überweisung bezahlen",
         "loginRequired": "Bitte melden Sie sich an, um einen Gutschein zu kaufen",
+        "loginRequiredOr": "Noch kein Konto?",
+        "signUpHere": "Hier registrieren",
         "securePayment": "Sichere Zahlung über PayPal",
         "bankTransferInfo": "Nach Abschluss der Bestellung erhalten Sie die Bankverbindung per E-Mail. Der Gutschein wird nach Zahlungseingang aktiviert.",
         "bankTransferDetails": "Bankverbindung wird nach Bestellung angezeigt",

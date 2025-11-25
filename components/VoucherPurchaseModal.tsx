@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Link } from "@/i18n/navigation";
 
 /**
  * VoucherPurchaseModal Component
@@ -613,11 +614,23 @@ function PaymentScreen({
                 <>
                   {!userId && (
                     <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
-                      <p className="text-sm text-red-800 flex items-center gap-2">
+                      <p className="text-sm text-red-800 flex items-center gap-2 mb-2">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         {t("payment.loginRequired")}
+                      </p>
+                      <p className="text-sm text-red-800">
+                        {t("payment.loginRequiredOr")}{" "}
+                        <Link 
+                          href="/auth/signup" 
+                          className="font-semibold underline hover:text-red-900 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                        >
+                          {t("payment.signUpHere")}
+                        </Link>
                       </p>
                     </div>
                   )}
@@ -649,11 +662,23 @@ function PaymentScreen({
                 <>
                   {!userId && (
                     <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
-                      <p className="text-sm text-red-800 flex items-center gap-2">
+                      <p className="text-sm text-red-800 flex items-center gap-2 mb-2">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         {t("payment.loginRequired")}
+                      </p>
+                      <p className="text-sm text-red-800">
+                        {t("payment.loginRequiredOr")}{" "}
+                        <Link 
+                          href="/auth/signup" 
+                          className="font-semibold underline hover:text-red-900 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                        >
+                          {t("payment.signUpHere")}
+                        </Link>
                       </p>
                     </div>
                   )}

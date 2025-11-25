@@ -361,6 +361,13 @@
     "cancel": "Cancel",
     "viewDetails": "View Details"
   },
+  "bookingSuccess": {
+    "title": "Thank You for Your Booking!",
+    "confirmed": "Booking confirmed",
+    "message": "Your booking has been successfully confirmed. We look forward to your visit!",
+    "emailInfo": "You will receive a confirmation email shortly with all details about your booking.",
+    "backToHome": "Back to Home"
+  },
   "vouchers": {
     "title": "My Vouchers",
     "subtitle": "Manage your gift vouchers",
@@ -407,6 +414,8 @@
         "payWithPayPal": "Pay with PayPal",
         "payWithBankTransfer": "Pay with Bank Transfer",
         "loginRequired": "Please sign in to purchase a voucher",
+        "loginRequiredOr": "Don't have an account?",
+        "signUpHere": "Sign up here",
         "securePayment": "Secure payment via PayPal",
         "bankTransferInfo": "After completing your order, you will receive bank details via email. The voucher will be activated once payment is received.",
         "bankTransferDetails": "Bank details will be shown after order",
