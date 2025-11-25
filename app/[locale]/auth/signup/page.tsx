@@ -68,11 +68,33 @@ export default function SignUpPage() {
     }
 
     try {
+      // Reason: Get the correct site URL for email redirects
+      // Always use production URL for email redirects to avoid localhost issues
+      const getRedirectUrl = () => {
+        // Check if we're in development
+        const isDevelopment = typeof window !== 'undefined' && 
+          (window.location.hostname === 'localhost' || 
+           window.location.hostname === '127.0.0.1' ||
+           window.location.hostname.includes('localhost'));
+        
+        if (isDevelopment) {
+          // In development, use localhost
+          return `${window.location.origin}/auth/callback`;
+        }
+        
+        // In production, always use the production URL
+        // This ensures emails redirect to the correct domain, not localhost
+        const productionUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sponkkeramik.de';
+        return `${productionUrl}/auth/callback`;
+      };
+
+      const redirectUrl = getRedirectUrl();
+
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: redirectUrl,
         },
       });
 
