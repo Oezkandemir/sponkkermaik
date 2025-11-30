@@ -323,11 +323,28 @@
       "passwordsDontMatch": "Passwords don't match",
       "signInFailed": "Sign in failed. Please check your credentials.",
       "signUpFailed": "Sign up failed. Please try again.",
-      "emailAlreadyExists": "This email address is already registered."
+      "emailAlreadyExists": "This email address is already registered.",
+      "resendFailed": "Error resending email. Please try again later."
     },
     "success": {
-      "signUpSuccess": "Registration successful! Please check your email.",
+      "signUpSuccess": "Registration successful!",
+      "checkEmail": "Please check your email and click the confirmation link.",
       "signOutSuccess": "You have been successfully signed out."
+    },
+    "resendEmail": {
+      "notReceived": "Didn't receive the email?",
+      "resend": "Resend Email",
+      "sending": "Sending..."
+    },
+    "backToSignIn": "Back to Sign In",
+    "errors": {
+      "invalidEmail": "Invalid email address",
+      "passwordTooShort": "Password must be at least 6 characters long",
+      "passwordsDontMatch": "Passwords don't match",
+      "signInFailed": "Sign in failed. Please check your credentials.",
+      "signUpFailed": "Sign up failed. Please try again.",
+      "emailAlreadyExists": "This email address is already registered.",
+      "resendFailed": "Error resending email. Please try again later."
     }
   },
   "profile": {

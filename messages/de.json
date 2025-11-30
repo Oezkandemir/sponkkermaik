@@ -323,11 +323,28 @@
       "passwordsDontMatch": "Passwörter stimmen nicht überein",
       "signInFailed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.",
       "signUpFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
-      "emailAlreadyExists": "Diese E-Mail-Adresse ist bereits registriert."
+      "emailAlreadyExists": "Diese E-Mail-Adresse ist bereits registriert.",
+      "resendFailed": "Fehler beim erneuten Senden der E-Mail. Bitte versuchen Sie es später erneut."
     },
     "success": {
-      "signUpSuccess": "Registrierung erfolgreich! Bitte überprüfen Sie Ihre E-Mail.",
+      "signUpSuccess": "Registrierung erfolgreich!",
+      "checkEmail": "Bitte überprüfen Sie Ihre E-Mail und klicken Sie auf den Bestätigungslink.",
       "signOutSuccess": "Sie wurden erfolgreich abgemeldet."
+    },
+    "resendEmail": {
+      "notReceived": "Keine E-Mail erhalten?",
+      "resend": "E-Mail erneut senden",
+      "sending": "Wird gesendet..."
+    },
+    "backToSignIn": "Zurück zur Anmeldung",
+    "errors": {
+      "invalidEmail": "Ungültige E-Mail-Adresse",
+      "passwordTooShort": "Passwort muss mindestens 6 Zeichen lang sein",
+      "passwordsDontMatch": "Passwörter stimmen nicht überein",
+      "signInFailed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.",
+      "signUpFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "emailAlreadyExists": "Diese E-Mail-Adresse ist bereits registriert.",
+      "resendFailed": "Fehler beim erneuten Senden der E-Mail. Bitte versuchen Sie es später erneut."
     }
   },
   "profile": {

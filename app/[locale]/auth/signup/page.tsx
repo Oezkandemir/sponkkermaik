@@ -22,6 +22,8 @@ export default function SignUpPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showResend, setShowResend] = useState(false);
+  const [resending, setResending] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -111,14 +113,61 @@ export default function SignUpPage() {
 
       setSuccess(true);
       setLoading(false);
+      setShowResend(true);
       
-      // Redirect to sign in after 3 seconds
-      setTimeout(() => {
-        router.push("/auth/signin");
-      }, 3000);
+      // Don't auto-redirect, let user resend email if needed
     } catch (err) {
       setError(t("errors.signUpFailed"));
       setLoading(false);
+    }
+  };
+
+  /**
+   * Handles resending confirmation email
+   */
+  const handleResendEmail = async () => {
+    if (!email) return;
+    
+    setResending(true);
+    setError("");
+    
+    try {
+      const getRedirectUrl = () => {
+        const isDevelopment = typeof window !== 'undefined' && 
+          (window.location.hostname === 'localhost' || 
+           window.location.hostname === '127.0.0.1' ||
+           window.location.hostname.includes('localhost'));
+        
+        if (isDevelopment) {
+          return `${window.location.origin}/auth/callback`;
+        }
+        
+        const productionUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sponkkeramik.de';
+        return `${productionUrl}/auth/callback`;
+      };
+
+      const redirectUrl = getRedirectUrl();
+
+      const { error: resendError } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: redirectUrl,
+        },
+      });
+
+      if (resendError) {
+        setError(t("errors.resendFailed"));
+        setResending(false);
+        return;
+      }
+
+      setSuccess(true);
+      setResending(false);
+      setError("");
+    } catch (err) {
+      setError(t("errors.resendFailed"));
+      setResending(false);
     }
   };
 
@@ -134,9 +183,38 @@ export default function SignUpPage() {
           <h2 className="text-2xl font-bold text-gray-900">
             {t("success.signUpSuccess")}
           </h2>
-          <p className="text-gray-600">
-            Redirecting to sign in...
+          <p className="text-gray-600 mb-6">
+            {t("success.checkEmail")}
           </p>
+          
+          {showResend && (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">
+                {t("resendEmail.notReceived")}
+              </p>
+              <button
+                onClick={handleResendEmail}
+                disabled={resending}
+                className="w-full px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {resending ? t("resendEmail.sending") : t("resendEmail.resend")}
+              </button>
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
+            </div>
+          )}
+          
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <Link
+              href="/auth/signin"
+              className="text-amber-600 hover:text-amber-700 font-medium text-sm"
+            >
+              {t("backToSignIn")}
+            </Link>
+          </div>
         </div>
       </div>
     );
