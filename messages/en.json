@@ -340,9 +340,20 @@
     "cancel": "Cancel",
     "fullName": "Full Name",
     "phone": "Phone Number",
+    "avatar": "Avatar",
+    "changeAvatar": "Change Picture",
+    "uploading": "Uploading...",
+    "avatarHint": "Max. 5MB, JPG, PNG, WebP or GIF",
     "memberSince": "Member Since",
     "success": {
-      "profileUpdated": "Profile updated successfully!"
+      "profileUpdated": "Profile updated successfully!",
+      "avatarUpdated": "Avatar updated successfully!"
+    },
+    "errors": {
+      "invalidFileType": "Please select an image file.",
+      "fileTooLarge": "File is too large. Maximum 5MB allowed.",
+      "uploadFailed": "Error uploading image. Please try again.",
+      "updateFailed": "Error updating profile. Please try again."
     }
   },
   "bookings": {
@@ -557,12 +568,22 @@
     "customerEmail": "Email Address",
     "customerNamePlaceholder": "Your full name",
     "customerEmailPlaceholder": "your.email@example.com",
+    "notLoggedIn": "You are not logged in",
+    "notLoggedInInfo": "You can still book. Optionally, you can create an account at the same time.",
+    "createAccount": "Create an account at Sponk Keramik at the same time",
+    "createAccountInfo": "With an account, you can manage your bookings and access additional features.",
+    "password": "Password",
+    "passwordPlaceholder": "At least 6 characters",
+    "passwordRequired": "Please enter a password (at least 6 characters)",
+    "passwordTooShort": "Password must be at least 6 characters long",
+    "accountCreated": "Your account has been successfully created!",
     "errors": {
       "loadFailed": "Error loading available times",
       "bookingFailed": "Error creating booking",
       "noCapacity": "No places available for this time slot.",
       "nameRequired": "Please enter your name",
-      "emailRequired": "Please enter a valid email address"
+      "emailRequired": "Please enter a valid email address",
+      "accountCreationFailed": "Error creating account. The booking was still created."
     }
   },
   "workshopsData": {

@@ -31,8 +31,8 @@ export default function HeroSection() {
             quality={80}
             sizes="100vw"
           />
-          {/* Overlay für bessere Textlesbarkeit */}
-          <div className="absolute inset-0 bg-gradient-to-r from-amber-700/40 via-amber-600/30 to-orange-700/40"></div>
+          {/* Overlay für bessere Textlesbarkeit - neutralisiert */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-gray-900/15 to-black/20"></div>
         </div>
         
         {/* Content */}

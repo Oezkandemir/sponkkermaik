@@ -340,9 +340,20 @@
     "cancel": "Abbrechen",
     "fullName": "Vollständiger Name",
     "phone": "Telefonnummer",
+    "avatar": "Profilbild",
+    "changeAvatar": "Bild ändern",
+    "uploading": "Wird hochgeladen...",
+    "avatarHint": "Max. 5MB, JPG, PNG, WebP oder GIF",
     "memberSince": "Mitglied seit",
     "success": {
-      "profileUpdated": "Profil erfolgreich aktualisiert!"
+      "profileUpdated": "Profil erfolgreich aktualisiert!",
+      "avatarUpdated": "Profilbild erfolgreich aktualisiert!"
+    },
+    "errors": {
+      "invalidFileType": "Bitte wählen Sie eine Bilddatei aus.",
+      "fileTooLarge": "Die Datei ist zu groß. Maximal 5MB erlaubt.",
+      "uploadFailed": "Fehler beim Hochladen des Bildes. Bitte versuchen Sie es erneut.",
+      "updateFailed": "Fehler beim Aktualisieren des Profils. Bitte versuchen Sie es erneut."
     }
   },
   "bookings": {
@@ -557,12 +568,22 @@
     "customerEmail": "E-Mail-Adresse",
     "customerNamePlaceholder": "Ihr vollständiger Name",
     "customerEmailPlaceholder": "ihre.email@beispiel.de",
+    "notLoggedIn": "Sie sind nicht angemeldet",
+    "notLoggedInInfo": "Sie können trotzdem buchen. Optional können Sie sich gleichzeitig ein Konto erstellen.",
+    "createAccount": "Gleichzeitig ein Konto bei Sponk Keramik erstellen",
+    "createAccountInfo": "Mit einem Konto können Sie Ihre Buchungen verwalten und erhalten Zugriff auf weitere Funktionen.",
+    "password": "Passwort",
+    "passwordPlaceholder": "Mindestens 6 Zeichen",
+    "passwordRequired": "Bitte geben Sie ein Passwort ein (mindestens 6 Zeichen)",
+    "passwordTooShort": "Passwort muss mindestens 6 Zeichen lang sein",
+    "accountCreated": "Ihr Konto wurde erfolgreich erstellt!",
     "errors": {
       "loadFailed": "Fehler beim Laden der verfügbaren Zeiten",
       "bookingFailed": "Fehler beim Erstellen der Buchung",
       "noCapacity": "Keine Plätze mehr verfügbar für diesen Zeitslot.",
       "nameRequired": "Bitte geben Sie Ihren Namen ein",
-      "emailRequired": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
+      "emailRequired": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+      "accountCreationFailed": "Fehler beim Erstellen des Kontos. Die Buchung wurde trotzdem erstellt."
     }
   },
   "workshopsData": {

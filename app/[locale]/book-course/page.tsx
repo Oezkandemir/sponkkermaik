@@ -54,6 +54,8 @@ export default function BookCoursePage() {
   const [notes, setNotes] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [createAccount, setCreateAccount] = useState(false);
+  const [password, setPassword] = useState("");
   const [booking, setBooking] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   
@@ -65,6 +67,8 @@ export default function BookCoursePage() {
     loadCourse();
     if (courseId) {
       loadTimeSlots();
+    } else {
+      setLoading(false);
     }
   }, [courseId]);
 
@@ -725,11 +729,6 @@ export default function BookCoursePage() {
   const handleBooking = async () => {
     if (!selectedSlot) return;
 
-    if (!user) {
-      router.push(`/auth/signin?redirect=/book-course${courseId ? `?course=${courseId}` : ''}`);
-      return;
-    }
-
     // Validate required fields
     if (!customerName.trim()) {
       setMessage({ type: "error", text: t("errors.nameRequired") });
@@ -739,6 +738,18 @@ export default function BookCoursePage() {
     if (!customerEmail.trim() || !customerEmail.includes("@")) {
       setMessage({ type: "error", text: t("errors.emailRequired") });
       return;
+    }
+    
+    // Validate password if creating account
+    if (createAccount && !user) {
+      if (!password.trim()) {
+        setMessage({ type: "error", text: t("passwordRequired") });
+        return;
+      }
+      if (password.length < 6) {
+        setMessage({ type: "error", text: t("passwordTooShort") });
+        return;
+      }
     }
 
     setBooking(true);
@@ -751,6 +762,53 @@ export default function BookCoursePage() {
         setBooking(false);
         return;
       }
+      
+      let userId = user?.id || null;
+      
+      // Create account if requested and user is not logged in
+      if (createAccount && !user) {
+        try {
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email: customerEmail.trim(),
+            password: password.trim(),
+            options: {
+              data: {
+                full_name: customerName.trim(),
+              },
+            },
+          });
+          
+          if (signUpError) {
+            // If email already exists, try to sign in
+            if (signUpError.message.includes("already registered")) {
+              const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+                email: customerEmail.trim(),
+                password: password.trim(),
+              });
+              
+              if (signInError) {
+                throw new Error("Account existiert bereits, aber Passwort ist falsch");
+              }
+              
+              userId = signInData.user?.id || null;
+            } else {
+              throw signUpError;
+            }
+          } else {
+            userId = signUpData.user?.id || null;
+            if (userId) {
+              setMessage({ type: "success", text: t("accountCreated") });
+            }
+          }
+        } catch (accountError: any) {
+          console.error("Error creating account:", accountError);
+          // Continue with booking even if account creation fails
+          setMessage({ 
+            type: "error", 
+            text: t("errors.accountCreationFailed") 
+          });
+        }
+      }
 
       // Format booking date consistently
       const bookingDate = selectedSlot.date;
@@ -762,7 +820,7 @@ export default function BookCoursePage() {
       const { data, error } = await supabase
         .from("bookings")
         .insert({
-          user_id: user.id,
+          user_id: userId,
           course_schedule_id: selectedSlot.timeSlot.id,
           booking_date: bookingDateString,
           start_time: selectedSlot.timeSlot.start_time,
@@ -776,7 +834,15 @@ export default function BookCoursePage() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error details:", {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+        });
+        throw error;
+      }
 
       // Send confirmation email
       try {
@@ -803,7 +869,9 @@ export default function BookCoursePage() {
         // Don't fail the booking if email fails
       }
 
-      setMessage({ type: "success", text: t("success.booked") });
+      if (!message || message.type !== "error") {
+        setMessage({ type: "success", text: t("success.booked") });
+      }
       
       // Reload slots to update availability
       if (selectedDate) {
@@ -825,9 +893,25 @@ export default function BookCoursePage() {
       setTimeout(() => {
         router.push(`/booking-success?id=${data.id}`);
       }, 2000);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error creating booking:", err);
-      setMessage({ type: "error", text: t("errors.bookingFailed") });
+      console.error("Error details:", {
+        message: err?.message,
+        details: err?.details,
+        hint: err?.hint,
+        code: err?.code,
+        stack: err?.stack,
+      });
+      
+      // Show more detailed error message
+      let errorMessage = t("errors.bookingFailed");
+      if (err?.message) {
+        errorMessage = `${errorMessage}: ${err.message}`;
+      } else if (err?.code) {
+        errorMessage = `${errorMessage} (Code: ${err.code})`;
+      }
+      
+      setMessage({ type: "error", text: errorMessage });
     } finally {
       setBooking(false);
     }
@@ -1240,6 +1324,71 @@ export default function BookCoursePage() {
                   />
                 </div>
 
+                {/* Not logged in notice */}
+                {!user && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-blue-900 mb-1">
+                          {t("notLoggedIn")}
+                        </p>
+                        <p className="text-xs text-blue-700">
+                          {t("notLoggedInInfo")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Create Account Checkbox */}
+                {!user && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={createAccount}
+                        onChange={(e) => {
+                          setCreateAccount(e.target.checked);
+                          if (!e.target.checked) {
+                            setPassword("");
+                          }
+                        }}
+                        className="mt-1 w-5 h-5 text-amber-600 border-gray-300 rounded focus:ring-amber-500"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900 mb-1">
+                          {t("createAccount")}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {t("createAccountInfo")}
+                        </p>
+                      </div>
+                    </label>
+                    
+                    {createAccount && (
+                      <div className="mt-4 pt-4 border-t border-amber-200">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {t("password")} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required={createAccount}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                          placeholder={t("passwordPlaceholder")}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Mindestens 6 Zeichen
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {t("notes")} <span className="text-gray-500">({t("optional")})</span>
@@ -1273,6 +1422,8 @@ export default function BookCoursePage() {
                     setNotes("");
                     setCustomerName("");
                     setCustomerEmail("");
+                    setCreateAccount(false);
+                    setPassword("");
                     setMessage(null);
                   }}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
@@ -1281,7 +1432,7 @@ export default function BookCoursePage() {
                 </button>
                 <button
                   onClick={handleBooking}
-                  disabled={booking || !customerName.trim() || !customerEmail.trim()}
+                  disabled={booking || !customerName.trim() || !customerEmail.trim() || (createAccount && !user && (!password.trim() || password.length < 6))}
                   className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {booking ? (

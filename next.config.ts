@@ -6,6 +6,18 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 const nextConfig: NextConfig = {
   images: {
     qualities: [70, 75, 90],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'roitdmoxjmapffclbpud.supabase.co',
+        pathname: '/storage/v1/object/public/avatars/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'robohash.org',
+        pathname: '/**',
+      },
+    ],
   },
   // Build optimizations
   compiler: {

@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import Image from "next/image";
 
 /**
  * UserMenu Component
@@ -18,10 +19,12 @@ export default function UserMenu() {
   const t = useTranslations("auth");
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const userRef = useRef<User | null>(null);
   const supabase = createClient();
 
   // Reason: Check admin status separately to avoid blocking user menu
@@ -52,6 +55,27 @@ export default function UserMenu() {
     }
   };
 
+  // Reason: Load avatar from profile
+  const loadAvatar = async (userId: string) => {
+    try {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("avatar_url")
+        .eq("id", userId)
+        .maybeSingle();
+      
+      if (profile && profile.avatar_url) {
+        setAvatarUrl(profile.avatar_url);
+      } else {
+        // Reason: Fallback to Robohash if no avatar
+        setAvatarUrl(`https://robohash.org/${userId}.png?set=set4`);
+      }
+    } catch (err) {
+      console.error("Error loading avatar:", err);
+      setAvatarUrl(`https://robohash.org/${userId}.png?set=set4`);
+    }
+  };
+
   useEffect(() => {
     // Reason: Get initial user session
     const getUser = async () => {
@@ -61,22 +85,27 @@ export default function UserMenu() {
         if (userError) {
           console.error("Error getting user:", userError);
           setUser(null);
+          setAvatarUrl(null);
           setIsAdmin(false);
           setLoading(false);
           return;
         }
         
         setUser(user);
+        userRef.current = user;
         
-        // Check admin status separately - don't block on errors
+        // Load avatar and check admin status separately - don't block on errors
         if (user) {
+          loadAvatar(user.id);
           checkAdminStatus(user.id);
         } else {
+          setAvatarUrl(null);
           setIsAdmin(false);
         }
       } catch (err) {
         console.error("Error in getUser:", err);
         setUser(null);
+        setAvatarUrl(null);
         setIsAdmin(false);
       } finally {
         setLoading(false);
@@ -89,18 +118,44 @@ export default function UserMenu() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setUser(session?.user ?? null);
+        userRef.current = session?.user ?? null;
         
-        // Check admin status when user changes
+        // Check admin status and load avatar when user changes
         if (session?.user) {
+          loadAvatar(session.user.id);
           checkAdminStatus(session.user.id);
         } else {
+          setAvatarUrl(null);
           setIsAdmin(false);
         }
       }
     );
 
-    return () => subscription.unsubscribe();
-  }, [supabase.auth]);
+    // Reason: Listen for profile changes to refresh avatar
+    const channel = supabase
+      .channel("avatar-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "profiles",
+        },
+        (payload) => {
+          // Reason: Reload avatar if current user's profile was updated
+          const currentUser = userRef.current;
+          if (currentUser && payload.new.id === currentUser.id && payload.new.avatar_url) {
+            setAvatarUrl(payload.new.avatar_url);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+      channel.unsubscribe();
+    };
+  }, [supabase.auth, supabase]);
 
   useEffect(() => {
     // Reason: Close dropdown when clicking outside
@@ -131,16 +186,28 @@ export default function UserMenu() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={loading}
-        className={`flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 ${
+        className={`flex items-center justify-center w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 ${
           loading ? "opacity-50 cursor-wait" : ""
         }`}
         aria-label={user ? t("myProfile") : t("signIn")}
       >
         {user ? (
-          // Reason: Show user initial if logged in
-          <span className="text-sm font-semibold">
-            {user.email?.charAt(0).toUpperCase() || "U"}
-          </span>
+          avatarUrl ? (
+            // Reason: Show avatar if available
+            <Image
+              src={avatarUrl}
+              alt={t("myProfile")}
+              width={36}
+              height={36}
+              className="w-full h-full object-cover"
+              unoptimized={avatarUrl.startsWith("https://robohash.org")}
+            />
+          ) : (
+            // Reason: Show user initial as fallback
+            <span className="text-sm font-semibold">
+              {user.email?.charAt(0).toUpperCase() || "U"}
+            </span>
+          )
         ) : (
           // Reason: Show user icon if logged out
           <svg

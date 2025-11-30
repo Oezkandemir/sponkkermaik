@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import Image from "next/image";
 
 /**
  * Profile Page Component
@@ -20,8 +21,11 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [success, setSuccess] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -35,21 +39,138 @@ export default function ProfilePage() {
       }
       
       setUser(user);
-      // TODO: Load additional profile data from database
+      
+      // Load profile data from database
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("full_name, phone, avatar_url")
+        .eq("id", user.id)
+        .single();
+      
+      if (profile && !error) {
+        setFullName(profile.full_name || "");
+        setPhone(profile.phone || "");
+        // Reason: Use Robohash avatar if no custom avatar is set
+        setAvatarUrl(profile.avatar_url || `https://robohash.org/${user.id}.png?set=set4`);
+      } else if (error && error.code !== "PGRST116") {
+        // PGRST116 = no rows returned, which is fine for new users
+        console.error("Error loading profile:", error);
+        // Reason: Fallback to Robohash if profile doesn't exist yet
+        setAvatarUrl(`https://robohash.org/${user.id}.png?set=set4`);
+      } else {
+        // Reason: New user without profile - use Robohash
+        setAvatarUrl(`https://robohash.org/${user.id}.png?set=set4`);
+      }
+      
       setLoading(false);
     }
 
     getUser();
-  }, [router, supabase.auth]);
+  }, [router, supabase]);
+
+  /**
+   * Handles avatar upload
+   * 
+   * Args:
+   *   file (File): The image file to upload
+   */
+  const handleAvatarUpload = async (file: File) => {
+    if (!user) return;
+    
+    setUploading(true);
+    
+    try {
+      // Reason: Validate file type and size
+      if (!file.type.startsWith("image/")) {
+        setSuccess("");
+        alert(t("errors.invalidFileType"));
+        setUploading(false);
+        return;
+      }
+      
+      if (file.size > 5 * 1024 * 1024) {
+        setSuccess("");
+        alert(t("errors.fileTooLarge"));
+        setUploading(false);
+        return;
+      }
+      
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+      
+      if (uploadError) {
+        throw uploadError;
+      }
+      
+      // Get public URL
+      const { data } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(fileName);
+      
+      const publicUrl = data.publicUrl;
+      
+      // Update profile with new avatar URL
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl })
+        .eq("id", user.id);
+      
+      if (updateError) {
+        throw updateError;
+      }
+      
+      setAvatarUrl(publicUrl);
+      setSuccess(t("success.avatarUpdated"));
+      
+      // Reason: Trigger a page refresh to update header avatar immediately
+      router.refresh();
+      
+      setTimeout(() => {
+        setSuccess("");
+      }, 3000);
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      alert(t("errors.uploadFailed"));
+    } finally {
+      setUploading(false);
+    }
+  };
 
   /**
    * Handles profile update
    */
   const handleSave = async () => {
-    setSuccess(t("success.profileUpdated"));
-    setIsEditing(false);
+    if (!user) return;
     
-    setTimeout(() => setSuccess(""), 3000);
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .upsert({
+          id: user.id,
+          full_name: fullName,
+          phone: phone,
+        });
+      
+      if (error) {
+        throw error;
+      }
+      
+      setSuccess(t("success.profileUpdated"));
+      setIsEditing(false);
+      
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert(t("errors.updateFailed"));
+    }
   };
 
   if (loading) {
@@ -108,6 +229,58 @@ export default function ProfilePage() {
           </div>
 
           <div className="space-y-6">
+            {/* Avatar */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t("avatar")}
+              </label>
+              <div className="flex items-center gap-4">
+                <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                  {avatarUrl ? (
+                    <Image
+                      src={avatarUrl}
+                      alt={t("avatar")}
+                      width={96}
+                      height={96}
+                      className="w-full h-full object-cover"
+                      unoptimized={avatarUrl.startsWith("https://robohash.org")}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white text-2xl font-bold">
+                      {user?.email?.charAt(0).toUpperCase() || "?"}
+                    </div>
+                  )}
+                </div>
+                {isEditing && (
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          handleAvatarUpload(file);
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                    >
+                      {uploading ? t("uploading") : t("changeAvatar")}
+                    </button>
+                    <p className="text-xs text-gray-500">
+                      {t("avatarHint")}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Full Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
