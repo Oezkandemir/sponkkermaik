@@ -76,9 +76,6 @@ export default function AtelierPage() {
         <div className="max-w-6xl mx-auto">
           {/* Künstler Info */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-6 sm:mb-8">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
-              {t("aboutArtist")}
-            </h2>
             <p className="text-sm sm:text-base text-gray-700 mb-3 sm:mb-4 leading-relaxed">
               {t("artistDescriptionFull")}
             </p>
