@@ -1,23 +1,61 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 /**
  * Booking Success Page
  * 
- * Displays confirmation message after successful Cal.com booking
+ * Displays confirmation message after successful booking
  */
 export default function BookingSuccessPage() {
   const t = useTranslations("bookingSuccess");
+  const searchParams = useSearchParams();
+  const bookingId = searchParams.get("id");
+  const [booking, setBooking] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    if (bookingId) {
+      loadBookingDetails(bookingId);
+    } else {
+      setLoading(false);
+    }
+  }, [bookingId]);
+
+  const loadBookingDetails = async (id: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+
+      setBooking({
+        ...data,
+        formattedDate: new Date(data.booking_date).toLocaleDateString("de-DE", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        formattedTime: `${data.start_time} - ${data.end_time}`,
+      });
+    } catch (err) {
+      console.error("Error loading booking:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center px-4 py-16">
-      {/* Cal.com Required: Hidden text for page recognition */}
-      <div className="sr-only" aria-hidden="true">
-        Buchung bestätigt
-      </div>
-      
       <div className="max-w-2xl w-full">
         {/* Success Card */}
         <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 text-center">
@@ -38,7 +76,7 @@ export default function BookingSuccessPage() {
             </svg>
           </div>
 
-          {/* Cal.com Required Text - Must be visible for Cal.com to recognize this as success page */}
+          {/* Success Title */}
           <div className="mb-4">
             <h2 className="text-3xl font-bold text-green-600">
               {t("confirmed")}
@@ -53,6 +91,37 @@ export default function BookingSuccessPage() {
           <p className="text-xl text-gray-600 mb-8">
             {t("message")}
           </p>
+
+          {/* Booking Details */}
+          {booking && (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-8 text-left">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {t("bookingDetails")}
+              </h3>
+              <div className="space-y-2 text-gray-700">
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span><strong>{t("date")}:</strong> {booking.formattedDate}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span><strong>{t("time")}:</strong> {booking.formattedTime}</span>
+                </div>
+                {booking.notes && (
+                  <div className="flex items-start gap-2 mt-2">
+                    <svg className="w-5 h-5 text-gray-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span><strong>{t("notes")}:</strong> {booking.notes}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Info Message */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">

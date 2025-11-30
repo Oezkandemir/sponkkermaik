@@ -74,7 +74,7 @@
       "pickupAfterFiring": "You can pick up your works after firing",
       "allLevels": "Perfect for beginners and advanced students",
       "groupCourses": "Group courses and individual support possible",
-      "onlineBooking": "Direct online booking via cal.com possible"
+      "onlineBooking": "Direct online booking possible"
     }
   },
   "courseCard": {
@@ -84,7 +84,8 @@
     "bookNow": "Book Now →",
     "contactUs": "Contact Us",
     "bookingTitle": "Book Appointment",
-    "closeModal": "Close modal"
+    "closeModal": "Close modal",
+    "or": "or"
   },
   "contact": {
     "title": "Contact",
@@ -313,6 +314,7 @@
     "orContinueWith": "Or continue with",
     "myProfile": "My Profile",
     "myBookings": "My Bookings",
+    "admin": "Admin",
     "myVouchers": "My Vouchers",
     "settings": "Settings",
     "errors": {
@@ -366,7 +368,11 @@
     "confirmed": "Booking confirmed",
     "message": "Your booking has been successfully confirmed. We look forward to your visit!",
     "emailInfo": "You will receive a confirmation email shortly with all details about your booking.",
-    "backToHome": "Back to Home"
+    "backToHome": "Back to Home",
+    "bookingDetails": "Booking Details",
+    "date": "Date",
+    "time": "Time",
+    "notes": "Notes"
   },
   "vouchers": {
     "title": "My Vouchers",
@@ -482,6 +488,81 @@
     "success": {
       "passwordUpdated": "Password updated successfully!",
       "settingsSaved": "Settings saved!"
+    }
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "subtitle": "Manage course schedules and other settings",
+    "selectCourse": "Select Course",
+    "firstSundayAvailable": "First Sunday Available",
+    "applyToAllCourses": "Apply to all courses",
+    "applyToAllCoursesConfirm": "Do you want to apply the time slots from \"{courseName}\" to all other {courseCount} courses? This will overwrite the existing time slots of the other courses.",
+    "applying": "Applying...",
+    "timeSlotsAppliedToAll": "Time slots have been successfully applied to all courses!",
+    "errorApplyingToAll": "Error applying time slots to all courses.",
+    "noTimeSlotsToCopy": "This course has no time slots to copy.",
+    "cancel": "Cancel",
+    "apply": "Apply"
+  },
+  "scheduleSettings": {
+    "title": "Manage Course Schedule",
+    "subtitle": "Configure available course times for each day of the week",
+    "save": "Save",
+    "saving": "Saving...",
+    "addTimeSlot": "Add time slot",
+    "addFirstTimeSlot": "Add first time slot",
+    "copyTimeSlots": "Copy time slots",
+    "removeTimeSlot": "Remove time slot",
+    "applyToOtherDays": "Apply to other days",
+    "applyTimeSlotsFrom": "Apply time slots from",
+    "selectDaysToApply": "Select the days to apply the time slots to:",
+    "cancel": "Cancel",
+    "apply": "Apply",
+    "firstSundayOfMonth": "First Sunday of Month",
+    "success": {
+      "saved": "Course schedule saved successfully!"
+    },
+    "errors": {
+      "loadFailed": "Error loading course schedule",
+      "saveFailed": "Error saving course schedule"
+    }
+  },
+  "bookCourse": {
+    "title": "Book Course",
+    "subtitle": "Select an available time slot for your course",
+    "selectDate": "Select Date",
+    "selectTime": "Select Time",
+    "confirmBooking": "Confirm Booking",
+    "date": "Date",
+    "time": "Time",
+    "notes": "Notes",
+    "optional": "Optional",
+    "notesPlaceholder": "Additional information or requests...",
+    "cancel": "Cancel",
+    "confirm": "Book",
+    "booking": "Booking...",
+    "back": "Back",
+    "backToWorkshops": "← Back to Workshops",
+    "needHelp": "Need help?",
+    "or": "or",
+    "noSlotsAvailable": "No time slots are currently available.",
+    "today": "Today",
+    "loginRequired": "You need to sign in to book a course.",
+    "placesAvailable": "places available",
+    "fullyBooked": "Fully booked",
+    "success": {
+      "booked": "Booking created successfully! Redirecting..."
+    },
+    "customerName": "Name",
+    "customerEmail": "Email Address",
+    "customerNamePlaceholder": "Your full name",
+    "customerEmailPlaceholder": "your.email@example.com",
+    "errors": {
+      "loadFailed": "Error loading available times",
+      "bookingFailed": "Error creating booking",
+      "noCapacity": "No places available for this time slot.",
+      "nameRequired": "Please enter your name",
+      "emailRequired": "Please enter a valid email address"
     }
   },
   "workshopsData": {

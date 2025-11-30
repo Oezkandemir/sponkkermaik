@@ -18,25 +18,84 @@ export default function UserMenu() {
   const t = useTranslations("auth");
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
 
+  // Reason: Check admin status separately to avoid blocking user menu
+  const checkAdminStatus = async (userId: string) => {
+    try {
+      const { data: adminData, error } = await supabase
+        .from("admins")
+        .select("user_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      
+      if (error) {
+        // Non-critical error - just log and continue
+        console.log("Admin check error (non-critical):", error.message);
+        setIsAdmin(false);
+        return;
+      }
+      
+      if (adminData && adminData.user_id) {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
+    } catch (err) {
+      // If admin check fails completely, just set to false
+      console.error("Error checking admin status:", err);
+      setIsAdmin(false);
+    }
+  };
+
   useEffect(() => {
     // Reason: Get initial user session
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
+      try {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError) {
+          console.error("Error getting user:", userError);
+          setUser(null);
+          setIsAdmin(false);
+          setLoading(false);
+          return;
+        }
+        
+        setUser(user);
+        
+        // Check admin status separately - don't block on errors
+        if (user) {
+          checkAdminStatus(user.id);
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (err) {
+        console.error("Error in getUser:", err);
+        setUser(null);
+        setIsAdmin(false);
+      } finally {
+        setLoading(false);
+      }
     };
 
     getUser();
 
     // Reason: Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
         setUser(session?.user ?? null);
+        
+        // Check admin status when user changes
+        if (session?.user) {
+          checkAdminStatus(session.user.id);
+        } else {
+          setIsAdmin(false);
+        }
       }
     );
 
@@ -65,18 +124,16 @@ export default function UserMenu() {
     router.refresh();
   };
 
-  if (loading) {
-    return (
-      <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
-    );
-  }
-
+  // Always render the menu, even if loading or errors occur
   return (
     <div className="relative" ref={dropdownRef}>
       {/* User Icon Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
+        disabled={loading}
+        className={`flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 ${
+          loading ? "opacity-50 cursor-wait" : ""
+        }`}
         aria-label={user ? t("myProfile") : t("signIn")}
       >
         {user ? (
@@ -155,6 +212,21 @@ export default function UserMenu() {
                 </svg>
                 {t("settings")}
               </Link>
+              {isAdmin && (
+                <>
+                  <div className="border-t border-gray-100 mt-2"></div>
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-purple-700 hover:bg-purple-50 hover:text-purple-800 transition-colors font-medium"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    {t("admin")}
+                  </Link>
+                </>
+              )}
               <div className="border-t border-gray-100 mt-2"></div>
               <button
                 onClick={handleSignOut}

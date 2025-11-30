@@ -74,7 +74,7 @@
       "pickupAfterFiring": "Ihre Werke können Sie nach dem Brennen abholen",
       "allLevels": "Perfekt für Anfänger und Fortgeschrittene",
       "groupCourses": "Gruppenkurse und individuelle Betreuung möglich",
-      "onlineBooking": "Direkte Online-Buchung über cal.com möglich"
+      "onlineBooking": "Direkte Online-Buchung möglich"
     }
   },
   "courseCard": {
@@ -84,7 +84,8 @@
     "bookNow": "Jetzt buchen →",
     "contactUs": "Kontakt aufnehmen",
     "bookingTitle": "Termin buchen",
-    "closeModal": "Modal schließen"
+    "closeModal": "Modal schließen",
+    "or": "oder"
   },
   "contact": {
     "title": "Kontakt",
@@ -313,6 +314,7 @@
     "orContinueWith": "Oder fortfahren mit",
     "myProfile": "Mein Profil",
     "myBookings": "Meine Buchungen",
+    "admin": "Admin",
     "myVouchers": "Meine Gutscheine",
     "settings": "Einstellungen",
     "errors": {
@@ -366,7 +368,11 @@
     "confirmed": "Buchung bestätigt",
     "message": "Ihre Buchung wurde erfolgreich bestätigt. Wir freuen uns auf Ihren Besuch!",
     "emailInfo": "Sie erhalten in Kürze eine Bestätigungs-E-Mail mit allen Details zu Ihrer Buchung.",
-    "backToHome": "Zur Startseite"
+    "backToHome": "Zur Startseite",
+    "bookingDetails": "Buchungsdetails",
+    "date": "Datum",
+    "time": "Uhrzeit",
+    "notes": "Notizen"
   },
   "vouchers": {
     "title": "Meine Gutscheine",
@@ -482,6 +488,81 @@
     "success": {
       "passwordUpdated": "Passwort erfolgreich aktualisiert!",
       "settingsSaved": "Einstellungen gespeichert!"
+    }
+  },
+  "admin": {
+    "title": "Admin Dashboard",
+    "subtitle": "Verwalten Sie Kurszeiten und andere Einstellungen",
+    "selectCourse": "Kurs auswählen",
+    "firstSundayAvailable": "Erster Sonntag verfügbar",
+    "applyToAllCourses": "Auf alle Kurse anwenden",
+    "applyToAllCoursesConfirm": "Möchten Sie die Zeitslots von \"{courseName}\" wirklich auf alle anderen {courseCount} Kurse anwenden? Dies überschreibt die bestehenden Zeitslots der anderen Kurse.",
+    "applying": "Wird angewendet...",
+    "timeSlotsAppliedToAll": "Zeitslots wurden erfolgreich auf alle Kurse angewendet!",
+    "errorApplyingToAll": "Fehler beim Anwenden der Zeitslots auf alle Kurse.",
+    "noTimeSlotsToCopy": "Dieser Kurs hat keine Zeitslots zum Kopieren.",
+    "cancel": "Abbrechen",
+    "apply": "Anwenden"
+  },
+  "scheduleSettings": {
+    "title": "Kurszeiten verwalten",
+    "subtitle": "Stellen Sie die verfügbaren Kurszeiten für jeden Wochentag ein",
+    "save": "Speichern",
+    "saving": "Speichern...",
+    "addTimeSlot": "Zeitslot hinzufügen",
+    "addFirstTimeSlot": "Ersten Zeitslot hinzufügen",
+    "copyTimeSlots": "Zeitslots kopieren",
+    "removeTimeSlot": "Zeitslot entfernen",
+    "applyToOtherDays": "Auf andere Tage anwenden",
+    "applyTimeSlotsFrom": "Zeitslots von",
+    "selectDaysToApply": "Wählen Sie die Tage aus, auf die die Zeitslots angewendet werden sollen:",
+    "cancel": "Abbrechen",
+    "apply": "Anwenden",
+    "firstSundayOfMonth": "Erster Sonntag im Monat",
+    "success": {
+      "saved": "Kurszeiten erfolgreich gespeichert!"
+    },
+    "errors": {
+      "loadFailed": "Fehler beim Laden der Kurszeiten",
+      "saveFailed": "Fehler beim Speichern der Kurszeiten"
+    }
+  },
+  "bookCourse": {
+    "title": "Kurs buchen",
+    "subtitle": "Wählen Sie einen verfügbaren Termin für Ihren Kurs",
+    "selectDate": "Datum auswählen",
+    "selectTime": "Uhrzeit auswählen",
+    "confirmBooking": "Buchung bestätigen",
+    "date": "Datum",
+    "time": "Uhrzeit",
+    "notes": "Notizen",
+    "optional": "Optional",
+    "notesPlaceholder": "Zusätzliche Informationen oder Wünsche...",
+    "cancel": "Abbrechen",
+    "confirm": "Buchen",
+    "booking": "Wird gebucht...",
+    "back": "Zurück",
+    "backToWorkshops": "← Zurück zu Workshops",
+    "needHelp": "Brauchst du Hilfe?",
+    "or": "oder",
+    "noSlotsAvailable": "Derzeit sind keine Termine verfügbar.",
+    "today": "Heute",
+    "loginRequired": "Sie müssen sich anmelden, um einen Kurs zu buchen.",
+    "placesAvailable": "Plätze verfügbar",
+    "fullyBooked": "Ausgebucht",
+    "success": {
+      "booked": "Buchung erfolgreich erstellt! Sie werden weitergeleitet..."
+    },
+    "customerName": "Name",
+    "customerEmail": "E-Mail-Adresse",
+    "customerNamePlaceholder": "Ihr vollständiger Name",
+    "customerEmailPlaceholder": "ihre.email@beispiel.de",
+    "errors": {
+      "loadFailed": "Fehler beim Laden der verfügbaren Zeiten",
+      "bookingFailed": "Fehler beim Erstellen der Buchung",
+      "noCapacity": "Keine Plätze mehr verfügbar für diesen Zeitslot.",
+      "nameRequired": "Bitte geben Sie Ihren Namen ein",
+      "emailRequired": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
     }
   },
   "workshopsData": {

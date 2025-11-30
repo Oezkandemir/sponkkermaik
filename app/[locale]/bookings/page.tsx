@@ -19,15 +19,13 @@ export default function BookingsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
+  const [upcomingBookings, setUpcomingBookings] = useState<any[]>([]);
+  const [pastBookings, setPastBookings] = useState<any[]>([]);
   const supabase = createClient();
 
-  // TODO: Replace with actual bookings from database
-  const upcomingBookings: any[] = [];
-  const pastBookings: any[] = [];
-
   useEffect(() => {
-    // Reason: Check authentication
-    async function getUser() {
+    // Reason: Check authentication and load bookings
+    async function getUserAndBookings() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -36,12 +34,82 @@ export default function BookingsPage() {
       }
       
       setUser(user);
-      // TODO: Load bookings from database
+      await loadBookings(user.id);
       setLoading(false);
     }
 
-    getUser();
+    getUserAndBookings();
   }, [router, supabase.auth]);
+
+  /**
+   * Loads bookings from database
+   */
+  const loadBookings = async (userId: string) => {
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("user_id", userId)
+        .order("booking_date", { ascending: true })
+        .order("start_time", { ascending: true });
+
+      if (error) throw error;
+
+      const upcoming: any[] = [];
+      const past: any[] = [];
+
+      data?.forEach((booking) => {
+        const bookingDate = booking.booking_date;
+        const formattedBooking = {
+          id: booking.id,
+          date: new Date(bookingDate).toLocaleDateString("de-DE", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+          time: `${booking.start_time} - ${booking.end_time}`,
+          status: booking.status,
+          notes: booking.notes,
+          booking_date: bookingDate,
+        };
+
+        if (bookingDate >= today) {
+          upcoming.push(formattedBooking);
+        } else {
+          past.push(formattedBooking);
+        }
+      });
+
+      setUpcomingBookings(upcoming);
+      setPastBookings(past);
+    } catch (err) {
+      console.error("Error loading bookings:", err);
+    }
+  };
+
+  /**
+   * Cancels a booking
+   */
+  const cancelBooking = async (bookingId: string) => {
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ status: "cancelled" })
+        .eq("id", bookingId);
+
+      if (error) throw error;
+
+      // Reload bookings
+      if (user) {
+        await loadBookings(user.id);
+      }
+    } catch (err) {
+      console.error("Error cancelling booking:", err);
+    }
+  };
 
   if (loading) {
     return (
@@ -101,14 +169,19 @@ export default function BookingsPage() {
           {activeTab === "upcoming" ? (
             upcomingBookings.length > 0 ? (
               upcomingBookings.map((booking) => (
-                <BookingCard key={booking.id} booking={booking} t={t} />
+                <BookingCard 
+                  key={booking.id} 
+                  booking={booking} 
+                  t={t} 
+                  onCancel={() => cancelBooking(booking.id)}
+                />
               ))
             ) : (
               <EmptyState
                 message={t("noUpcoming")}
                 action={
                   <Link
-                    href="/kurse-preise-sponk-keramik"
+                    href="/book-course"
                     className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700 transition-all"
                   >
                     {t("browseWorkshops")}
@@ -137,17 +210,18 @@ export default function BookingsPage() {
  *   t: Translation function
  *   isPast: Whether this is a past booking
  */
-function BookingCard({ booking, t, isPast = false }: {
+function BookingCard({ booking, t, isPast = false, onCancel }: {
   booking: any;
   t: any;
   isPast?: boolean;
+  onCancel?: () => void;
 }) {
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            {booking.workshop_name}
+            Kursbuchung
           </h3>
           <div className="space-y-2 text-gray-600">
             <div className="flex items-center gap-2">
@@ -162,12 +236,22 @@ function BookingCard({ booking, t, isPast = false }: {
               </svg>
               <span>{t("time")}: {booking.time}</span>
             </div>
+            {booking.notes && (
+              <div className="flex items-start gap-2 mt-2">
+                <svg className="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                <span className="text-sm">{booking.notes}</span>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                 booking.status === "confirmed"
                   ? "bg-green-100 text-green-800"
                   : booking.status === "pending"
                   ? "bg-yellow-100 text-yellow-800"
+                  : booking.status === "cancelled"
+                  ? "bg-red-100 text-red-800"
                   : "bg-gray-100 text-gray-800"
               }`}>
                 {t(booking.status)}
@@ -175,12 +259,12 @@ function BookingCard({ booking, t, isPast = false }: {
             </div>
           </div>
         </div>
-        {!isPast && (
+        {!isPast && booking.status !== "cancelled" && onCancel && (
           <div className="flex gap-2">
-            <button className="px-4 py-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors">
-              {t("viewDetails")}
-            </button>
-            <button className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+            <button 
+              onClick={onCancel}
+              className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
               {t("cancel")}
             </button>
           </div>

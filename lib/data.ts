@@ -11,7 +11,6 @@ export interface Workshop {
   price: string;
   time?: string;
   day?: string;
-  bookingLink?: string; // cal.com oder andere Buchungslinks
   featured?: boolean; // Für Featured-Kurse auf der Homepage
   topOffer?: boolean; // Top Angebot Markierung
   badgeText?: string; // Spezifischer Badge-Text (z.B. "Best preis garantie in düsseldorf")
@@ -48,7 +47,6 @@ export const workshops: Workshop[] = [
       "Sonntag keine Eigenen Werke malen! Glasieren (Keramik bemalen) an einem Rohling – pro Person 39 Euro. Wähle aus verschiedenen Rohlingsformen wie Kaffeetassen, Müslischalen usw. ",
     duration: "90 Minuten",
     price: "39 € pro Person",
-    bookingLink: "https://cal.com/sponkkeramik.de/workshop-nur-keramik-bemalen-glasieren?overlayCalendar=true",
     badgeText: "Best preis garantie in düsseldorf",
     featured: true,
     images: [
@@ -62,7 +60,6 @@ export const workshops: Workshop[] = [
       "Erlebe die Faszination des Drehens an der Töpferscheibe! In diesem Schnupperkurs lernst du die Grundlagen des Zentrierens, Hochziehens und Formens von Ton. Unter fachkundiger Anleitung gestaltest du deine ersten eigenen Gefäße in entspannter Atelieratmosphäre. Perfekt zum Ausprobieren und Entdecken deiner Kreativität! Die weiteren Schritte werden vor Ort besprochen.",
     duration: "2,5 Stunden",
     price: "80 € pro Person",
-    bookingLink: "https://cal.com/sponkkeramik.de/topferscheibe-testen?overlayCalendar=true",
     topOffer: true,
     images: [
       "/images/workshops/IMG_4079.jpeg",
@@ -77,7 +74,6 @@ export const workshops: Workshop[] = [
       "Unterschiedliche Aufbautechniken, 3 Stunden Werke herstellen, nach dem ersten Brennen kommst du nochmal ca. 90 Minuten zum bemalen. 3 Werke (Müsslischale, Tasse usw.) möglich. Pro Person, 87,-€ + 18,-€ pro Kg für bemalen und Brennen. Die fertigen Werke werden gewogen.",
     duration: "3 Stunden + 90 Minuten bemalen",
     price: "87 € pro Person + 18 € pro Kg",
-    bookingLink: "https://cal.com/sponkkeramik.de/aufbau-workshop-1?overlayCalendar=true",
     topOffer: true,
     images: [
       "/images/workshops/IMG_3294.webp",
@@ -93,7 +89,6 @@ export const workshops: Workshop[] = [
     duration: "1.5 Stunden",
     price: "39 € pro Person",
     day: "Sonntag",
-    bookingLink: "https://cal.com/sponkkeramik.de/sonntags-workshop?overlayCalendar=true&month=2025-12",
     topOffer: true,
     images: [
       "/images/workshops/IMG_3997-300x252.webp",
@@ -108,7 +103,6 @@ export const workshops: Workshop[] = [
       "Unterschiedliche Aufbautechniken – 2 x 3 Stunden – 2 Stunden Glasurtermin – 5 bis 6 Werke (Müsslischale, Tasse usw.) möglich. Pro Person, 157 Euro + 18,- € pro Kilogramm Material und Brennen. Die Werke werden gewogen.",
     duration: "2 x 3 Stunden + 2 Stunden Glasurtermin",
     price: "157 € pro Person + 18 € pro Kg",
-    bookingLink: "https://cal.com/sponkkeramik.de/aufbau-workshop-2?overlayCalendar=true",
     topOffer: true,
     images: [
       "/images/workshops/AE454F7E-1EEF-4AA4-8539-59A2E5127C2C-768x861 (1).webp",
@@ -121,7 +115,6 @@ export const workshops: Workshop[] = [
       "Übungen an der Töpferscheibe – 3 x 3 Stunden – Glasurtermin – wenn es mit dem Töpfern nicht klappt, Aufbau möglich – bis zu 10 Werke möglich – pro Person 195 Euro – Glasur und Brennen werden nach Anzahl der Werkstücke am Ende berechnet, indem wir wiegen (kg/18 ,- €).",
     duration: "3 x 3 Stunden + Glasurtermin",
     price: "195 € pro Person + 18 € pro Kg",
-    bookingLink: "https://cal.com/sponkkeramik.de/einsteiger-kurse-an-der-topferscheibe?overlayCalendar=true",
     topOffer: true,
     images: [
       "/images/workshops/IMG_3906-712x1024 (1).webp",
