@@ -238,6 +238,20 @@ export default function CourseCard({ workshop }: CourseCardProps) {
     return dayOfWeek === 0 && dayOfMonth <= 7;
   };
   
+  const isDecember = (date: Date): boolean => {
+    return date.getMonth() === 11; // JavaScript months are 0-indexed, so December is 11
+  };
+  
+  const isSundayWorkshopAvailable = (date: Date): boolean => {
+    const dayOfWeek = date.getDay();
+    // Must be a Sunday
+    if (dayOfWeek !== 0) return false;
+    // In December, all Sundays are available
+    if (isDecember(date)) return true;
+    // In other months, only the first Sunday
+    return isFirstSundayOfMonth(date);
+  };
+  
   const getSlotsForDate = async (date: Date): Promise<AvailableSlot[]> => {
     const dayOfWeek = date.getDay();
     const year = date.getFullYear();
@@ -307,7 +321,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
     // Special handling for Sunday workshop
     const isSundayWorkshop = workshop.id === "keramik-bemalen-sonntag";
     if (isSundayWorkshop) {
-      if (dayOfWeek !== 0 || !isFirstSundayOfMonth(date)) {
+      if (!isSundayWorkshopAvailable(date)) {
         return [];
       }
     }
@@ -373,7 +387,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
     
     const isSundayWorkshop = workshop.id === "keramik-bemalen-sonntag";
     if (isSundayWorkshop) {
-      if (dayOfWeek !== 0 || !isFirstSundayOfMonth(date)) return false;
+      if (!isSundayWorkshopAvailable(date)) return false;
     }
     
     const matchingSlots = timeSlots.filter((slot) => slot.day_of_week === dayOfWeek);

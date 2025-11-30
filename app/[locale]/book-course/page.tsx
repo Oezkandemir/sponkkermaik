@@ -266,6 +266,28 @@ export default function BookCoursePage() {
     const dayOfMonth = date.getDate();
     return dayOfWeek === 0 && dayOfMonth <= 7; // Sunday (0) and within first 7 days
   };
+  
+  /**
+   * Checks if a date is in December
+   */
+  const isDecember = (date: Date): boolean => {
+    return date.getMonth() === 11; // JavaScript months are 0-indexed, so December is 11
+  };
+  
+  /**
+   * Checks if Sunday workshop is available for a given date
+   * In December: all Sundays are available
+   * In other months: only the first Sunday
+   */
+  const isSundayWorkshopAvailable = (date: Date): boolean => {
+    const dayOfWeek = date.getDay();
+    // Must be a Sunday
+    if (dayOfWeek !== 0) return false;
+    // In December, all Sundays are available
+    if (isDecember(date)) return true;
+    // In other months, only the first Sunday
+    return isFirstSundayOfMonth(date);
+  };
 
   /**
    * Gets available slots for a specific date with capacity information
@@ -365,18 +387,16 @@ export default function BookCoursePage() {
       }
     }
     
-    // Special handling for "keramik-bemalen-sonntag" course: ONLY allow first Sunday of month
+    // Special handling for "keramik-bemalen-sonntag" course
     const isSundayWorkshop = courseId === "keramik-bemalen-sonntag";
     if (isSundayWorkshop) {
-      // For Sunday workshop, ONLY allow Sundays (day_of_week === 0)
-      if (dayOfWeek !== 0) {
-        console.log(`[getSlotsForDate] Sonntags-Workshop: ${date.toLocaleDateString("de-DE")} ist kein Sonntag - keine Slots zurückgeben`);
-        return [];
-      }
-      // And only the first Sunday of the month
-      const isFirstSunday = isFirstSundayOfMonth(date);
-      if (!isFirstSunday) {
-        console.log(`[getSlotsForDate] Sonntag ${date.toLocaleDateString("de-DE")} ist nicht der erste Sonntag im Monat - keine Slots zurückgeben`);
+      // Check if this Sunday is available (all Sundays in December, first Sunday in other months)
+      if (!isSundayWorkshopAvailable(date)) {
+        if (dayOfWeek !== 0) {
+          console.log(`[getSlotsForDate] Sonntags-Workshop: ${date.toLocaleDateString("de-DE")} ist kein Sonntag - keine Slots zurückgeben`);
+        } else if (!isDecember(date) && !isFirstSundayOfMonth(date)) {
+          console.log(`[getSlotsForDate] Sonntag ${date.toLocaleDateString("de-DE")} ist nicht der erste Sonntag im Monat (außer Dezember) - keine Slots zurückgeben`);
+        }
         return [];
       }
     }
@@ -491,21 +511,19 @@ export default function BookCoursePage() {
       }
     }
     
-    // Special handling for "keramik-bemalen-sonntag" course: ONLY show Sundays, and only the first Sunday
+    // Special handling for "keramik-bemalen-sonntag" course
     const isSundayWorkshop = courseId === "keramik-bemalen-sonntag";
     if (isSundayWorkshop) {
-      // For Sunday workshop, ONLY allow Sundays (day_of_week === 0)
-      if (dayOfWeek !== 0) {
-        console.log(`[hasAvailableSlots] Sonntags-Workshop: ${date.toLocaleDateString("de-DE")} ist kein Sonntag - überspringe`);
+      // Check if this Sunday is available (all Sundays in December, first Sunday in other months)
+      if (!isSundayWorkshopAvailable(date)) {
+        if (dayOfWeek !== 0) {
+          console.log(`[hasAvailableSlots] Sonntags-Workshop: ${date.toLocaleDateString("de-DE")} ist kein Sonntag - überspringe`);
+        } else if (!isDecember(date) && !isFirstSundayOfMonth(date)) {
+          console.log(`[hasAvailableSlots] Sonntag ${date.toLocaleDateString("de-DE")} ist nicht der erste Sonntag im Monat (außer Dezember) - überspringe`);
+        }
         return false;
       }
-      // And only the first Sunday of the month
-      const isFirstSunday = isFirstSundayOfMonth(date);
-      if (!isFirstSunday) {
-        console.log(`[hasAvailableSlots] Sonntag ${date.toLocaleDateString("de-DE")} ist nicht der erste Sonntag im Monat - überspringe`);
-        return false;
-      }
-      // If we get here, it's the first Sunday - check if there are slots
+      // If we get here, it's an available Sunday - check if there are slots
       const matchingSlots = timeSlots.filter((slot) => slot.day_of_week === dayOfWeek);
       return matchingSlots.length > 0;
     }
