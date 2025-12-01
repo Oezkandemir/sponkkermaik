@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
   <style>
     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-    .header { background-color: #d97706; color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
-    .logo { max-width: 200px; height: auto; margin-bottom: 15px; }
+    .header { padding: 0; text-align: center; border-radius: 8px 8px 0 0; overflow: hidden; }
+    .logo { width: 100%; max-width: 600px; height: auto; display: block; }
     .content { padding: 20px; background-color: #f9fafb; }
     .details { background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #d97706; }
     .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
@@ -62,23 +62,21 @@ export async function POST(request: NextRequest) {
   <div class="container">
     <div class="header">
       <img src="${logoUrl}" alt="Sponk Keramik Logo" class="logo" />
-      <h1 style="margin: 0; font-size: 24px;">Sponk Keramik</h1>
     </div>
     <div class="content">
       <h2>Buchungsbestätigung</h2>
       <p>Hallo ${customerName},</p>
-      <p>vielen Dank für Ihre Buchung bei Sponk Keramik!</p>
+      <p>vielen Dank für deine Buchung!</p>
       
       <div class="details">
         <h3>Buchungsdetails:</h3>
+        <p><strong>Teilnehmer:</strong> ${customerName}</p>
+        <p><strong>E-Mail:</strong> ${customerEmail}</p>
         <p><strong>Kurs:</strong> ${courseTitle}</p>
         <p><strong>Datum:</strong> ${bookingDate}</p>
         <p><strong>Zeit:</strong> ${bookingTime}</p>
         <p><strong>Status:</strong> ${booking.status === "pending" ? "Ausstehend" : "Bestätigt"}</p>
       </div>
-      
-      <p>Wir werden Ihre Buchung schnellstmöglich bearbeiten und Ihnen eine Bestätigung senden.</p>
-      <p>Bei Fragen können Sie uns jederzeit kontaktieren.</p>
       
       <p>Mit freundlichen Grüßen,<br>Ihr Team von Sponk Keramik</p>
     </div>
@@ -93,17 +91,15 @@ export async function POST(request: NextRequest) {
     const emailText = `
 Hallo ${customerName},
 
-vielen Dank für Ihre Buchung bei Sponk Keramik!
+vielen Dank für deine Buchung!
 
 Buchungsdetails:
+- Teilnehmer: ${customerName}
+- E-Mail: ${customerEmail}
 - Kurs: ${courseTitle}
 - Datum: ${bookingDate}
 - Zeit: ${bookingTime}
 - Status: ${booking.status === "pending" ? "Ausstehend" : "Bestätigt"}
-
-Wir werden Ihre Buchung schnellstmöglich bearbeiten und Ihnen eine Bestätigung senden.
-
-Bei Fragen können Sie uns jederzeit kontaktieren.
 
 Mit freundlichen Grüßen,
 Ihr Team von Sponk Keramik

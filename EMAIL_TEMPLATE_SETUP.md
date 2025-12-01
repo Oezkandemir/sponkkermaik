@@ -199,3 +199,4 @@ Für alle Templates gilt das gleiche Prinzip: Logo groß machen, Text entfernen.
 - ✅ Logo ist größer und prominenter
 - ✅ Responsive Design für verschiedene E-Mail-Client
 
+
