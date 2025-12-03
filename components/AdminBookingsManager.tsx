@@ -23,6 +23,7 @@ interface Booking {
   customer_name?: string;
   customer_email?: string;
   hasMessages?: boolean;
+  participantList?: string[]; // Extracted participant names
 }
 
 type BookingFilter = "upcoming" | "unconfirmed" | "recurring" | "past" | "cancelled";
@@ -42,6 +43,8 @@ export default function AdminBookingsManager() {
   const [replyModalOpen, setReplyModalOpen] = useState(false);
   const [messagesModalOpen, setMessagesModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [addingParticipant, setAddingParticipant] = useState<Set<string>>(new Set());
+  const [newParticipantName, setNewParticipantName] = useState<Record<string, string>>({});
 
   useEffect(() => {
     loadBookings();
@@ -84,6 +87,8 @@ export default function AdminBookingsManager() {
       // Map bookings with course titles and customer info
       const bookingsWithDetails = (data || []).map((booking: any) => {
         const courseId = booking.course_schedule?.course_id;
+        // Extract participant names from notes
+        const participantList = extractParticipantsFromNotes(booking.notes || "");
         return {
           ...booking,
           course_title: courseId ? (courseTitlesMap[courseId] || "Unbekannter Kurs") : "Unbekannter Kurs",
@@ -91,6 +96,7 @@ export default function AdminBookingsManager() {
           customer_email: booking.customer_email || (booking.user_id ? `User ${booking.user_id.substring(0, 8)}...` : "Unbekannt"),
           customer_name: booking.customer_name || "Unbekannt",
           hasMessages: false, // Will be updated below
+          participantList: participantList,
         };
       });
 
@@ -137,6 +143,90 @@ export default function AdminBookingsManager() {
     } catch (err) {
       console.error("Error updating booking status:", err);
       setMessage({ type: "error", text: "Fehler beim Aktualisieren des Status" });
+    }
+  };
+
+  /**
+   * Extracts participant names from notes field
+   */
+  const extractParticipantsFromNotes = (notes: string): string[] => {
+    const participants: string[] = [];
+    const lines = notes.split("\n");
+    let inParticipantsSection = false;
+
+    for (const line of lines) {
+      if (line.trim() === "Teilnehmer:") {
+        inParticipantsSection = true;
+        continue;
+      }
+      if (inParticipantsSection) {
+        const match = line.match(/^Teilnehmer \d+: (.+)$/);
+        if (match) {
+          participants.push(match[1].trim());
+        }
+      }
+    }
+
+    return participants;
+  };
+
+  /**
+   * Adds a new participant to a booking
+   * Automatically saves and sends email notification
+   */
+  const addParticipant = async (bookingId: string, participantName: string) => {
+    if (!participantName.trim()) {
+      return;
+    }
+
+    try {
+      // Show loading state
+      setAddingParticipant((prev) => new Set(prev).add(bookingId));
+
+      const response = await fetch("/api/bookings/add-participant", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bookingId,
+          participantName: participantName.trim(),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Fehler beim Hinzufügen des Teilnehmers");
+      }
+
+      // Clear input field
+      setNewParticipantName((prev) => {
+        const newState = { ...prev };
+        delete newState[bookingId];
+        return newState;
+      });
+
+      setMessage({
+        type: "success",
+        text: `Teilnehmer "${participantName.trim()}" erfolgreich hinzugefügt${result.emailSent ? " (E-Mail gesendet)" : ""}`,
+      });
+
+      // Reload bookings to ensure consistency
+      await loadBookings();
+    } catch (err) {
+      console.error("Error adding participant:", err);
+      setMessage({
+        type: "error",
+        text: `Fehler beim Hinzufügen des Teilnehmers: ${err instanceof Error ? err.message : "Unbekannter Fehler"}`,
+      });
+    } finally {
+      // Remove loading state
+      setAddingParticipant((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(bookingId);
+        return newSet;
+      });
     }
   };
 
@@ -344,7 +434,94 @@ export default function AdminBookingsManager() {
                       <span className="font-medium">E-Mail:</span> {booking.customer_email || booking.user_email || "Unbekannt"}
                     </div>
                     <div>
-                      <span className="font-medium">Teilnehmer:</span> {booking.participants}
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="font-medium">Teilnehmer:</span>
+                        <span className="text-gray-700">{booking.participants}</span>
+                      </div>
+                      {booking.participantList && booking.participantList.length > 0 && (
+                        <div className="ml-0 sm:ml-4 mt-1 mb-2">
+                          <ul className="text-sm text-gray-600 space-y-1">
+                            {booking.participantList.map((name, index) => (
+                              <li key={index} className="flex items-center gap-2">
+                                <span className="text-gray-400">•</span>
+                                <span>{name}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      <div className="mt-2">
+                        {addingParticipant.has(booking.id) ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={newParticipantName[booking.id] || ""}
+                              onChange={(e) => {
+                                setNewParticipantName((prev) => ({
+                                  ...prev,
+                                  [booking.id]: e.target.value,
+                                }));
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && newParticipantName[booking.id]?.trim()) {
+                                  e.preventDefault();
+                                  addParticipant(booking.id, newParticipantName[booking.id]);
+                                }
+                                if (e.key === "Escape") {
+                                  e.preventDefault();
+                                  setNewParticipantName((prev) => {
+                                    const newState = { ...prev };
+                                    delete newState[booking.id];
+                                    return newState;
+                                  });
+                                  setAddingParticipant((prev) => {
+                                    const newSet = new Set(prev);
+                                    newSet.delete(booking.id);
+                                    return newSet;
+                                  });
+                                }
+                              }}
+                              onBlur={() => {
+                                // Small delay to allow button clicks
+                                setTimeout(() => {
+                                  if (newParticipantName[booking.id]?.trim()) {
+                                    addParticipant(booking.id, newParticipantName[booking.id]);
+                                  } else {
+                                    setAddingParticipant((prev) => {
+                                      const newSet = new Set(prev);
+                                      newSet.delete(booking.id);
+                                      return newSet;
+                                    });
+                                    setNewParticipantName((prev) => {
+                                      const newState = { ...prev };
+                                      delete newState[booking.id];
+                                      return newState;
+                                    });
+                                  }
+                                }, 200);
+                              }}
+                              autoFocus
+                              placeholder="Name eingeben und Enter drücken..."
+                              className="flex-1 px-3 py-1.5 text-sm border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                            />
+                            <div className="animate-spin h-4 w-4 border-2 border-amber-600 border-t-transparent rounded-full"></div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setAddingParticipant((prev) => new Set(prev).add(booking.id));
+                              setNewParticipantName((prev) => ({ ...prev, [booking.id]: "" }));
+                            }}
+                            className="px-3 py-1.5 text-xs bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors flex items-center gap-1.5"
+                            title="Teilnehmer hinzufügen"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Teilnehmer hinzufügen
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                   {booking.notes && (
