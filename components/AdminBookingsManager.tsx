@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { useRouter } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -33,7 +33,7 @@ type BookingFilter = "upcoming" | "unconfirmed" | "recurring" | "past" | "cancel
  * 
  * Allows admins to view and manage all bookings with filters.
  */
-export default function AdminBookingsManager() {
+function AdminBookingsManager() {
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
@@ -53,15 +53,11 @@ export default function AdminBookingsManager() {
   const [selectedBookings, setSelectedBookings] = useState<Set<string>>(new Set());
   const [bulkActionMode, setBulkActionMode] = useState(false);
 
-  useEffect(() => {
-    loadBookings();
-    loadCourses();
-  }, []);
-
   /**
    * Loads all available courses for filtering
+   * Memoized callback to prevent unnecessary re-renders
    */
-  const loadCourses = async () => {
+  const loadCourses = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("courses")
@@ -73,83 +69,37 @@ export default function AdminBookingsManager() {
     } catch (err) {
       console.error("Error loading courses:", err);
     }
-  };
+  }, [supabase]);
 
   /**
-   * Loads all bookings from database
+   * Loads all bookings from database with optimized queries
+   * Memoized callback to prevent unnecessary re-renders
    */
-  const loadBookings = async () => {
+  const loadBookings = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("bookings")
-        .select(`
-          *,
-          course_schedule:course_schedule_id (
-            course_id
-          )
-        `)
-        .order("booking_date", { ascending: false })
-        .order("start_time", { ascending: false });
-
-      // Load course titles separately
-      const courseIds = [...new Set((data || []).map((b: any) => b.course_schedule?.course_id).filter(Boolean))];
-      const courseTitlesMap: Record<string, string> = {};
       
-      if (courseIds.length > 0) {
-        const { data: coursesData } = await supabase
-          .from("courses")
-          .select("id, title")
-          .in("id", courseIds);
-        
-        (coursesData || []).forEach((course: any) => {
-          courseTitlesMap[course.id] = course.title;
-        });
+      // Use API route for better performance and server-side optimization
+      const response = await fetch("/api/admin/bookings");
+      
+      if (!response.ok) {
+        throw new Error("Failed to load bookings");
       }
 
-      if (error) throw error;
-
-      // Map bookings with course titles and customer info
-      const bookingsWithDetails = (data || []).map((booking: any) => {
-        const courseId = booking.course_schedule?.course_id;
-        // Extract participant names from notes
-        const participantList = extractParticipantsFromNotes(booking.notes || "");
-        return {
-          ...booking,
-          course_title: courseId ? (courseTitlesMap[courseId] || "Unbekannter Kurs") : "Unbekannter Kurs",
-          // Use customer_email and customer_name from booking, fallback to user_id if not available
-          customer_email: booking.customer_email || (booking.user_id ? `User ${booking.user_id.substring(0, 8)}...` : "Unbekannt"),
-          customer_name: booking.customer_name || "Unbekannt",
-          hasMessages: false, // Will be updated below
-          participantList: participantList,
-        };
-      });
-
-      // Check which bookings have messages
-      const bookingIds = bookingsWithDetails.map((b) => b.id);
-      if (bookingIds.length > 0) {
-        const { data: messagesData } = await supabase
-          .from("booking_messages")
-          .select("booking_id")
-          .in("booking_id", bookingIds);
-
-        const bookingsWithMessages = new Set(
-          (messagesData || []).map((m: any) => m.booking_id)
-        );
-
-        bookingsWithDetails.forEach((booking) => {
-          booking.hasMessages = bookingsWithMessages.has(booking.id);
-        });
-      }
-
-      setBookings(bookingsWithDetails);
+      const result = await response.json();
+      setBookings(result.bookings || []);
     } catch (err) {
       console.error("Error loading bookings:", err);
       setMessage({ type: "error", text: "Fehler beim Laden der Buchungen" });
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadBookings();
+    loadCourses();
+  }, [loadBookings, loadCourses]);
 
   /**
    * Updates booking status
@@ -370,8 +320,9 @@ export default function AdminBookingsManager() {
 
   /**
    * Filters bookings based on active filter, search query, course, and date range
+   * Memoized for performance
    */
-  const getFilteredBookings = (): Booking[] => {
+  const filteredBookings = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
     const now = new Date().toTimeString().split(" ")[0].substring(0, 5);
 
@@ -437,9 +388,7 @@ export default function AdminBookingsManager() {
     }
 
     return filtered;
-  };
-
-  const filteredBookings = getFilteredBookings();
+  }, [bookings, activeFilter, searchQuery, selectedCourseFilter, dateRangeStart, dateRangeEnd, availableCourses]);
 
   const filters: { id: BookingFilter; label: string; icon: string }[] = [
     { id: "upcoming", label: "Bevorstehende", icon: "📅" },
@@ -978,4 +927,6 @@ export default function AdminBookingsManager() {
     </div>
   );
 }
+
+export default memo(AdminBookingsManager);
 

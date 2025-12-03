@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import CourseScheduleManager from "@/components/CourseScheduleManager";
-import AdminBookingsManager from "@/components/AdminBookingsManager";
-import AdminVouchersManager from "@/components/AdminVouchersManager";
-import AdminDashboardOverview from "@/components/AdminDashboardOverview";
-import AdminCoursesManager from "@/components/AdminCoursesManager";
-import AdminUsersManager from "@/components/AdminUsersManager";
+
+// Lazy load tab components for better initial load performance
+const AdminDashboardOverview = lazy(() => import("@/components/AdminDashboardOverview").then(m => ({ default: m.default })));
+const AdminBookingsManager = lazy(() => import("@/components/AdminBookingsManager").then(m => ({ default: m.default })));
+const AdminVouchersManager = lazy(() => import("@/components/AdminVouchersManager").then(m => ({ default: m.default })));
+const AdminCoursesManager = lazy(() => import("@/components/AdminCoursesManager").then(m => ({ default: m.default })));
+const AdminUsersManager = lazy(() => import("@/components/AdminUsersManager").then(m => ({ default: m.default })));
 
 interface Course {
   id: string;
@@ -341,7 +343,13 @@ export default function AdminPage() {
           {/* Dashboard Tab */}
           {activeTab === "dashboard" && (
             <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
-              <AdminDashboardOverview />
+              <Suspense fallback={
+                <div className="text-center py-8">
+                  <div className="animate-spin h-8 w-8 border-2 border-amber-600 border-t-transparent rounded-full mx-auto"></div>
+                </div>
+              }>
+                <AdminDashboardOverview />
+              </Suspense>
             </div>
           )}
 
@@ -349,7 +357,13 @@ export default function AdminPage() {
           {activeTab === "bookings" && (
             <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Buchungen verwalten</h2>
-              <AdminBookingsManager />
+              <Suspense fallback={
+                <div className="text-center py-8">
+                  <div className="animate-spin h-8 w-8 border-2 border-amber-600 border-t-transparent rounded-full mx-auto"></div>
+                </div>
+              }>
+                <AdminBookingsManager />
+              </Suspense>
             </div>
           )}
 
@@ -357,21 +371,39 @@ export default function AdminPage() {
           {activeTab === "vouchers" && (
             <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Gutscheine verwalten</h2>
-              <AdminVouchersManager />
+              <Suspense fallback={
+                <div className="text-center py-8">
+                  <div className="animate-spin h-8 w-8 border-2 border-amber-600 border-t-transparent rounded-full mx-auto"></div>
+                </div>
+              }>
+                <AdminVouchersManager />
+              </Suspense>
             </div>
           )}
 
           {/* Course Management Tab */}
           {activeTab === "courseManagement" && (
             <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
-              <AdminCoursesManager />
+              <Suspense fallback={
+                <div className="text-center py-8">
+                  <div className="animate-spin h-8 w-8 border-2 border-amber-600 border-t-transparent rounded-full mx-auto"></div>
+                </div>
+              }>
+                <AdminCoursesManager />
+              </Suspense>
             </div>
           )}
 
           {/* Users Tab */}
           {activeTab === "users" && (
             <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
-              <AdminUsersManager />
+              <Suspense fallback={
+                <div className="text-center py-8">
+                  <div className="animate-spin h-8 w-8 border-2 border-amber-600 border-t-transparent rounded-full mx-auto"></div>
+                </div>
+              }>
+                <AdminUsersManager />
+              </Suspense>
             </div>
           )}
 

@@ -268,6 +268,7 @@ export async function GET(request: Request) {
         bookings_count: bookingInfo?.count || 0,
         vouchers_count: vouchersByUserId[userId] || 0,
         created_at: authUser.created_at,
+        banned_until: authUser.banned_until || null,
       };
     });
 
@@ -315,6 +316,92 @@ export async function GET(request: Request) {
     console.error("Error fetching users:", error);
     return NextResponse.json(
       { error: "Failed to fetch users" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const supabase = await createClient();
+
+    // Check if user is admin
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data: adminCheck } = await supabase
+      .from("admins")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!adminCheck) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { email, password, name, is_admin } = body;
+
+    if (!email || !password) {
+      return NextResponse.json(
+        { error: "Email and password are required" },
+        { status: 400 }
+      );
+    }
+
+    // Use service role client to create user
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return NextResponse.json(
+        { error: "Server configuration error" },
+        { status: 500 }
+      );
+    }
+
+    const serviceClient = createServiceClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+
+    // Create user
+    const { data: newUser, error: createError } = await serviceClient.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: name ? { full_name: name } : {},
+    });
+
+    if (createError) {
+      console.error("Error creating user:", createError);
+      return NextResponse.json(
+        { error: createError.message || "Failed to create user" },
+        { status: 500 }
+      );
+    }
+
+    // Add admin status if requested
+    if (is_admin && newUser.user) {
+      const { error: adminError } = await supabase
+        .from("admins")
+        .insert({ user_id: newUser.user.id });
+
+      if (adminError && adminError.code !== "23505") {
+        // 23505 = duplicate key, which is fine
+        console.error("Error adding admin status:", adminError);
+      }
+    }
+
+    return NextResponse.json({ success: true, user: newUser.user });
+  } catch (error) {
+    console.error("Error creating user:", error);
+    return NextResponse.json(
+      { error: "Failed to create user" },
       { status: 500 }
     );
   }
@@ -380,6 +467,97 @@ export async function PUT(request: Request) {
     console.error("Error updating user:", error);
     return NextResponse.json(
       { error: "Failed to update user" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const supabase = await createClient();
+
+    // Check if user is admin
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data: adminCheck } = await supabase
+      .from("admins")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!adminCheck) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { userId } = body;
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "User ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Prevent deleting admins
+    const { data: targetAdminCheck } = await supabase
+      .from("admins")
+      .select("user_id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (targetAdminCheck) {
+      return NextResponse.json(
+        { error: "Cannot delete admin users" },
+        { status: 400 }
+      );
+    }
+
+    // Prevent deleting yourself
+    if (userId === user.id) {
+      return NextResponse.json(
+        { error: "Cannot delete your own account" },
+        { status: 400 }
+      );
+    }
+
+    // Use service role client to delete user
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return NextResponse.json(
+        { error: "Server configuration error" },
+        { status: 500 }
+      );
+    }
+
+    const serviceClient = createServiceClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+
+    // Delete user
+    const { error: deleteError } = await serviceClient.auth.admin.deleteUser(userId);
+
+    if (deleteError) {
+      console.error("Error deleting user:", deleteError);
+      return NextResponse.json(
+        { error: deleteError.message || "Failed to delete user" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return NextResponse.json(
+      { error: "Failed to delete user" },
       { status: 500 }
     );
   }

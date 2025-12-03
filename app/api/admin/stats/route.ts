@@ -69,67 +69,64 @@ export async function GET() {
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
     const startOfWeekStr = startOfWeek.toISOString().split("T")[0];
 
-    // Get today's bookings
-    const { data: todayBookings, error: todayError } = await supabase
-      .from("bookings")
-      .select("id, status, booking_date, start_time")
-      .eq("booking_date", today)
-      .gte("start_time", now)
-      .neq("status", "cancelled");
+    // Execute multiple queries in parallel for better performance
+    const [
+      { data: todayBookings, error: todayError },
+      { data: pendingBookings, error: pendingError },
+      { data: activeVouchers, error: vouchersError },
+    ] = await Promise.all([
+      supabase
+        .from("bookings")
+        .select("id, status, booking_date, start_time")
+        .eq("booking_date", today)
+        .gte("start_time", now)
+        .neq("status", "cancelled"),
+      supabase
+        .from("bookings")
+        .select("id")
+        .eq("status", "pending"),
+      supabase
+        .from("vouchers")
+        .select("id, value, status")
+        .eq("status", "active"),
+    ]);
 
     if (todayError) throw todayError;
-
-    // Get pending confirmations
-    const { data: pendingBookings, error: pendingError } = await supabase
-      .from("bookings")
-      .select("id")
-      .eq("status", "pending");
-
     if (pendingError) throw pendingError;
-
-    // Get active vouchers
-    const { data: activeVouchers, error: vouchersError } = await supabase
-      .from("vouchers")
-      .select("id, value, status")
-      .eq("status", "active");
-
     if (vouchersError) throw vouchersError;
 
-    // Calculate monthly revenue from vouchers
-    const { data: monthlyVouchers, error: monthlyVouchersError } = await supabase
-      .from("vouchers")
-      .select("value, created_at")
-      .gte("created_at", startOfMonth)
-      .eq("status", "active");
+    // Execute revenue queries in parallel
+    const [
+      { data: monthlyVouchers, error: monthlyVouchersError },
+      { data: bookingsForRevenue, error: bookingsRevenueError },
+      { data: allCourses, error: coursesPriceError },
+    ] = await Promise.all([
+      supabase
+        .from("vouchers")
+        .select("value, created_at")
+        .gte("created_at", startOfMonth)
+        .eq("status", "active"),
+      supabase
+        .from("bookings")
+        .select(`
+          participants,
+          booking_date,
+          course_schedule:course_schedule_id (
+            course_id
+          )
+        `)
+        .in("status", ["confirmed", "completed"])
+        .neq("status", "cancelled"),
+      supabase
+        .from("courses")
+        .select("id, price"),
+    ]);
 
     if (monthlyVouchersError) throw monthlyVouchersError;
+    if (bookingsRevenueError) throw bookingsRevenueError;
+    if (coursesPriceError) throw coursesPriceError;
 
     const monthlyVoucherRevenue = monthlyVouchers?.reduce((sum, v) => sum + Number(v.value || 0), 0) || 0;
-
-    // Calculate revenue from bookings
-    // Get all confirmed/completed bookings with course and participant info
-    const { data: bookingsForRevenue, error: bookingsRevenueError } = await supabase
-      .from("bookings")
-      .select(`
-        id,
-        participants,
-        booking_date,
-        status,
-        course_schedule:course_schedule_id (
-          course_id
-        )
-      `)
-      .in("status", ["confirmed", "completed"])
-      .neq("status", "cancelled");
-
-    if (bookingsRevenueError) throw bookingsRevenueError;
-
-    // Get all courses with prices
-    const { data: allCourses, error: coursesPriceError } = await supabase
-      .from("courses")
-      .select("id, price");
-
-    if (coursesPriceError) throw coursesPriceError;
 
     // Create price map
     const coursePriceMap: Record<string, number> = {};
@@ -170,18 +167,34 @@ export async function GET() {
     // Total monthly revenue = vouchers + bookings
     const monthlyRevenue = monthlyVoucherRevenue + monthlyBookingRevenue;
 
-    // Get booking trends (last 7 days)
+    // Get booking trends (last 7 days) and popular courses in parallel
+    // Only fetch necessary fields for better performance
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const sevenDaysAgoStr = sevenDaysAgo.toISOString().split("T")[0];
 
-    const { data: recentBookings, error: recentError } = await supabase
-      .from("bookings")
-      .select("booking_date, status, created_at, participants")
-      .gte("booking_date", sevenDaysAgoStr)
-      .neq("status", "cancelled");
+    const [
+      { data: recentBookings, error: recentError },
+      { data: allBookings, error: allBookingsError },
+    ] = await Promise.all([
+      supabase
+        .from("bookings")
+        .select("booking_date, participants")
+        .gte("booking_date", sevenDaysAgoStr)
+        .neq("status", "cancelled"),
+      supabase
+        .from("bookings")
+        .select(`
+          participants,
+          course_schedule:course_schedule_id (
+            course_id
+          )
+        `)
+        .neq("status", "cancelled"),
+    ]);
 
     if (recentError) throw recentError;
+    if (allBookingsError) throw allBookingsError;
 
     // Group bookings by date for trend (count bookings and participants)
     const bookingsByDate: Record<string, { bookings: number; participants: number }> = {};
@@ -194,19 +207,7 @@ export async function GET() {
       bookingsByDate[date].participants += booking.participants || 1;
     });
 
-    // Get popular courses (count bookings and participants)
-    const { data: allBookings, error: allBookingsError } = await supabase
-      .from("bookings")
-      .select(`
-        participants,
-        course_schedule:course_schedule_id (
-          course_id
-        )
-      `)
-      .neq("status", "cancelled");
-
-    if (allBookingsError) throw allBookingsError;
-
+    // Process course counts
     const courseCounts: Record<string, { bookings: number; participants: number }> = {};
     allBookings?.forEach((booking: any) => {
       const courseId = booking.course_schedule?.course_id;
@@ -219,14 +220,18 @@ export async function GET() {
       }
     });
 
-    // Get course titles
+    // Get course titles (only if we have course counts)
     const courseIds = Object.keys(courseCounts);
-    const { data: courses, error: coursesError } = await supabase
-      .from("courses")
-      .select("id, title")
-      .in("id", courseIds);
+    let courses: any[] = [];
+    if (courseIds.length > 0) {
+      const { data: coursesData, error: coursesError } = await supabase
+        .from("courses")
+        .select("id, title")
+        .in("id", courseIds);
 
-    if (coursesError) throw coursesError;
+      if (coursesError) throw coursesError;
+      courses = coursesData || [];
+    }
 
     const popularCourses = courses?.map((course) => {
       const counts = courseCounts[course.id] || { bookings: 0, participants: 0 };
@@ -238,22 +243,24 @@ export async function GET() {
       };
     }).sort((a, b) => b.participants - a.participants).slice(0, 5) || [];
 
-    // Get weekly bookings
-    const { data: weeklyBookings, error: weeklyError } = await supabase
-      .from("bookings")
-      .select("booking_date")
-      .gte("booking_date", startOfWeekStr)
-      .neq("status", "cancelled");
+    // Get weekly and monthly booking counts (only count, not full data for better performance)
+    const [
+      { count: weeklyBookingsCount, error: weeklyError },
+      { count: monthlyBookingsCount, error: monthlyBookingsError },
+    ] = await Promise.all([
+      supabase
+        .from("bookings")
+        .select("booking_date", { count: "exact", head: true })
+        .gte("booking_date", startOfWeekStr)
+        .neq("status", "cancelled"),
+      supabase
+        .from("bookings")
+        .select("booking_date", { count: "exact", head: true })
+        .gte("booking_date", startOfMonth)
+        .neq("status", "cancelled"),
+    ]);
 
     if (weeklyError) throw weeklyError;
-
-    // Get monthly bookings
-    const { data: monthlyBookings, error: monthlyBookingsError } = await supabase
-      .from("bookings")
-      .select("booking_date")
-      .gte("booking_date", startOfMonth)
-      .neq("status", "cancelled");
-
     if (monthlyBookingsError) throw monthlyBookingsError;
 
     return NextResponse.json({
@@ -266,8 +273,8 @@ export async function GET() {
       weeklyBookingRevenue: weeklyBookingRevenue,
       todayBookingRevenue: todayBookingRevenue,
       totalRevenue: totalRevenue,
-      weeklyBookings: weeklyBookings?.length || 0,
-      monthlyBookings: monthlyBookings?.length || 0,
+      weeklyBookings: weeklyBookingsCount || 0,
+      monthlyBookings: monthlyBookingsCount || 0,
       bookingsTrend: bookingsByDate,
       popularCourses: popularCourses,
     });

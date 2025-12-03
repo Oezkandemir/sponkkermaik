@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, memo } from "react";
 import { useTranslations } from "next-intl";
 import {
   LineChart,
@@ -41,23 +41,41 @@ interface DashboardStats {
  * 
  * Displays key statistics, charts, and quick access to important information.
  */
-export default function AdminDashboardOverview() {
+function AdminDashboardOverview() {
   const t = useTranslations("admin.dashboard");
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // Simple cache with 30 second TTL
+  const cacheKey = "admin-dashboard-stats";
+  const cacheTTL = 30000; // 30 seconds
 
   useEffect(() => {
+    // Only load stats when component is mounted (tab is active)
     loadStats();
   }, []);
 
   /**
-   * Loads dashboard statistics from API
+   * Loads dashboard statistics from API with caching
    */
   const loadStats = async () => {
     try {
       setLoading(true);
       setError(null);
+      
+      // Check cache first
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        const age = Date.now() - timestamp;
+        if (age < cacheTTL) {
+          setStats(data);
+          setLoading(false);
+          return;
+        }
+      }
+      
       const response = await fetch("/api/admin/stats");
       
       if (!response.ok) {
@@ -66,6 +84,12 @@ export default function AdminDashboardOverview() {
 
       const data = await response.json();
       setStats(data);
+      
+      // Cache the result
+      sessionStorage.setItem(cacheKey, JSON.stringify({
+        data,
+        timestamp: Date.now(),
+      }));
     } catch (err) {
       console.error("Error loading dashboard stats:", err);
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -73,6 +97,38 @@ export default function AdminDashboardOverview() {
       setLoading(false);
     }
   };
+
+  // Memoize expensive calculations - MUST be called before early returns to maintain hook order
+  const trendData = useMemo(() => {
+    if (!stats) return [];
+    
+    return Object.entries(stats.bookingsTrend)
+      .map(([date, data]) => ({
+        date: new Date(date).toLocaleDateString("de-DE", { month: "short", day: "numeric" }),
+        bookings: data.bookings,
+        participants: data.participants,
+      }))
+      .sort((a, b) => {
+        const dateA = Object.keys(stats.bookingsTrend).find(
+          (d) => new Date(d).toLocaleDateString("de-DE", { month: "short", day: "numeric" }) === a.date
+        );
+        const dateB = Object.keys(stats.bookingsTrend).find(
+          (d) => new Date(d).toLocaleDateString("de-DE", { month: "short", day: "numeric" }) === b.date
+        );
+        return dateA && dateB ? dateA.localeCompare(dateB) : 0;
+      });
+  }, [stats]);
+
+  // Memoize popular courses data - MUST be called before early returns
+  const coursesData = useMemo(() => {
+    if (!stats) return [];
+    
+    return stats.popularCourses.map((course) => ({
+      name: course.title.length > 20 ? course.title.substring(0, 20) + "..." : course.title,
+      bookings: course.bookings,
+      participants: course.participants,
+    }));
+  }, [stats]);
 
   if (loading) {
     return (
@@ -99,30 +155,6 @@ export default function AdminDashboardOverview() {
   if (!stats) {
     return null;
   }
-
-  // Prepare trend data for chart (with bookings and participants)
-  const trendData = Object.entries(stats.bookingsTrend)
-    .map(([date, data]) => ({
-      date: new Date(date).toLocaleDateString("de-DE", { month: "short", day: "numeric" }),
-      bookings: data.bookings,
-      participants: data.participants,
-    }))
-    .sort((a, b) => {
-      const dateA = Object.keys(stats.bookingsTrend).find(
-        (d) => new Date(d).toLocaleDateString("de-DE", { month: "short", day: "numeric" }) === a.date
-      );
-      const dateB = Object.keys(stats.bookingsTrend).find(
-        (d) => new Date(d).toLocaleDateString("de-DE", { month: "short", day: "numeric" }) === b.date
-      );
-      return dateA && dateB ? dateA.localeCompare(dateB) : 0;
-    });
-
-  // Prepare popular courses data for chart (with bookings and participants)
-  const coursesData = stats.popularCourses.map((course) => ({
-    name: course.title.length > 20 ? course.title.substring(0, 20) + "..." : course.title,
-    bookings: course.bookings,
-    participants: course.participants,
-  }));
 
   return (
     <div className="space-y-6">
@@ -268,4 +300,6 @@ export default function AdminDashboardOverview() {
     </div>
   );
 }
+
+export default memo(AdminDashboardOverview);
 

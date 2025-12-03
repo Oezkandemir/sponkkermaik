@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Link } from "@/i18n/navigation";
 import VoucherReplyModal from "./VoucherReplyModal";
@@ -31,7 +31,7 @@ type VoucherFilter = "all" | "active" | "pending" | "used" | "expired" | "blocke
  * Allows admins to view and manage all vouchers with filters.
  * Can change status, delete, and block vouchers.
  */
-export default function AdminVouchersManager() {
+function AdminVouchersManager() {
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
@@ -41,195 +41,38 @@ export default function AdminVouchersManager() {
   const [messagesModalOpen, setMessagesModalOpen] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
 
-  useEffect(() => {
-    loadVouchers();
-  }, []);
-
   /**
-   * Loads all vouchers from database
+   * Loads all vouchers from database using optimized API route
+   * Memoized callback to prevent unnecessary re-renders
    */
-  const loadVouchers = async () => {
+  const loadVouchers = useCallback(async () => {
     try {
       setLoading(true);
       
-      // Check if user is admin first
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error("❌ No user found");
-        setMessage({ type: "error", text: "Nicht angemeldet" });
-        return;
-      }
+      // Use API route for better performance and server-side optimization
+      const response = await fetch("/api/admin/vouchers");
       
-      // Use maybeSingle() to avoid errors when no admin entry exists
-      const { data: adminCheck, error: adminError } = await supabase
-        .from("admins")
-        .select("user_id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      
-      // Check if user is admin - allow if adminCheck exists OR if no error (RLS might allow access)
-      if (adminError && adminError.code !== "PGRST116") {
-        // PGRST116 = no rows returned, which is fine - user is not admin
-        console.error("❌ Error checking admin status:", adminError);
-        setMessage({ type: "error", text: "Fehler bei Admin-Prüfung" });
-        return;
-      }
-      
-      if (!adminCheck) {
-        console.error("❌ User is not admin");
-        setMessage({ type: "error", text: "Keine Admin-Berechtigung" });
-        return;
-      }
-      
-      console.log("✅ Admin verified, loading all vouchers...");
-      
-      // Load ALL vouchers without any filters
-      const { data, error } = await supabase
-        .from("vouchers")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("❌ Error loading vouchers:", error);
-        throw error;
-      }
-      
-      console.log(`📊 Loaded ${data?.length || 0} vouchers from database`);
-      if (data && data.length > 0) {
-        console.log("Voucher user_ids:", data.map((v: any) => v.user_id));
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.error || "Failed to load vouchers");
       }
 
-      // Get user emails and names for display using API route
-      const userIds = [...new Set((data || []).map((v: any) => v.user_id).filter(Boolean))];
-      const userDataMap: Record<string, { email: string; name: string | null }> = {};
-      
-      if (userIds.length > 0) {
-        try {
-          console.log(`🔍 Fetching user data for ${userIds.length} users...`);
-          const response = await fetch("/api/admin/voucher-users", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ userIds }),
-          });
-
-          if (response.ok) {
-            const result = await response.json();
-            console.log("📦 API Response:", result);
-            
-            if (result.users && Object.keys(result.users).length > 0) {
-              Object.assign(userDataMap, result.users);
-              console.log(`✅ User data loaded from API: ${Object.keys(result.users).length} users`);
-              
-              // Log each user's data for debugging
-              Object.entries(result.users).forEach(([userId, userData]: [string, any]) => {
-                console.log(`  - ${userId}: email=${userData.email}, name=${userData.name || 'null'}`);
-              });
-            } else {
-              console.warn("⚠️ API returned no user data");
-              setMessage({ 
-                type: "error", 
-                text: "Fehler beim Laden der Kundendaten. Bitte überprüfen Sie die Server-Konfiguration." 
-              });
-            }
-          } else {
-            const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-            console.error("❌ Error fetching user data:", response.status, errorData);
-            
-            // Show specific error message if service role key is missing
-            if (response.status === 500 && errorData.message?.includes("SUPABASE_SERVICE_ROLE_KEY")) {
-              setMessage({ 
-                type: "error", 
-                text: "Server-Konfigurationsfehler: SUPABASE_SERVICE_ROLE_KEY ist nicht gesetzt. Bitte kontaktieren Sie den Administrator." 
-              });
-            } else {
-              setMessage({ 
-                type: "error", 
-                text: `Fehler beim Laden der Kundendaten: ${errorData.error || "Unbekannter Fehler"}` 
-              });
-            }
-          }
-        } catch (apiError) {
-          console.error("❌ Exception calling user API:", apiError);
-          setMessage({ 
-            type: "error", 
-            text: `Fehler beim Laden der Kundendaten: ${apiError instanceof Error ? apiError.message : "Netzwerkfehler"}` 
-          });
-        }
-      }
-
-      // Map vouchers with user info
-      const vouchersWithDetails = (data || []).map((voucher: any) => {
-        const userData = userDataMap[voucher.user_id];
-        
-        // Extract email prefix as name if no name is available
-        let customerName: string;
-        let userEmail: string;
-        
-        if (userData && userData.email) {
-          // We have user data with email
-          userEmail = userData.email;
-          
-          if (userData.name) {
-            customerName = userData.name;
-          } else {
-            // Use email prefix (part before @) as name
-            customerName = userData.email.split("@")[0];
-          }
-        } else if (userData && !userData.email) {
-          // We have user data but no email - this shouldn't happen, but handle it
-          userEmail = `User ${voucher.user_id?.substring(0, 8)}...`;
-          customerName = userData.name || userEmail;
-          console.warn(`⚠️ User data found but no email for voucher ${voucher.code}, user_id: ${voucher.user_id}`);
-        } else {
-          // No user data found - use fallback
-          userEmail = `User ${voucher.user_id?.substring(0, 8)}...`;
-          customerName = userEmail;
-          console.warn(`⚠️ No user data found for voucher ${voucher.code}, user_id: ${voucher.user_id}`);
-        }
-        
-        // Ensure we never show the full user_id - always use mapped values
-        // Determine payment method
-        const paymentMethod = voucher.paypal_order_id ? "paypal" : "bank_transfer";
-        
-        return {
-          ...voucher,
-          user_email: userEmail,
-          customer_name: customerName,
-          payment_method: paymentMethod,
-          hasMessages: false, // Will be updated below
-        };
-      });
-      
-      // Check which vouchers have messages
-      const voucherIds = vouchersWithDetails.map((v) => v.id);
-      if (voucherIds.length > 0) {
-        const { data: messagesData } = await supabase
-          .from("voucher_messages")
-          .select("voucher_id")
-          .in("voucher_id", voucherIds);
-
-        const vouchersWithMessages = new Set(
-          (messagesData || []).map((m: any) => m.voucher_id)
-        );
-
-        vouchersWithDetails.forEach((voucher) => {
-          voucher.hasMessages = vouchersWithMessages.has(voucher.id);
-        });
-      }
-      
-      console.log(`✅ Mapped ${vouchersWithDetails.length} vouchers with user data`);
-
-      setVouchers(vouchersWithDetails);
+      const result = await response.json();
+      setVouchers(result.vouchers || []);
     } catch (err) {
       console.error("Error loading vouchers:", err);
-      setMessage({ type: "error", text: "Fehler beim Laden der Gutscheine" });
+      setMessage({ 
+        type: "error", 
+        text: err instanceof Error ? err.message : "Fehler beim Laden der Gutscheine" 
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
+  useEffect(() => {
+    loadVouchers();
+  }, [loadVouchers]);
 
   /**
    * Updates voucher status
@@ -324,8 +167,9 @@ export default function AdminVouchersManager() {
 
   /**
    * Filters vouchers based on active filter
+   * Memoized for performance
    */
-  const getFilteredVouchers = (): Voucher[] => {
+  const filteredVouchers = useMemo(() => {
     switch (activeFilter) {
       case "active":
         return vouchers.filter((v) => v.status === "active");
@@ -340,9 +184,7 @@ export default function AdminVouchersManager() {
       default:
         return vouchers;
     }
-  };
-
-  const filteredVouchers = getFilteredVouchers();
+  }, [vouchers, activeFilter]);
 
   const filters: { id: VoucherFilter; label: string; icon: string }[] = [
     { id: "all", label: "Alle", icon: "📋" },
@@ -628,4 +470,6 @@ export default function AdminVouchersManager() {
     </div>
   );
 }
+
+export default memo(AdminVouchersManager);
 
