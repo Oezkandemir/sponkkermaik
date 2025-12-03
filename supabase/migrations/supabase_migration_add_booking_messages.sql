@@ -72,3 +72,4 @@ CREATE POLICY "Users can insert own booking messages"
     AND sender_type = 'customer'
   );
 
+

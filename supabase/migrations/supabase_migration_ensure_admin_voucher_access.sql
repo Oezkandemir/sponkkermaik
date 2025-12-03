@@ -81,3 +81,4 @@ ORDER BY policyname;
 -- This should return all vouchers if you're logged in as admin
 -- SELECT COUNT(*) as total_vouchers FROM vouchers;
 
+

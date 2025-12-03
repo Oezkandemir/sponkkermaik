@@ -57,15 +57,29 @@ export async function POST(request: Request) {
     }
 
     // Use service role client to access auth.users
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl) {
+      console.error("⚠️ NEXT_PUBLIC_SUPABASE_URL not configured");
+      return NextResponse.json(
+        { error: "Server configuration error" },
+        { status: 500 }
+      );
+    }
     
     if (!supabaseServiceKey) {
       console.error("⚠️ SUPABASE_SERVICE_ROLE_KEY not configured - cannot access auth.users");
-      console.error("💡 Please add SUPABASE_SERVICE_ROLE_KEY to your .env.local file");
+      console.error("💡 Please add SUPABASE_SERVICE_ROLE_KEY to your environment variables");
       console.error("   You can find it in Supabase Dashboard > Settings > API > service_role key");
-      // Fallback to profiles table only
-      return await getUsersFromProfiles(userIds);
+      // Return error instead of fallback - profiles table doesn't have emails
+      return NextResponse.json(
+        { 
+          error: "Service role key not configured",
+          message: "SUPABASE_SERVICE_ROLE_KEY must be set to access user emails"
+        },
+        { status: 500 }
+      );
     }
 
     const serviceClient = createServiceClient(supabaseUrl, supabaseServiceKey, {
@@ -78,72 +92,67 @@ export async function POST(request: Request) {
     const userDataMap: Record<string, { email: string; name: string | null }> = {};
 
     // Get user emails from auth.users using service role
-    for (const userId of userIds) {
-      try {
-        const { data: authUser, error: authError } = await serviceClient.auth.admin.getUserById(userId);
-        
-        if (authError) {
-          console.error(`Error fetching user ${userId}:`, authError);
-          continue;
-        }
-        
-        if (authUser?.user?.email) {
-          // Ensure email is a valid string, not user_id
-          const email = authUser.user.email.trim();
-          if (email && email.includes("@")) {
-            userDataMap[userId] = {
-              email: email,
-              name: null,
-            };
-            console.log(`✅ Loaded email for user ${userId}: ${email}`);
-          } else {
-            console.warn(`⚠️ Invalid email format for user ${userId}: ${email}`);
+    // Use batch fetching for better performance
+    const batchSize = 10;
+    for (let i = 0; i < userIds.length; i += batchSize) {
+      const batch = userIds.slice(i, i + batchSize);
+      
+      await Promise.all(
+        batch.map(async (userId) => {
+          try {
+            const { data: authUser, error: authError } = await serviceClient.auth.admin.getUserById(userId);
+            
+            if (authError) {
+              console.error(`❌ Error fetching user ${userId}:`, authError.message || authError);
+              return;
+            }
+            
+            if (authUser?.user?.email) {
+              // Ensure email is a valid string, not user_id
+              const email = authUser.user.email.trim();
+              if (email && email.includes("@") && email !== userId) {
+                userDataMap[userId] = {
+                  email: email,
+                  name: null,
+                };
+                console.log(`✅ Loaded email for user ${userId.substring(0, 8)}...: ${email}`);
+              } else {
+                console.warn(`⚠️ Invalid email format for user ${userId}: ${email}`);
+              }
+            } else {
+              console.warn(`⚠️ No email found for user ${userId}`);
+            }
+          } catch (err) {
+            console.error(`❌ Exception fetching user ${userId}:`, err instanceof Error ? err.message : err);
           }
-        } else {
-          console.warn(`⚠️ No email found for user ${userId}`);
-        }
-      } catch (err) {
-        console.error(`Exception fetching user ${userId}:`, err);
-      }
+        })
+      );
     }
     
     console.log(`📊 Loaded ${Object.keys(userDataMap).length} emails from auth.users`);
 
-    // Also try to get names and emails from profiles table (as fallback or supplement)
+    // Also try to get names from profiles table (profiles table doesn't have email column)
     const { data: profilesData, error: profilesError } = await supabase
       .from("profiles")
-      .select("id, email, full_name")
+      .select("id, full_name")
       .in("id", userIds);
 
     if (profilesError) {
-      console.error("Error fetching profiles:", profilesError);
+      console.error("⚠️ Error fetching profiles:", profilesError.message || profilesError);
     }
 
     if (profilesData) {
-      console.log(`📋 Found ${profilesData.length} profiles`);
+      console.log(`📋 Found ${profilesData.length} profiles for name lookup`);
       profilesData.forEach((profile: any) => {
         if (userDataMap[profile.id]) {
           // Update name if we have email but no name
           if (!userDataMap[profile.id].name && profile.full_name) {
             userDataMap[profile.id].name = profile.full_name;
+            console.log(`✅ Added name for user ${profile.id.substring(0, 8)}...: ${profile.full_name}`);
           }
-          // Update email from profile if we don't have it from auth
-          if (!userDataMap[profile.id].email && profile.email) {
-            userDataMap[profile.id].email = profile.email;
-          }
-        } else {
-          // If we don't have email from auth, use profile email or fallback
-          // Ensure profile.email is a valid email, not user_id
-          let email = profile.email;
-          if (!email || !email.includes("@") || email === profile.id) {
-            // Invalid email or email is same as user_id - use fallback
-            email = `User ${profile.id.substring(0, 8)}...`;
-          }
-          userDataMap[profile.id] = {
-            email: email,
-            name: profile.full_name || null,
-          };
         }
+        // Note: We don't create entries from profiles alone since they don't have emails
+        // All entries must come from auth.users
       });
     }
 
@@ -170,43 +179,4 @@ export async function POST(request: Request) {
   }
 }
 
-/**
- * Fallback function to get users from profiles table only
- */
-async function getUsersFromProfiles(userIds: string[]) {
-  const supabase = await createClient();
-  const userDataMap: Record<string, { email: string; name: string | null }> = {};
-
-  const { data: profilesData } = await supabase
-    .from("profiles")
-    .select("id, email, full_name")
-    .in("id", userIds);
-
-  if (profilesData) {
-    profilesData.forEach((profile: any) => {
-      // Ensure profile.email is a valid email, not user_id
-      let email = profile.email;
-      if (!email || !email.includes("@") || email === profile.id) {
-        // Invalid email or email is same as user_id - use fallback
-        email = `User ${profile.id.substring(0, 8)}...`;
-      }
-      userDataMap[profile.id] = {
-        email: email,
-        name: profile.full_name || null,
-      };
-    });
-  }
-
-  // Fill in missing users
-  userIds.forEach((userId: string) => {
-    if (!userDataMap[userId]) {
-      userDataMap[userId] = {
-        email: `User ${userId.substring(0, 8)}...`,
-        name: null,
-      };
-    }
-  });
-
-  return NextResponse.json({ users: userDataMap });
-}
 

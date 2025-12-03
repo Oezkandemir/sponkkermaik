@@ -127,20 +127,35 @@ export default function AdminVouchersManager() {
                 console.log(`  - ${userId}: email=${userData.email}, name=${userData.name || 'null'}`);
               });
             } else {
-              console.warn("⚠️ API returned no user data, trying profiles fallback");
-              // Fallback: try profiles table
-              await loadUsersFromProfiles(userIds, userDataMap);
+              console.warn("⚠️ API returned no user data");
+              setMessage({ 
+                type: "error", 
+                text: "Fehler beim Laden der Kundendaten. Bitte überprüfen Sie die Server-Konfiguration." 
+              });
             }
           } else {
-            const errorText = await response.text();
-            console.error("❌ Error fetching user data:", response.status, errorText);
-            // Fallback: try profiles table
-            await loadUsersFromProfiles(userIds, userDataMap);
+            const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+            console.error("❌ Error fetching user data:", response.status, errorData);
+            
+            // Show specific error message if service role key is missing
+            if (response.status === 500 && errorData.message?.includes("SUPABASE_SERVICE_ROLE_KEY")) {
+              setMessage({ 
+                type: "error", 
+                text: "Server-Konfigurationsfehler: SUPABASE_SERVICE_ROLE_KEY ist nicht gesetzt. Bitte kontaktieren Sie den Administrator." 
+              });
+            } else {
+              setMessage({ 
+                type: "error", 
+                text: `Fehler beim Laden der Kundendaten: ${errorData.error || "Unbekannter Fehler"}` 
+              });
+            }
           }
         } catch (apiError) {
           console.error("❌ Exception calling user API:", apiError);
-          // Fallback: try profiles table
-          await loadUsersFromProfiles(userIds, userDataMap);
+          setMessage({ 
+            type: "error", 
+            text: `Fehler beim Laden der Kundendaten: ${apiError instanceof Error ? apiError.message : "Netzwerkfehler"}` 
+          });
         }
       }
 
@@ -215,43 +230,6 @@ export default function AdminVouchersManager() {
     }
   };
 
-  /**
-   * Fallback: Load users from profiles table
-   */
-  const loadUsersFromProfiles = async (
-    userIds: string[],
-    userDataMap: Record<string, { email: string; name: string | null }>
-  ) => {
-    try {
-      const { data: profilesData } = await supabase
-        .from("profiles")
-        .select("id, email, full_name")
-        .in("id", userIds);
-      
-      if (profilesData) {
-        profilesData.forEach((profile: any) => {
-          // Only update if we don't already have data for this user
-          if (!userDataMap[profile.id]) {
-            userDataMap[profile.id] = {
-              email: profile.email || `User ${profile.id.substring(0, 8)}...`,
-              name: profile.full_name || null,
-            };
-          } else {
-            // Update name if we have email but no name
-            if (!userDataMap[profile.id].name && profile.full_name) {
-              userDataMap[profile.id].name = profile.full_name;
-            }
-            // Update email if we don't have it yet
-            if (!userDataMap[profile.id].email && profile.email) {
-              userDataMap[profile.id].email = profile.email;
-            }
-          }
-        });
-      }
-    } catch (profileError) {
-      console.log("Could not fetch profiles:", profileError);
-    }
-  };
 
   /**
    * Updates voucher status

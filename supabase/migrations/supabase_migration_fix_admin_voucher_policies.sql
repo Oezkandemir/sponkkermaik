@@ -60,3 +60,4 @@ FROM pg_policies
 WHERE tablename = 'vouchers'
 ORDER BY policyname;
 
+
