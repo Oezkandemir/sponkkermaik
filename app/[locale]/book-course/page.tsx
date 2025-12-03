@@ -1327,7 +1327,7 @@ export default function BookCoursePage() {
 
         {/* Booking Form Modal */}
         {selectedSlot && (
-          <div className="fixed inset-0 bg-black/50 md:bg-black/50 flex items-center justify-center z-50 p-0 md:p-4"
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-0 md:p-4 animate-in fade-in duration-200"
             onClick={(e) => {
               // Only close on backdrop click on desktop
               if (e.target === e.currentTarget && window.innerWidth >= 768) {
@@ -1343,9 +1343,10 @@ export default function BookCoursePage() {
               }
             }}
           >
-            <div className="bg-white rounded-none md:rounded-xl shadow-xl max-w-full md:max-w-md w-full h-full md:h-auto md:max-h-[95vh] flex flex-col md:block overflow-y-auto p-6">
-              {/* Close button for mobile */}
-              <div className="flex justify-end mb-4 md:hidden">
+            <div className="bg-white rounded-none md:rounded-2xl shadow-2xl max-w-full md:max-w-md w-full h-full md:h-auto md:max-h-[95vh] flex flex-col md:block overflow-y-auto animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+              {/* Header with Close Button */}
+              <div className="flex-shrink-0 bg-gradient-to-r from-amber-50 to-orange-50 border-b-2 border-amber-200 px-6 py-5 relative">
+                {/* Close button for mobile */}
                 <button
                   onClick={() => {
                     setSelectedSlot(null);
@@ -1358,139 +1359,194 @@ export default function BookCoursePage() {
                     setParticipantNames([]);
                     setMessage(null);
                   }}
-                  className="text-gray-400 hover:text-gray-600 transition-colors p-2 -mt-2 -mr-2"
+                  className="absolute top-5 right-6 text-gray-400 hover:text-gray-600 transition-all duration-200 p-2 rounded-lg hover:bg-white/80 md:hidden"
                   aria-label="Schließen"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
+                {/* Close button for desktop */}
+                <button
+                  onClick={() => {
+                    setSelectedSlot(null);
+                    setNotes("");
+                    setCustomerName("");
+                    setCustomerEmail("");
+                    setCreateAccount(false);
+                    setPassword("");
+                    setParticipants(1);
+                    setParticipantNames([]);
+                    setMessage(null);
+                  }}
+                  className="absolute top-5 right-6 text-gray-400 hover:text-gray-600 transition-all duration-200 p-2 rounded-lg hover:bg-white/80 hidden md:block"
+                  aria-label="Schließen"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+                <div className="text-center">
+                  <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+                    {t("confirmBooking")}
+                  </h3>
+                  {course && (
+                    <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-lg border-2 border-amber-300 shadow-sm">
+                      <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-lg font-bold text-amber-700">{course.price}</p>
+                    </div>
+                  )}
+                  <p className="text-sm text-gray-600 mt-3">Bitte füllen Sie die folgenden Informationen aus</p>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                {t("confirmBooking")}
-              </h3>
+              
+              <div className="p-6 md:p-8">
 
-              <div className="space-y-4 mb-6">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+              <div className="space-y-5 mb-6">
+                {/* Booking Summary Card */}
+                <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-5 border-2 border-amber-200 shadow-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-amber-600 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <h4 className="text-lg font-semibold text-gray-900">Buchungsdetails</h4>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="bg-white rounded-lg p-3 border border-amber-100">
+                      <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">
                         {t("date")}
                       </label>
-                      <p className="text-gray-900 font-semibold">{selectedSlot.formattedDate}</p>
+                      <p className="text-base font-bold text-gray-900">{selectedSlot.formattedDate}</p>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <div className="bg-white rounded-lg p-3 border border-amber-100">
+                      <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">
                         {t("time")}
                       </label>
-                      <p className="text-gray-900 font-semibold">{selectedSlot.formattedTime}</p>
+                      <p className="text-base font-bold text-gray-900">{selectedSlot.formattedTime}</p>
                     </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-700 bg-white rounded-lg p-3 border border-amber-100">
+                    <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-medium">{formatDuration(selectedSlot.duration)}</span>
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t("customerName")} <span className="text-red-500">*</span>
+                {/* Customer Name */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-900">
+                    {t("customerName")} <span className="text-red-500 font-normal">*</span>
                   </label>
                   <input
                     type="text"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    className="w-full px-4 py-3.5 text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white hover:border-gray-300"
                     placeholder={t("customerNamePlaceholder")}
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t("customerEmail")} <span className="text-red-500">*</span>
+                {/* Customer Email */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-900">
+                    {t("customerEmail")} <span className="text-red-500 font-normal">*</span>
                   </label>
                   <input
                     type="email"
                     value={customerEmail}
                     onChange={(e) => setCustomerEmail(e.target.value)}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    className="w-full px-4 py-3.5 text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white hover:border-gray-300"
                     placeholder={t("customerEmailPlaceholder")}
                   />
                 </div>
 
                 {/* Participants Selection */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Anzahl der Teilnehmer <span className="text-red-500">*</span>
+                <div className="space-y-3">
+                  <label className="block text-sm font-semibold text-gray-900">
+                    Anzahl der Teilnehmer <span className="text-red-500 font-normal">*</span>
                   </label>
-                  <div className="flex items-center gap-4">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (participants > 1) {
-                          setParticipants(participants - 1);
-                          // Remove last participant name when reducing count
-                          setParticipantNames((prev) => prev.slice(0, participants - 2));
-                        }
-                      }}
-                      disabled={participants <= 1}
-                      className="w-10 h-10 rounded-lg border-2 border-gray-300 flex items-center justify-center text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      aria-label="Teilnehmer reduzieren"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                      </svg>
-                    </button>
-                    <div className="flex-1 text-center">
-                      <span className="text-2xl font-bold text-gray-900">{participants}</span>
-                      <span className="text-sm text-gray-600 ml-2">
-                        {participants === 1 ? "Teilnehmer" : "Teilnehmer"}
-                      </span>
+                  <div className="bg-gray-50 rounded-xl p-4 border-2 border-gray-200">
+                    <div className="flex items-center gap-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (participants > 1) {
+                            setParticipants(participants - 1);
+                            // Remove last participant name when reducing count
+                            setParticipantNames((prev) => prev.slice(0, participants - 2));
+                          }
+                        }}
+                        disabled={participants <= 1}
+                        className="w-12 h-12 rounded-xl border-2 border-gray-300 bg-white flex items-center justify-center text-gray-700 hover:bg-amber-50 hover:border-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 active:scale-95 shadow-sm"
+                        aria-label="Teilnehmer reduzieren"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M20 12H4" />
+                        </svg>
+                      </button>
+                      <div className="flex-1 text-center">
+                        <span className="text-4xl font-bold text-gray-900 block">{participants}</span>
+                        <span className="text-sm text-gray-600 font-medium">
+                          {participants === 1 ? "Teilnehmer" : "Teilnehmer"}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const maxParticipants = selectedSlot?.availablePlaces || 1;
+                          if (participants < maxParticipants) {
+                            setParticipants(participants + 1);
+                            // Add empty name field for new participant
+                            setParticipantNames((prev) => [...prev, ""]);
+                          }
+                        }}
+                        disabled={participants >= (selectedSlot?.availablePlaces || 1)}
+                        className="w-12 h-12 rounded-xl border-2 border-gray-300 bg-white flex items-center justify-center text-gray-700 hover:bg-amber-50 hover:border-amber-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 active:scale-95 shadow-sm"
+                        aria-label="Teilnehmer hinzufügen"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                        </svg>
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const maxParticipants = selectedSlot?.availablePlaces || 1;
-                        if (participants < maxParticipants) {
-                          setParticipants(participants + 1);
-                          // Add empty name field for new participant
-                          setParticipantNames((prev) => [...prev, ""]);
-                        }
-                      }}
-                      disabled={participants >= (selectedSlot?.availablePlaces || 1)}
-                      className="w-10 h-10 rounded-lg border-2 border-gray-300 flex items-center justify-center text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      aria-label="Teilnehmer hinzufügen"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                    </button>
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      {selectedSlot && (
+                        <>
+                          {selectedSlot.availablePlaces > 0 ? (
+                            <div className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full ${selectedSlot.availablePlaces <= 2 ? "bg-yellow-500" : "bg-green-500"}`}></div>
+                              <p className="text-sm text-gray-700">
+                                <span className="font-semibold">{selectedSlot.availablePlaces}</span> {selectedSlot.availablePlaces === 1 ? "Platz" : "Plätze"} verfügbar
+                              </p>
+                              {participants > selectedSlot.availablePlaces && (
+                                <span className="ml-auto text-xs text-red-600 font-medium bg-red-50 px-2 py-1 rounded">⚠️ Nicht genug Plätze</span>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-red-600 font-medium">Keine Plätze verfügbar</p>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    {selectedSlot && (
-                      <>
-                        {selectedSlot.availablePlaces > 0 ? (
-                          <>
-                            {selectedSlot.availablePlaces} {selectedSlot.availablePlaces === 1 ? "Platz" : "Plätze"} verfügbar
-                            {participants > selectedSlot.availablePlaces && (
-                              <span className="text-red-600 ml-2">⚠️ Nicht genug Plätze verfügbar</span>
-                            )}
-                          </>
-                        ) : (
-                          <span className="text-red-600">Keine Plätze verfügbar</span>
-                        )}
-                      </>
-                    )}
-                  </p>
                   
                   {/* Participant Name Fields - Show for additional participants (2nd, 3rd, etc.) */}
                   {participants > 1 && (
-                    <div className="mt-4 space-y-3">
-                      <p className="text-sm font-medium text-gray-700 mb-2">
-                        Namen der zusätzlichen Teilnehmer:
+                    <div className="mt-5 pt-5 border-t border-gray-200 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <p className="text-sm font-semibold text-gray-900 mb-3">
+                        Namen der zusätzlichen Teilnehmer
                       </p>
                       {Array.from({ length: participants - 1 }).map((_, index) => (
-                        <div key={index}>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Teilnehmer {index + 2} <span className="text-red-500">*</span>
+                        <div key={index} className="space-y-2">
+                          <label className="block text-sm font-semibold text-gray-900">
+                            Teilnehmer {index + 2} <span className="text-red-500 font-normal">*</span>
                           </label>
                           <input
                             type="text"
@@ -1501,7 +1557,7 @@ export default function BookCoursePage() {
                               setParticipantNames(newNames);
                             }}
                             required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                            className="w-full px-4 py-3.5 text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white hover:border-gray-300"
                             placeholder={`Name des ${index + 2}. Teilnehmers`}
                           />
                         </div>
@@ -1512,16 +1568,18 @@ export default function BookCoursePage() {
 
                 {/* Not logged in notice */}
                 {!user && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
                     <div className="flex items-start gap-3">
-                      <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                      <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-blue-900 mb-1">
+                        <p className="text-sm font-semibold text-blue-900 mb-1">
                           {t("notLoggedIn")}
                         </p>
-                        <p className="text-xs text-blue-700">
+                        <p className="text-xs text-blue-700 leading-relaxed">
                           {t("notLoggedInInfo")}
                         </p>
                       </div>
@@ -1531,59 +1589,65 @@ export default function BookCoursePage() {
                 
                 {/* Create Account Checkbox */}
                 {!user && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                    <label className="flex items-start gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={createAccount}
-                        onChange={(e) => {
-                          setCreateAccount(e.target.checked);
-                          if (!e.target.checked) {
-                            setPassword("");
-                          }
-                        }}
-                        className="mt-1 w-5 h-5 text-amber-600 border-gray-300 rounded focus:ring-amber-500"
-                      />
+                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl p-5">
+                    <label className="flex items-start gap-4 cursor-pointer group">
+                      <div className="relative flex-shrink-0 mt-0.5">
+                        <input
+                          type="checkbox"
+                          checked={createAccount}
+                          onChange={(e) => {
+                            setCreateAccount(e.target.checked);
+                            if (!e.target.checked) {
+                              setPassword("");
+                            }
+                          }}
+                          className="w-6 h-6 text-amber-600 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all duration-200 cursor-pointer"
+                        />
+                      </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900 mb-1">
+                        <p className="text-sm font-semibold text-gray-900 mb-1.5">
                           {t("createAccount")}
                         </p>
-                        <p className="text-xs text-gray-600">
+                        <p className="text-xs text-gray-700 leading-relaxed">
                           {t("createAccountInfo")}
                         </p>
                       </div>
                     </label>
                     
                     {createAccount && (
-                      <div className="mt-4 pt-4 border-t border-amber-200">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {t("password")} <span className="text-red-500">*</span>
+                      <div className="mt-5 pt-5 border-t border-amber-300 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <label className="block text-sm font-semibold text-gray-900 mb-2">
+                          {t("password")} <span className="text-red-500 font-normal">*</span>
                         </label>
                         <input
                           type="password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required={createAccount}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                          className="w-full px-4 py-3.5 text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white hover:border-gray-300"
                           placeholder={t("passwordPlaceholder")}
                         />
-                        <p className="text-xs text-gray-500 mt-1">
-                          Mindestens 6 Zeichen
+                        <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Mindestens 6 Zeichen erforderlich
                         </p>
                       </div>
                     )}
                   </div>
                 )}
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t("notes")} <span className="text-gray-500">({t("optional")})</span>
+                {/* Notes */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-900">
+                    {t("notes")} <span className="text-gray-500 text-xs font-normal">({t("optional")})</span>
                   </label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows={4}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    className="w-full px-4 py-3.5 text-base border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 bg-white hover:border-gray-300 resize-none"
                     placeholder={t("notesPlaceholder")}
                   />
                 </div>
@@ -1591,17 +1655,28 @@ export default function BookCoursePage() {
 
               {message && (
                 <div
-                  className={`mb-4 p-3 rounded-lg ${
+                  className={`mb-5 p-4 rounded-xl text-sm border-2 animate-in fade-in slide-in-from-bottom-2 duration-300 ${
                     message.type === "success"
-                      ? "bg-green-50 border border-green-200 text-green-700"
-                      : "bg-red-50 border border-red-200 text-red-700"
+                      ? "bg-green-50 border-green-300 text-green-800 shadow-sm"
+                      : "bg-red-50 border-red-300 text-red-800 shadow-sm"
                   }`}
                 >
-                  {message.text}
+                  <div className="flex items-start gap-3">
+                    {message.type === "success" ? (
+                      <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    )}
+                    <p className="flex-1 font-medium">{message.text}</p>
+                  </div>
                 </div>
               )}
 
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
                 <button
                   onClick={() => {
                     setSelectedSlot(null);
@@ -1614,7 +1689,7 @@ export default function BookCoursePage() {
                     setParticipantNames([]);
                     setMessage(null);
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-6 py-4 text-base border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 font-semibold active:scale-98 shadow-sm"
                 >
                   {t("cancel")}
                 </button>
@@ -1629,20 +1704,26 @@ export default function BookCoursePage() {
                     (createAccount && !user && (!password.trim() || password.length < 6)) ||
                     (participants > 1 && participantNames.slice(0, participants - 1).some(name => !name.trim()))
                   }
-                  className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 px-6 py-4 text-base bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-xl hover:from-amber-700 hover:to-amber-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-semibold shadow-lg hover:shadow-xl active:scale-98 disabled:active:scale-100"
                 >
                   {booking ? (
                     <>
-                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
                       {t("booking")}
                     </>
                   ) : (
-                    t("confirm")
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      {t("confirm")}
+                    </>
                   )}
                 </button>
+              </div>
               </div>
             </div>
           </div>
