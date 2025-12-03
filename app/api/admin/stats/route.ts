@@ -63,7 +63,6 @@ export async function GET() {
     }
 
     const today = new Date().toISOString().split("T")[0];
-    const now = new Date().toTimeString().split(" ")[0].substring(0, 5);
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0];
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
@@ -77,9 +76,8 @@ export async function GET() {
     ] = await Promise.all([
       supabase
         .from("bookings")
-        .select("id, status, booking_date, start_time")
+        .select("id, status, booking_date")
         .eq("booking_date", today)
-        .gte("start_time", now)
         .neq("status", "cancelled"),
       supabase
         .from("bookings")
@@ -96,6 +94,7 @@ export async function GET() {
     if (vouchersError) throw vouchersError;
 
     // Execute revenue queries in parallel
+    // Only fetch confirmed/completed bookings (not cancelled) for revenue calculation
     const [
       { data: monthlyVouchers, error: monthlyVouchersError },
       { data: bookingsForRevenue, error: bookingsRevenueError },
@@ -115,8 +114,7 @@ export async function GET() {
             course_id
           )
         `)
-        .in("status", ["confirmed", "completed"])
-        .neq("status", "cancelled"),
+        .in("status", ["confirmed", "completed"]),
       supabase
         .from("courses")
         .select("id, price"),
@@ -167,82 +165,6 @@ export async function GET() {
     // Total monthly revenue = vouchers + bookings
     const monthlyRevenue = monthlyVoucherRevenue + monthlyBookingRevenue;
 
-    // Get booking trends (last 7 days) and popular courses in parallel
-    // Only fetch necessary fields for better performance
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const sevenDaysAgoStr = sevenDaysAgo.toISOString().split("T")[0];
-
-    const [
-      { data: recentBookings, error: recentError },
-      { data: allBookings, error: allBookingsError },
-    ] = await Promise.all([
-      supabase
-        .from("bookings")
-        .select("booking_date, participants")
-        .gte("booking_date", sevenDaysAgoStr)
-        .neq("status", "cancelled"),
-      supabase
-        .from("bookings")
-        .select(`
-          participants,
-          course_schedule:course_schedule_id (
-            course_id
-          )
-        `)
-        .neq("status", "cancelled"),
-    ]);
-
-    if (recentError) throw recentError;
-    if (allBookingsError) throw allBookingsError;
-
-    // Group bookings by date for trend (count bookings and participants)
-    const bookingsByDate: Record<string, { bookings: number; participants: number }> = {};
-    recentBookings?.forEach((booking: any) => {
-      const date = booking.booking_date;
-      if (!bookingsByDate[date]) {
-        bookingsByDate[date] = { bookings: 0, participants: 0 };
-      }
-      bookingsByDate[date].bookings += 1;
-      bookingsByDate[date].participants += booking.participants || 1;
-    });
-
-    // Process course counts
-    const courseCounts: Record<string, { bookings: number; participants: number }> = {};
-    allBookings?.forEach((booking: any) => {
-      const courseId = booking.course_schedule?.course_id;
-      if (courseId) {
-        if (!courseCounts[courseId]) {
-          courseCounts[courseId] = { bookings: 0, participants: 0 };
-        }
-        courseCounts[courseId].bookings += 1;
-        courseCounts[courseId].participants += booking.participants || 1;
-      }
-    });
-
-    // Get course titles (only if we have course counts)
-    const courseIds = Object.keys(courseCounts);
-    let courses: any[] = [];
-    if (courseIds.length > 0) {
-      const { data: coursesData, error: coursesError } = await supabase
-        .from("courses")
-        .select("id, title")
-        .in("id", courseIds);
-
-      if (coursesError) throw coursesError;
-      courses = coursesData || [];
-    }
-
-    const popularCourses = courses?.map((course) => {
-      const counts = courseCounts[course.id] || { bookings: 0, participants: 0 };
-      return {
-        id: course.id,
-        title: course.title,
-        bookings: counts.bookings,
-        participants: counts.participants,
-      };
-    }).sort((a, b) => b.participants - a.participants).slice(0, 5) || [];
-
     // Get weekly and monthly booking counts (only count, not full data for better performance)
     const [
       { count: weeklyBookingsCount, error: weeklyError },
@@ -275,8 +197,6 @@ export async function GET() {
       totalRevenue: totalRevenue,
       weeklyBookings: weeklyBookingsCount || 0,
       monthlyBookings: monthlyBookingsCount || 0,
-      bookingsTrend: bookingsByDate,
-      popularCourses: popularCourses,
     });
   } catch (error) {
     console.error("Error fetching admin stats:", error);

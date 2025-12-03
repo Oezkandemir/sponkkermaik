@@ -1,19 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo, memo } from "react";
+import { useState, useEffect, memo } from "react";
 import { useTranslations } from "next-intl";
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
 
 interface DashboardStats {
   todayBookings: number;
@@ -27,13 +15,6 @@ interface DashboardStats {
   totalRevenue: number;
   weeklyBookings: number;
   monthlyBookings: number;
-  bookingsTrend: Record<string, { bookings: number; participants: number }>;
-  popularCourses: Array<{
-    id: string;
-    title: string;
-    bookings: number;
-    participants: number;
-  }>;
 }
 
 /**
@@ -98,37 +79,6 @@ function AdminDashboardOverview() {
     }
   };
 
-  // Memoize expensive calculations - MUST be called before early returns to maintain hook order
-  const trendData = useMemo(() => {
-    if (!stats) return [];
-    
-    return Object.entries(stats.bookingsTrend)
-      .map(([date, data]) => ({
-        date: new Date(date).toLocaleDateString("de-DE", { month: "short", day: "numeric" }),
-        bookings: data.bookings,
-        participants: data.participants,
-      }))
-      .sort((a, b) => {
-        const dateA = Object.keys(stats.bookingsTrend).find(
-          (d) => new Date(d).toLocaleDateString("de-DE", { month: "short", day: "numeric" }) === a.date
-        );
-        const dateB = Object.keys(stats.bookingsTrend).find(
-          (d) => new Date(d).toLocaleDateString("de-DE", { month: "short", day: "numeric" }) === b.date
-        );
-        return dateA && dateB ? dateA.localeCompare(dateB) : 0;
-      });
-  }, [stats]);
-
-  // Memoize popular courses data - MUST be called before early returns
-  const coursesData = useMemo(() => {
-    if (!stats) return [];
-    
-    return stats.popularCourses.map((course) => ({
-      name: course.title.length > 20 ? course.title.substring(0, 20) + "..." : course.title,
-      bookings: course.bookings,
-      participants: course.participants,
-    }));
-  }, [stats]);
 
   if (loading) {
     return (
@@ -220,53 +170,6 @@ function AdminDashboardOverview() {
               </svg>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Bookings Trend Chart */}
-        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("bookingsTrend")}</h3>
-          {trendData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="bookings" stroke="#f59e0b" strokeWidth={2} name="Buchungen" />
-                <Line type="monotone" dataKey="participants" stroke="#10b981" strokeWidth={2} name="Teilnehmer" />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="text-center py-12 text-gray-500">
-              <p>{t("noDataAvailable")}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Popular Courses Chart */}
-        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t("popularCourses")}</h3>
-          {coursesData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={coursesData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="bookings" fill="#f59e0b" name="Buchungen" />
-                <Bar dataKey="participants" fill="#10b981" name="Teilnehmer" />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="text-center py-12 text-gray-500">
-              <p>{t("noDataAvailable")}</p>
-            </div>
-          )}
         </div>
       </div>
 
