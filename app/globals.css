@@ -108,3 +108,25 @@ iframe[src*="chatbase"] {
   background: transparent !important;
   background-color: transparent !important;
 }
+
+/* Chatbase Begrüßungstext "Wie kann ich dir helfen" ausblenden */
+#chatbase-widget *[class*="greeting"],
+#chatbase-widget *[class*="Greeting"],
+#chatbase-widget *[class*="welcome"],
+#chatbase-widget *[class*="Welcome"],
+#chatbase-widget *[class*="intro"],
+#chatbase-widget *[class*="Intro"],
+#chatbase-widget *[data-greeting],
+#chatbase-widget *[data-welcome],
+iframe[src*="chatbase"] *[class*="greeting"],
+iframe[src*="chatbase"] *[class*="Greeting"],
+iframe[src*="chatbase"] *[class*="welcome"],
+iframe[src*="chatbase"] *[class*="Welcome"],
+iframe[src*="chatbase"] *[class*="intro"],
+iframe[src*="chatbase"] *[class*="Intro"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}

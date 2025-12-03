@@ -90,7 +90,7 @@ export default function Header() {
             <div className="flex items-center gap-3">
               <Link
                 href="/"
-                className="flex items-center gap-[1px] group"
+                className="flex items-center gap-3 group"
               >
                 <Image
                   src="/images/logo.png"

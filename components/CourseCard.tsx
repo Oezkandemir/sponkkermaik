@@ -741,9 +741,10 @@ export default function CourseCard({ workshop }: CourseCardProps) {
       {/* Booking Modal */}
       {isModalOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto"
+          className="fixed inset-0 bg-black/50 md:bg-black/50 flex items-center justify-center z-50 p-0 md:p-2 md:sm:p-4 overflow-y-auto"
           onClick={(e) => {
-            if (e.target === e.currentTarget) {
+            // Only close on backdrop click on desktop
+            if (e.target === e.currentTarget && window.innerWidth >= 768) {
               setIsModalOpen(false);
               setSelectedDate(null);
               setSelectedSlot(null);
@@ -754,7 +755,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
             }
           }}
         >
-          <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full my-4 sm:my-8 max-h-[95vh] flex flex-col">
+          <div className="bg-white rounded-none md:rounded-xl shadow-2xl max-w-full md:max-w-6xl w-full h-full md:h-auto md:my-4 md:sm:my-8 md:max-h-[95vh] flex flex-col">
             {/* Modal Header */}
             <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between">
               <div>
@@ -773,9 +774,10 @@ export default function CourseCard({ workshop }: CourseCardProps) {
                   setPassword("");
                   setMessage(null);
                 }}
-                className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 p-2 -mr-2"
+                aria-label="Schließen"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>

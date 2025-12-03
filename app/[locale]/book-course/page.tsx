@@ -1272,8 +1272,41 @@ export default function BookCoursePage() {
 
         {/* Booking Form Modal */}
         {selectedSlot && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+          <div className="fixed inset-0 bg-black/50 md:bg-black/50 flex items-center justify-center z-50 p-0 md:p-4"
+            onClick={(e) => {
+              // Only close on backdrop click on desktop
+              if (e.target === e.currentTarget && window.innerWidth >= 768) {
+                setSelectedSlot(null);
+                setNotes("");
+                setCustomerName("");
+                setCustomerEmail("");
+                setCreateAccount(false);
+                setPassword("");
+                setMessage(null);
+              }
+            }}
+          >
+            <div className="bg-white rounded-none md:rounded-xl shadow-xl max-w-full md:max-w-md w-full h-full md:h-auto md:max-h-[95vh] flex flex-col md:block overflow-y-auto p-6">
+              {/* Close button for mobile */}
+              <div className="flex justify-end mb-4 md:hidden">
+                <button
+                  onClick={() => {
+                    setSelectedSlot(null);
+                    setNotes("");
+                    setCustomerName("");
+                    setCustomerEmail("");
+                    setCreateAccount(false);
+                    setPassword("");
+                    setMessage(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-2 -mt-2 -mr-2"
+                  aria-label="Schließen"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
               <h3 className="text-xl font-bold text-gray-900 mb-4">
                 {t("confirmBooking")}
               </h3>
