@@ -65,6 +65,15 @@ function AdminCalendarView() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<CalendarView>("month");
+  
+  // Handler to convert react-big-calendar View type to CalendarView
+  const handleViewChange = useCallback((newView: View) => {
+    // Only allow the views we support
+    if (newView === "month" || newView === "week" || newView === "day" || newView === "agenda") {
+      setView(newView as CalendarView);
+    }
+  }, []);
+  
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [replyModalOpen, setReplyModalOpen] = useState(false);
   const [messagesModalOpen, setMessagesModalOpen] = useState(false);
@@ -415,7 +424,7 @@ function AdminCalendarView() {
           startAccessor="start"
           endAccessor="end"
           view={view}
-          onView={setView}
+          onView={handleViewChange}
           date={currentDate}
           onNavigate={setCurrentDate}
           onSelectEvent={handleSelectEvent}
@@ -559,19 +568,30 @@ function AdminCalendarView() {
       {/* Modals */}
       {selectedBooking && (
         <>
-          <BookingReplyModal
-            isOpen={replyModalOpen}
-            onClose={() => {
-              setReplyModalOpen(false);
-              loadBookings();
-            }}
-            booking={selectedBooking}
-          />
-          <BookingMessagesModal
-            isOpen={messagesModalOpen}
-            onClose={() => setMessagesModalOpen(false)}
-            booking={selectedBooking}
-          />
+          {selectedBooking && (
+            <BookingReplyModal
+              isOpen={replyModalOpen}
+              onClose={() => {
+                setReplyModalOpen(false);
+                loadBookings();
+              }}
+              bookingId={selectedBooking.id}
+              customerEmail={selectedBooking.customer_email || selectedBooking.user_email || ""}
+              customerName={selectedBooking.customer_name || "Unbekannt"}
+              courseTitle={selectedBooking.course_title || "Unbekannter Kurs"}
+              bookingDate={moment(selectedBooking.booking_date).format("DD.MM.YYYY")}
+              bookingTime={`${selectedBooking.start_time} - ${selectedBooking.end_time}`}
+              originalNotes={selectedBooking.notes}
+              onSuccess={loadBookings}
+            />
+          )}
+          {selectedBooking && (
+            <BookingMessagesModal
+              isOpen={messagesModalOpen}
+              onClose={() => setMessagesModalOpen(false)}
+              bookingId={selectedBooking.id}
+            />
+          )}
         </>
       )}
     </div>
