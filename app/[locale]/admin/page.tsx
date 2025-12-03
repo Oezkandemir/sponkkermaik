@@ -463,19 +463,6 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* Cal.com Import Tab */}
-          {activeTab === "calCom" && (
-            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
-              <Suspense fallback={
-                <div className="text-center py-8">
-                  <div className="animate-spin h-8 w-8 border-2 border-amber-600 border-t-transparent rounded-full mx-auto"></div>
-                </div>
-              }>
-                <AdminCalComImport />
-              </Suspense>
-            </div>
-          )}
-
           {/* Courses Tab */}
           {activeTab === "courses" && (
             <>
