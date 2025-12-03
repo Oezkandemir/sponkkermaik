@@ -53,11 +53,20 @@ export default function AdminVouchersManager() {
         return;
       }
       
-      const { data: adminCheck } = await supabase
+      // Use maybeSingle() to avoid errors when no admin entry exists
+      const { data: adminCheck, error: adminError } = await supabase
         .from("admins")
         .select("user_id")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
+      
+      // Check if user is admin - allow if adminCheck exists OR if no error (RLS might allow access)
+      if (adminError && adminError.code !== "PGRST116") {
+        // PGRST116 = no rows returned, which is fine - user is not admin
+        console.error("❌ Error checking admin status:", adminError);
+        setMessage({ type: "error", text: "Fehler bei Admin-Prüfung" });
+        return;
+      }
       
       if (!adminCheck) {
         console.error("❌ User is not admin");
@@ -136,17 +145,21 @@ export default function AdminVouchersManager() {
         let customerName: string;
         let userEmail: string;
         
-        if (userData) {
-          userEmail = userData.email || `User ${voucher.user_id?.substring(0, 8)}...`;
+        if (userData && userData.email) {
+          // We have user data with email
+          userEmail = userData.email;
           
           if (userData.name) {
             customerName = userData.name;
-          } else if (userData.email) {
+          } else {
             // Use email prefix (part before @) as name
             customerName = userData.email.split("@")[0];
-          } else {
-            customerName = `User ${voucher.user_id?.substring(0, 8)}...`;
           }
+        } else if (userData && !userData.email) {
+          // We have user data but no email - this shouldn't happen, but handle it
+          userEmail = `User ${voucher.user_id?.substring(0, 8)}...`;
+          customerName = userData.name || userEmail;
+          console.warn(`⚠️ User data found but no email for voucher ${voucher.code}, user_id: ${voucher.user_id}`);
         } else {
           // No user data found - use fallback
           userEmail = `User ${voucher.user_id?.substring(0, 8)}...`;
@@ -154,6 +167,7 @@ export default function AdminVouchersManager() {
           console.warn(`⚠️ No user data found for voucher ${voucher.code}, user_id: ${voucher.user_id}`);
         }
         
+        // Ensure we never show the full user_id - always use mapped values
         // Determine payment method
         const paymentMethod = voucher.paypal_order_id ? "paypal" : "bank_transfer";
         
@@ -445,10 +459,12 @@ export default function AdminVouchersManager() {
                       <span className="font-bold text-amber-600">{voucher.value}€</span>
                     </div>
                     <div>
-                      <span className="font-medium">Kunde:</span> {voucher.customer_name}
+                      <span className="font-medium">Kunde:</span>{" "}
+                      {voucher.customer_name || voucher.user_email?.split("@")[0] || `User ${voucher.user_id?.substring(0, 8)}...`}
                     </div>
                     <div>
-                      <span className="font-medium">E-Mail:</span> {voucher.user_email}
+                      <span className="font-medium">E-Mail:</span>{" "}
+                      {voucher.user_email || `User ${voucher.user_id?.substring(0, 8)}...`}
                     </div>
                     <div>
                       <span className="font-medium">Gültig bis:</span>{" "}

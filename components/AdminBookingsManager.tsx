@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import BookingReplyModal from "./BookingReplyModal";
+import BookingMessagesModal from "./BookingMessagesModal";
 
 interface Booking {
   id: string;
@@ -18,6 +20,7 @@ interface Booking {
   user_email?: string;
   customer_name?: string;
   customer_email?: string;
+  hasMessages?: boolean;
 }
 
 type BookingFilter = "upcoming" | "unconfirmed" | "recurring" | "past" | "cancelled";
@@ -33,6 +36,9 @@ export default function AdminBookingsManager() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [activeFilter, setActiveFilter] = useState<BookingFilter>("upcoming");
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [replyModalOpen, setReplyModalOpen] = useState(false);
+  const [messagesModalOpen, setMessagesModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
   useEffect(() => {
     loadBookings();
@@ -81,8 +87,26 @@ export default function AdminBookingsManager() {
           // Use customer_email and customer_name from booking, fallback to user_id if not available
           customer_email: booking.customer_email || (booking.user_id ? `User ${booking.user_id.substring(0, 8)}...` : "Unbekannt"),
           customer_name: booking.customer_name || "Unbekannt",
+          hasMessages: false, // Will be updated below
         };
       });
+
+      // Check which bookings have messages
+      const bookingIds = bookingsWithDetails.map((b) => b.id);
+      if (bookingIds.length > 0) {
+        const { data: messagesData } = await supabase
+          .from("booking_messages")
+          .select("booking_id")
+          .in("booking_id", bookingIds);
+
+        const bookingsWithMessages = new Set(
+          (messagesData || []).map((m: any) => m.booking_id)
+        );
+
+        bookingsWithDetails.forEach((booking) => {
+          booking.hasMessages = bookingsWithMessages.has(booking.id);
+        });
+      }
 
       setBookings(bookingsWithDetails);
     } catch (err) {
@@ -317,9 +341,24 @@ export default function AdminBookingsManager() {
                   </div>
                   {booking.notes && (
                     <div className="mt-3 pt-3 border-t border-gray-200">
-                      <p className="text-sm text-gray-600 break-words">
-                        <span className="font-medium">Notizen:</span> {booking.notes}
-                      </p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm text-gray-600 break-words flex-1">
+                          <span className="font-medium">Notizen:</span> {booking.notes}
+                        </p>
+                        <button
+                          onClick={() => {
+                            setSelectedBooking(booking);
+                            setReplyModalOpen(true);
+                          }}
+                          className="ml-2 px-3 py-1.5 text-xs bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors whitespace-nowrap flex-shrink-0"
+                          title="Auf Notiz antworten"
+                        >
+                          <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                          </svg>
+                          Antworten
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -348,6 +387,21 @@ export default function AdminBookingsManager() {
                       Stornieren
                     </button>
                   )}
+                  {booking.hasMessages && (
+                    <button
+                      onClick={() => {
+                        setSelectedBooking(booking);
+                        setMessagesModalOpen(true);
+                      }}
+                      className="w-full sm:w-auto px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-1"
+                      title="Nachrichtenverlauf anzeigen"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                      Nachrichtenverlauf
+                    </button>
+                  )}
                   <button
                     onClick={() => deleteBooking(booking.id)}
                     className="w-full sm:w-auto px-3 py-1.5 text-xs bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors sm:mt-2"
@@ -360,6 +414,45 @@ export default function AdminBookingsManager() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Reply Modal */}
+      {selectedBooking && (
+        <BookingReplyModal
+          isOpen={replyModalOpen}
+          onClose={() => {
+            setReplyModalOpen(false);
+            setSelectedBooking(null);
+          }}
+          bookingId={selectedBooking.id}
+          customerEmail={selectedBooking.customer_email || selectedBooking.user_email || ""}
+          customerName={selectedBooking.customer_name || "Kunde"}
+          courseTitle={selectedBooking.course_title || "Kurs"}
+          bookingDate={new Date(selectedBooking.booking_date).toLocaleDateString("de-DE", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+          bookingTime={`${selectedBooking.start_time} - ${selectedBooking.end_time}`}
+          originalNotes={selectedBooking.notes}
+          onSuccess={() => {
+            // Reload bookings to update hasMessages flag
+            loadBookings();
+          }}
+        />
+      )}
+
+      {/* Messages Modal */}
+      {selectedBooking && (
+        <BookingMessagesModal
+          isOpen={messagesModalOpen}
+          onClose={() => {
+            setMessagesModalOpen(false);
+            setSelectedBooking(null);
+          }}
+          bookingId={selectedBooking.id}
+        />
       )}
     </div>
   );

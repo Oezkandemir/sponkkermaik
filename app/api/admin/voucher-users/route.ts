@@ -33,13 +33,23 @@ export async function POST(request: Request) {
       );
     }
 
+    // Use maybeSingle() to properly check admin status
     const { data: adminData, error: adminError } = await supabase
       .from("admins")
       .select("user_id")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
-    if (adminError || !adminData) {
+    // Check if user is admin - PGRST116 means no rows found (not an admin)
+    if (adminError && adminError.code !== "PGRST116") {
+      console.error("Error checking admin status:", adminError);
+      return NextResponse.json(
+        { error: "Error checking admin access" },
+        { status: 500 }
+      );
+    }
+
+    if (!adminData) {
       return NextResponse.json(
         { error: "Forbidden - Admin access required" },
         { status: 403 }
@@ -78,11 +88,17 @@ export async function POST(request: Request) {
         }
         
         if (authUser?.user?.email) {
-          userDataMap[userId] = {
-            email: authUser.user.email,
-            name: null,
-          };
-          console.log(`✅ Loaded email for user ${userId}: ${authUser.user.email}`);
+          // Ensure email is a valid string, not user_id
+          const email = authUser.user.email.trim();
+          if (email && email.includes("@")) {
+            userDataMap[userId] = {
+              email: email,
+              name: null,
+            };
+            console.log(`✅ Loaded email for user ${userId}: ${email}`);
+          } else {
+            console.warn(`⚠️ Invalid email format for user ${userId}: ${email}`);
+          }
         } else {
           console.warn(`⚠️ No email found for user ${userId}`);
         }
@@ -117,8 +133,14 @@ export async function POST(request: Request) {
           }
         } else {
           // If we don't have email from auth, use profile email or fallback
+          // Ensure profile.email is a valid email, not user_id
+          let email = profile.email;
+          if (!email || !email.includes("@") || email === profile.id) {
+            // Invalid email or email is same as user_id - use fallback
+            email = `User ${profile.id.substring(0, 8)}...`;
+          }
           userDataMap[profile.id] = {
-            email: profile.email || `User ${profile.id.substring(0, 8)}...`,
+            email: email,
             name: profile.full_name || null,
           };
         }
@@ -162,8 +184,14 @@ async function getUsersFromProfiles(userIds: string[]) {
 
   if (profilesData) {
     profilesData.forEach((profile: any) => {
+      // Ensure profile.email is a valid email, not user_id
+      let email = profile.email;
+      if (!email || !email.includes("@") || email === profile.id) {
+        // Invalid email or email is same as user_id - use fallback
+        email = `User ${profile.id.substring(0, 8)}...`;
+      }
       userDataMap[profile.id] = {
-        email: profile.email || `User ${profile.id.substring(0, 8)}...`,
+        email: email,
         name: profile.full_name || null,
       };
     });
