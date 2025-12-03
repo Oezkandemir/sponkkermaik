@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
@@ -18,8 +18,8 @@ interface BookingMessage {
 /**
  * Booking Details Page Component
  * 
- * Displays detailed information about a specific booking including messages.
- * Allows customers to reply to admin messages.
+ * Displays detailed information about a specific booking with improved UI/UX.
+ * Allows customers and admins to communicate via messages.
  */
 export default function BookingDetailsPage() {
   const router = useRouter();
@@ -37,6 +37,7 @@ export default function BookingDetailsPage() {
   const [sendingReply, setSendingReply] = useState(false);
   const [replyError, setReplyError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [participantList, setParticipantList] = useState<string[]>([]);
 
   useEffect(() => {
     async function loadData() {
@@ -83,6 +84,27 @@ export default function BookingDetailsPage() {
 
         setBooking(bookingData);
 
+        // Extract participant names from notes
+        if (bookingData.notes) {
+          const participants: string[] = [];
+          const lines = bookingData.notes.split("\n");
+          let inParticipantsSection = false;
+
+          for (const line of lines) {
+            if (line.trim() === "Teilnehmer:") {
+              inParticipantsSection = true;
+              continue;
+            }
+            if (inParticipantsSection) {
+              const match = line.match(/^Teilnehmer \d+: (.+)$/);
+              if (match) {
+                participants.push(match[1].trim());
+              }
+            }
+          }
+          setParticipantList(participants);
+        }
+
         // Load course title
         if (bookingData.course_schedule?.course_id) {
           const { data: course } = await supabase
@@ -109,7 +131,6 @@ export default function BookingDetailsPage() {
       loadData();
     }
   }, [bookingId]);
-
 
   /**
    * Loads messages for the booking
@@ -183,6 +204,14 @@ export default function BookingDetailsPage() {
       setReplyMessage("");
       setReplyError(null);
       await loadMessages();
+      
+      // Scroll to bottom of messages
+      setTimeout(() => {
+        const messagesContainer = document.getElementById("messages-container");
+        if (messagesContainer) {
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+      }, 100);
     } catch (err) {
       console.error("Error sending reply:", err);
       setReplyError(err instanceof Error ? err.message : "Fehler beim Senden der Nachricht");
@@ -202,14 +231,27 @@ export default function BookingDetailsPage() {
     });
   };
 
+  // Format booking date for display and API
+  const bookingDate = useMemo(() => {
+    if (!booking?.booking_date) return "";
+    return new Date(booking.booking_date).toLocaleDateString("de-DE", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  }, [booking]);
+
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-            <div className="h-64 bg-gray-200 rounded-xl mb-6"></div>
-            <div className="h-32 bg-gray-200 rounded-xl"></div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-4xl mx-auto">
+            <div className="animate-pulse space-y-6">
+              <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+              <div className="h-64 bg-gray-200 rounded-xl"></div>
+              <div className="h-96 bg-gray-200 rounded-xl"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -220,207 +262,358 @@ export default function BookingDetailsPage() {
     return null;
   }
 
-  // Format booking date for display and API
-  const bookingDate = booking.booking_date 
-    ? new Date(booking.booking_date).toLocaleDateString("de-DE", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "";
-
   return (
-    <div className="container mx-auto px-4 py-16">
-      <div className="max-w-4xl mx-auto">
-        {/* Back Button */}
-        <Link
-          href={isAdmin ? "/admin" : "/bookings"}
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          {isAdmin ? "Zurück zum Admin-Dashboard" : "Zurück zu Meine Buchungen"}
-        </Link>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8 sm:py-16">
+        <div className="max-w-5xl mx-auto">
+          {/* Back Button */}
+          <Link
+            href={isAdmin ? "/admin" : "/bookings"}
+            className="inline-flex items-center gap-2 text-gray-600 hover:text-amber-600 mb-6 transition-colors group"
+          >
+            <svg className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            <span className="font-medium">{isAdmin ? "Zurück zum Admin-Dashboard" : "Zurück zu Meine Buchungen"}</span>
+          </Link>
 
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Buchungsdetails</h1>
-          <p className="text-gray-600">{courseTitle}</p>
-        </div>
-
-        {/* Booking Information Card */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Buchungsinformationen</h2>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <label className="text-sm font-medium text-gray-500">Kurs</label>
-              <p className="text-lg text-gray-900 mt-1">{courseTitle}</p>
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium text-gray-500">Status</label>
-              <p className="mt-1">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+          {/* Header Card */}
+          <div className={`bg-gradient-to-r rounded-xl shadow-lg p-6 sm:p-8 mb-6 ${
+            booking.status === "confirmed"
+              ? "from-green-500 to-green-600"
+              : booking.status === "pending"
+              ? "from-yellow-500 to-yellow-600"
+              : booking.status === "cancelled"
+              ? "from-red-500 to-red-600"
+              : "from-gray-500 to-gray-600"
+          }`}>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">{courseTitle}</h1>
+                <p className="text-white/90 text-sm sm:text-base">
+                  {bookingDate} • {booking.start_time} - {booking.end_time}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
                   booking.status === "confirmed"
-                    ? "bg-green-100 text-green-800"
+                    ? "bg-white text-green-700"
                     : booking.status === "pending"
-                    ? "bg-yellow-100 text-yellow-800"
+                    ? "bg-white text-yellow-700"
                     : booking.status === "cancelled"
-                    ? "bg-red-100 text-red-800"
-                    : "bg-gray-100 text-gray-800"
+                    ? "bg-white text-red-700"
+                    : "bg-white text-gray-700"
                 }`}>
-                  {booking.status === "confirmed" ? "Bestätigt" : 
-                   booking.status === "pending" ? "Unbestätigt" : 
-                   booking.status === "cancelled" ? "Abgesagt" : "Abgeschlossen"}
+                  {booking.status === "confirmed" ? "✓ Bestätigt" : 
+                   booking.status === "pending" ? "⏳ Unbestätigt" : 
+                   booking.status === "cancelled" ? "✗ Abgesagt" : "✓ Abgeschlossen"}
                 </span>
-              </p>
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium text-gray-500">Datum</label>
-              <p className="text-lg text-gray-900 mt-1">{bookingDate}</p>
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium text-gray-500">Zeit</label>
-              <p className="text-lg text-gray-900 mt-1">{booking.start_time} - {booking.end_time}</p>
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium text-gray-500">Teilnehmer</label>
-              <p className="text-lg text-gray-900 mt-1">{booking.participants}</p>
-            </div>
-            
-            {booking.customer_name && (
-              <div>
-                <label className="text-sm font-medium text-gray-500">Name</label>
-                <p className="text-lg text-gray-900 mt-1">{booking.customer_name}</p>
               </div>
-            )}
-            
-            {booking.customer_email && (
-              <div>
-                <label className="text-sm font-medium text-gray-500">E-Mail</label>
-                <p className="text-lg text-gray-900 mt-1">{booking.customer_email}</p>
-              </div>
-            )}
+            </div>
           </div>
 
-          {booking.notes && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <label className="text-sm font-medium text-gray-500">Ihre Notizen</label>
-              <p className="text-gray-700 mt-2 whitespace-pre-wrap">{booking.notes}</p>
-            </div>
-          )}
-        </div>
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            {/* Booking Details Card */}
+            <div className="lg:col-span-2 bg-white rounded-xl shadow-md p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Buchungsinformationen
+              </h2>
+              
+              <div className="space-y-4">
+                {/* Info Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-xs font-medium text-gray-500 uppercase">Datum</span>
+                    </div>
+                    <p className="text-lg font-semibold text-gray-900">{bookingDate}</p>
+                  </div>
 
-        {/* Messages Section - Chat Style */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Nachrichten</h2>
-          
-          {messages.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <p>Noch keine Nachrichten vorhanden.</p>
-              {booking.notes && !isAdmin && (
-                <p className="mt-2 text-sm">Sie haben eine Notiz bei der Buchung hinterlassen. Der Admin wird sich bei Bedarf bei Ihnen melden.</p>
-              )}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-xs font-medium text-gray-500 uppercase">Zeit</span>
+                    </div>
+                    <p className="text-lg font-semibold text-gray-900">{booking.start_time} - {booking.end_time}</p>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      <span className="text-xs font-medium text-gray-500 uppercase">Teilnehmer</span>
+                    </div>
+                    <p className="text-lg font-semibold text-gray-900">{booking.participants} Person{booking.participants !== 1 ? "en" : ""}</p>
+                  </div>
+
+                  {booking.customer_name && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span className="text-xs font-medium text-gray-500 uppercase">Name</span>
+                      </div>
+                      <p className="text-lg font-semibold text-gray-900">{booking.customer_name}</p>
+                    </div>
+                  )}
+
+                  {booking.customer_email && (
+                    <div className="bg-gray-50 rounded-lg p-4 sm:col-span-2">
+                      <div className="flex items-center gap-2 mb-2">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <span className="text-xs font-medium text-gray-500 uppercase">E-Mail</span>
+                      </div>
+                      <p className="text-lg font-semibold text-gray-900 break-words">{booking.customer_email}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Participant List */}
+                {participantList.length > 0 && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      <span className="text-sm font-semibold text-blue-900">Teilnehmerliste</span>
+                    </div>
+                    <ul className="space-y-2">
+                      {participantList.map((name, index) => (
+                        <li key={index} className="flex items-center gap-2 text-blue-900">
+                          <span className="w-6 h-6 rounded-full bg-blue-200 flex items-center justify-center text-xs font-semibold">
+                            {index + 1}
+                          </span>
+                          <span>{name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Notes */}
+                {booking.notes && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg className="w-5 h-5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      <span className="text-sm font-semibold text-amber-900">Ihre Notizen</span>
+                    </div>
+                    <p className="text-amber-900 whitespace-pre-wrap leading-relaxed">{booking.notes}</p>
+                  </div>
+                )}
+              </div>
             </div>
-          ) : (
-            <>
-              {/* Chat Messages */}
-              <div className="space-y-4 mb-6 max-h-96 overflow-y-auto pr-2">
-                {messages.map((msg) => {
-                  const isCurrentUser = (isAdmin && msg.sender_type === "admin") || (!isAdmin && msg.sender_type === "customer");
-                  return (
-                    <div
-                      key={msg.id}
-                      className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}
+
+            {/* Quick Actions Sidebar */}
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Schnellaktionen</h3>
+              <div className="space-y-3">
+                {isAdmin && booking.status === "pending" && (
+                  <>
+                    <button
+                      onClick={() => {
+                        if (confirm("Möchten Sie diese Buchung wirklich bestätigen?")) {
+                          // This would need to be implemented
+                        }
+                      }}
+                      className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2 font-medium"
                     >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Bestätigen
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm("Möchten Sie diese Buchung wirklich ablehnen?")) {
+                          // This would need to be implemented
+                        }
+                      }}
+                      className="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center gap-2 font-medium"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      Ablehnen
+                    </button>
+                  </>
+                )}
+                <Link
+                  href={isAdmin ? "/admin" : "/bookings"}
+                  className="block w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-center font-medium"
+                >
+                  Zurück zur Übersicht
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Messages Section - Chat Style */}
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              Nachrichtenverlauf
+            </h2>
+            
+            {messages.length === 0 ? (
+              <div className="text-center py-12 bg-gray-50 rounded-lg">
+                <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <p className="text-gray-500 font-medium">Noch keine Nachrichten vorhanden</p>
+                {booking.notes && !isAdmin && (
+                  <p className="mt-2 text-sm text-gray-400">
+                    Sie haben eine Notiz bei der Buchung hinterlassen. Der Admin wird sich bei Bedarf bei Ihnen melden.
+                  </p>
+                )}
+              </div>
+            ) : (
+              <>
+                {/* Chat Messages */}
+                <div 
+                  id="messages-container"
+                  className="space-y-4 mb-6 max-h-96 overflow-y-auto pr-2 scroll-smooth"
+                >
+                  {messages.map((msg, index) => {
+                    const isCurrentUser = (isAdmin && msg.sender_type === "admin") || (!isAdmin && msg.sender_type === "customer");
+                    const isLastMessage = index === messages.length - 1;
+                    
+                    return (
                       <div
-                        className={`max-w-[80%] p-4 rounded-lg ${
+                        key={msg.id}
+                        className={`flex ${isCurrentUser ? "justify-end" : "justify-start"} ${isLastMessage ? "animate-fade-in" : ""}`}
+                      >
+                        <div className={`max-w-[85%] sm:max-w-[75%] ${isCurrentUser ? "order-2" : "order-1"}`}>
+                          <div className={`p-4 rounded-2xl shadow-sm ${
+                            isCurrentUser
+                              ? isAdmin
+                                ? "bg-gradient-to-br from-amber-500 to-amber-600 text-white rounded-br-none"
+                                : "bg-gradient-to-br from-gray-600 to-gray-700 text-white rounded-br-none"
+                              : isAdmin
+                              ? "bg-gray-100 text-gray-900 rounded-bl-none"
+                              : "bg-amber-100 text-gray-900 rounded-bl-none"
+                          }`}>
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className={`text-xs font-semibold ${
+                                isCurrentUser ? "text-white/90" : "text-gray-600"
+                              }`}>
+                                {msg.sender_type === "admin" ? "👤 Admin" : isAdmin ? "👤 Kunde" : "Sie"}
+                              </span>
+                              <span className={`text-xs ${
+                                isCurrentUser ? "text-white/70" : "text-gray-500"
+                              }`}>
+                                {formatDate(msg.created_at)}
+                              </span>
+                            </div>
+                            <p className={`text-sm leading-relaxed whitespace-pre-wrap ${
+                              isCurrentUser ? "text-white" : "text-gray-700"
+                            }`}>
+                              {msg.message}
+                            </p>
+                          </div>
+                        </div>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                          isCurrentUser ? "order-1 ml-2" : "order-2 mr-2"
+                        } ${
                           isCurrentUser
                             ? isAdmin
-                              ? "bg-amber-600 text-white rounded-br-none"
-                              : "bg-gray-600 text-white rounded-br-none"
+                              ? "bg-amber-500"
+                              : "bg-gray-600"
                             : isAdmin
-                            ? "bg-gray-100 text-gray-900 rounded-bl-none"
-                            : "bg-amber-100 text-gray-900 rounded-bl-none"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-xs font-medium ${
-                            isCurrentUser ? "text-white/80" : "text-gray-600"
+                            ? "bg-gray-300"
+                            : "bg-amber-200"
+                        }`}>
+                          <span className={`text-xs font-semibold ${
+                            isCurrentUser ? "text-white" : "text-gray-700"
                           }`}>
-                            {msg.sender_type === "admin" ? "Admin" : isAdmin ? "Kunde" : "Sie"}
-                          </span>
-                          <span className={`text-xs ${
-                            isCurrentUser ? "text-white/60" : "text-gray-500"
-                          }`}>
-                            {formatDate(msg.created_at)}
+                            {msg.sender_type === "admin" ? "A" : "K"}
                           </span>
                         </div>
-                        <p className={`text-sm whitespace-pre-wrap ${
-                          isCurrentUser ? "text-white" : "text-gray-700"
-                        }`}>
-                          {msg.message}
-                        </p>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
-
-          {/* Chat Input Section (always visible for both admin and customer) */}
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {isAdmin ? "Nachricht senden" : "Antwort schreiben"}
-            </h3>
-            <div className="mb-4">
-              <textarea
-                value={replyMessage}
-                onChange={(e) => setReplyMessage(e.target.value)}
-                rows={4}
-                disabled={sendingReply}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                placeholder={isAdmin ? "Schreiben Sie hier eine Nachricht an den Kunden..." : "Schreiben Sie hier Ihre Antwort..."}
-              />
-            </div>
-            {replyError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-                {replyError}
-              </div>
+                    );
+                  })}
+                </div>
+              </>
             )}
-            <button
-              onClick={handleSendReply}
-              disabled={sendingReply || !replyMessage.trim()}
-              className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {sendingReply ? (
-                <>
-                  <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+
+            {/* Chat Input Section */}
+            <div className="border-t border-gray-200 pt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                {isAdmin ? "Nachricht an Kunde senden" : "Antwort schreiben"}
+              </h3>
+              <div className="mb-4">
+                <textarea
+                  value={replyMessage}
+                  onChange={(e) => setReplyMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                      e.preventDefault();
+                      handleSendReply();
+                    }
+                  }}
+                  rows={4}
+                  disabled={sendingReply}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 disabled:bg-gray-100 disabled:cursor-not-allowed resize-none transition-colors"
+                  placeholder={isAdmin ? "Schreiben Sie hier eine Nachricht an den Kunden..." : "Schreiben Sie hier Ihre Antwort... (Strg/Cmd + Enter zum Senden)"}
+                />
+                <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+                  <span>{replyMessage.length} Zeichen</span>
+                  <span>Strg/Cmd + Enter zum Senden</span>
+                </div>
+              </div>
+              {replyError && (
+                <div className="mb-4 p-3 bg-red-50 border-2 border-red-200 text-red-700 rounded-lg text-sm flex items-center gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Wird gesendet...
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
-                  {isAdmin ? "Nachricht senden" : "Antwort senden"}
-                </>
+                  {replyError}
+                </div>
               )}
-            </button>
+              <button
+                onClick={handleSendReply}
+                disabled={sendingReply || !replyMessage.trim()}
+                className="w-full px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:transform-none"
+              >
+                {sendingReply ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Wird gesendet...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    {isAdmin ? "Nachricht senden" : "Antwort senden"}
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
-

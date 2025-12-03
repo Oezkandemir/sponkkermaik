@@ -52,6 +52,7 @@ function AdminBookingsManager() {
   const [availableCourses, setAvailableCourses] = useState<Array<{ id: string; title: string }>>([]);
   const [selectedBookings, setSelectedBookings] = useState<Set<string>>(new Set());
   const [bulkActionMode, setBulkActionMode] = useState(false);
+  const [expandedBookings, setExpandedBookings] = useState<Set<string>>(new Set());
 
   /**
    * Loads all available courses for filtering
@@ -210,6 +211,21 @@ function AdminBookingsManager() {
    */
   const toggleBookingSelection = (bookingId: string) => {
     setSelectedBookings((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(bookingId)) {
+        newSet.delete(bookingId);
+      } else {
+        newSet.add(bookingId);
+      }
+      return newSet;
+    });
+  };
+
+  /**
+   * Toggles accordion expansion for a booking
+   */
+  const toggleBookingExpansion = (bookingId: string) => {
+    setExpandedBookings((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(bookingId)) {
         newSet.delete(bookingId);
@@ -635,86 +651,153 @@ function AdminBookingsManager() {
             </div>
           )}
 
-          {filteredBookings.map((booking) => (
-            <div
-              key={booking.id}
-              className={`bg-white border rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow ${
-                bulkActionMode && selectedBookings.has(booking.id)
-                  ? "border-amber-600 bg-amber-50"
-                  : "border-gray-200"
-              }`}
-            >
-              {/* Bulk Selection Checkbox */}
-              {bulkActionMode && (
-                <div className="mb-3">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedBookings.has(booking.id)}
-                      onChange={() => toggleBookingSelection(booking.id)}
-                      className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500"
-                    />
-                    <span className="text-sm text-gray-700">Auswählen</span>
-                  </label>
-                </div>
-              )}
-
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
-                    <Link
-                      href={`/bookings/${booking.id}`}
-                      className="text-base sm:text-lg font-semibold text-gray-900 break-words hover:text-amber-600 transition-colors cursor-pointer"
-                    >
-                      {booking.course_title}
-                    </Link>
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded whitespace-nowrap ${
-                        booking.status === "confirmed"
-                          ? "bg-green-100 text-green-700"
-                          : booking.status === "pending"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : booking.status === "cancelled"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {booking.status === "confirmed"
-                        ? "Bestätigt"
-                        : booking.status === "pending"
-                        ? "Unbestätigt"
-                        : booking.status === "cancelled"
-                        ? "Abgesagt"
-                        : "Abgeschlossen"}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm text-gray-600">
-                    <div>
-                      <span className="font-medium">Datum:</span>{" "}
-                      {new Date(booking.booking_date).toLocaleDateString("de-DE", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </div>
-                    <div>
-                      <span className="font-medium">Zeit:</span> {booking.start_time} - {booking.end_time}
-                    </div>
-                    <div>
-                      <span className="font-medium">Name:</span> {booking.customer_name || "Unbekannt"}
-                    </div>
-                    <div>
-                      <span className="font-medium">E-Mail:</span> {booking.customer_email || booking.user_email || "Unbekannt"}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="font-medium">Teilnehmer:</span>
-                        <span className="text-gray-700">{booking.participants}</span>
+          {filteredBookings.map((booking) => {
+            const isExpanded = expandedBookings.has(booking.id);
+            const isSelected = bulkActionMode && selectedBookings.has(booking.id);
+            
+            return (
+              <div
+                key={booking.id}
+                className={`bg-white border-2 rounded-lg transition-all ${
+                  isSelected
+                    ? "border-amber-600 bg-amber-50 shadow-lg"
+                    : booking.status === "pending"
+                    ? "border-yellow-300 hover:border-yellow-400"
+                    : booking.status === "confirmed"
+                    ? "border-green-300 hover:border-green-400"
+                    : booking.status === "cancelled"
+                    ? "border-red-300 hover:border-red-400"
+                    : "border-gray-200 hover:border-gray-300"
+                } ${isExpanded ? "shadow-md" : "hover:shadow-sm"}`}
+              >
+                {/* Accordion Header - Always Visible */}
+                <button
+                  onClick={() => toggleBookingExpansion(booking.id)}
+                  className="w-full p-4 sm:p-5 text-left focus:outline-none focus:ring-2 focus:ring-amber-500 rounded-lg"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    {/* Left Side - Main Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                        {/* Bulk Selection Checkbox */}
+                        {bulkActionMode && (
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleBookingSelection(booking.id);
+                            }}
+                            className="flex items-center"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedBookings.has(booking.id)}
+                              onChange={() => toggleBookingSelection(booking.id)}
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500"
+                            />
+                          </div>
+                        )}
+                        
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 break-words">
+                          {booking.course_title}
+                        </h3>
+                        
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded whitespace-nowrap ${
+                            booking.status === "confirmed"
+                              ? "bg-green-100 text-green-700"
+                              : booking.status === "pending"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : booking.status === "cancelled"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {booking.status === "confirmed"
+                            ? "Bestätigt"
+                            : booking.status === "pending"
+                            ? "Unbestätigt"
+                            : booking.status === "cancelled"
+                            ? "Abgesagt"
+                            : "Abgeschlossen"}
+                        </span>
+                        
+                        {booking.hasMessages && (
+                          <span className="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700 flex items-center gap-1">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            Nachrichten
+                          </span>
+                        )}
                       </div>
+                      
+                      {/* Key Info Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 text-sm">
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span className="text-gray-600">
+                            {new Date(booking.booking_date).toLocaleDateString("de-DE", {
+                              weekday: "short",
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                            })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-gray-600">{booking.start_time} - {booking.end_time}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          <span className="text-gray-600 truncate">{booking.customer_name || "Unbekannt"}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                          <span className="text-gray-600">{booking.participants} Teilnehmer</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Right Side - Expand Icon */}
+                    <div className="flex-shrink-0">
+                      <svg
+                        className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Accordion Content - Expandable */}
+                {isExpanded && (
+                  <div className="px-4 sm:px-5 pb-4 sm:pb-5 border-t border-gray-200 pt-4 space-y-4">
+                    {/* Detailed Information */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="bg-gray-50 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 mb-1">E-Mail</div>
+                        <div className="text-sm text-gray-900 break-words">
+                          {booking.customer_email || booking.user_email || "Unbekannt"}
+                        </div>
+                      </div>
+                      
                       {booking.participantList && booking.participantList.length > 0 && (
-                        <div className="ml-0 sm:ml-4 mt-1 mb-2">
-                          <ul className="text-sm text-gray-600 space-y-1">
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <div className="text-xs text-gray-500 mb-2">Teilnehmerliste</div>
+                          <ul className="text-sm text-gray-900 space-y-1">
                             {booking.participantList.map((name, index) => (
                               <li key={index} className="flex items-center gap-2">
                                 <span className="text-gray-400">•</span>
@@ -724,7 +807,110 @@ function AdminBookingsManager() {
                           </ul>
                         </div>
                       )}
-                      <div className="mt-2">
+                    </div>
+
+                    {/* Notes */}
+                    {booking.notes && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                        <div className="text-xs font-medium text-amber-800 mb-1">Notizen</div>
+                        <p className="text-sm text-amber-900 break-words whitespace-pre-wrap">
+                          {booking.notes}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200">
+                      <Link
+                        href={`/bookings/${booking.id}`}
+                        className="px-3 py-2 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-1.5"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        Details
+                      </Link>
+                      
+                      {booking.notes && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedBooking(booking);
+                            setReplyModalOpen(true);
+                          }}
+                          className="px-3 py-2 text-xs bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors flex items-center gap-1.5"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                          </svg>
+                          Antworten
+                        </button>
+                      )}
+                      
+                      {booking.status === "pending" && (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateBookingStatus(booking.id, "confirmed");
+                            }}
+                            className="px-3 py-2 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors flex items-center gap-1.5"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Bestätigen
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateBookingStatus(booking.id, "cancelled");
+                            }}
+                            className="px-3 py-2 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center gap-1.5"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Ablehnen
+                          </button>
+                        </>
+                      )}
+                      
+                      {booking.status === "confirmed" && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateBookingStatus(booking.id, "cancelled");
+                          }}
+                          className="px-3 py-2 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center gap-1.5"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          Stornieren
+                        </button>
+                      )}
+                      
+                      {booking.hasMessages && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedBooking(booking);
+                            setMessagesModalOpen(true);
+                          }}
+                          className="px-3 py-2 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors flex items-center gap-1.5"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                          </svg>
+                          Nachrichten
+                        </button>
+                      )}
+                      
+                      {/* Add Participant */}
+                      <div className="flex-1 min-w-[200px]">
                         {addingParticipant.has(booking.id) ? (
                           <div className="flex items-center gap-2">
                             <input
@@ -739,10 +925,12 @@ function AdminBookingsManager() {
                               onKeyDown={(e) => {
                                 if (e.key === "Enter" && newParticipantName[booking.id]?.trim()) {
                                   e.preventDefault();
+                                  e.stopPropagation();
                                   addParticipant(booking.id, newParticipantName[booking.id]);
                                 }
                                 if (e.key === "Escape") {
                                   e.preventDefault();
+                                  e.stopPropagation();
                                   setNewParticipantName((prev) => {
                                     const newState = { ...prev };
                                     delete newState[booking.id];
@@ -755,8 +943,8 @@ function AdminBookingsManager() {
                                   });
                                 }
                               }}
+                              onClick={(e) => e.stopPropagation()}
                               onBlur={() => {
-                                // Small delay to allow button clicks
                                 setTimeout(() => {
                                   if (newParticipantName[booking.id]?.trim()) {
                                     addParticipant(booking.id, newParticipantName[booking.id]);
@@ -775,19 +963,19 @@ function AdminBookingsManager() {
                                 }, 200);
                               }}
                               autoFocus
-                              placeholder="Name eingeben und Enter drücken..."
-                              className="flex-1 px-3 py-1.5 text-sm border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                              placeholder="Name eingeben..."
+                              className="flex-1 px-3 py-2 text-xs border border-amber-300 rounded focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                             />
                             <div className="animate-spin h-4 w-4 border-2 border-amber-600 border-t-transparent rounded-full"></div>
                           </div>
                         ) : (
                           <button
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setAddingParticipant((prev) => new Set(prev).add(booking.id));
                               setNewParticipantName((prev) => ({ ...prev, [booking.id]: "" }));
                             }}
-                            className="px-3 py-1.5 text-xs bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors flex items-center gap-1.5"
-                            title="Teilnehmer hinzufügen"
+                            className="w-full px-3 py-2 text-xs bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors flex items-center justify-center gap-1.5"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -796,93 +984,25 @@ function AdminBookingsManager() {
                           </button>
                         )}
                       </div>
+                      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteBooking(booking.id);
+                        }}
+                        className="px-3 py-2 text-xs bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors flex items-center gap-1.5"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Löschen
+                      </button>
                     </div>
                   </div>
-                  {booking.notes && (
-                    <div className="mt-3 pt-3 border-t border-gray-200">
-                      <p className="text-sm text-gray-600 break-words">
-                        <span className="font-medium">Notizen:</span> {booking.notes}
-                      </p>
-                    </div>
-                  )}
-                </div>
-                <div className="sm:ml-4 flex flex-col gap-2 w-full sm:w-auto">
-                  <Link
-                    href={`/bookings/${booking.id}`}
-                    className="w-full sm:w-auto px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-1"
-                    title="Details anzeigen"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    Details
-                  </Link>
-                  {booking.notes && (
-                    <button
-                      onClick={() => {
-                        setSelectedBooking(booking);
-                        setReplyModalOpen(true);
-                      }}
-                      className="w-full sm:w-auto px-3 py-1.5 text-xs bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors flex items-center justify-center gap-1"
-                      title="Auf Notiz antworten"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                      </svg>
-                      Antworten
-                    </button>
-                  )}
-                  {booking.status === "pending" && (
-                    <>
-                      <button
-                        onClick={() => updateBookingStatus(booking.id, "confirmed")}
-                        className="w-full sm:w-auto px-3 py-1.5 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                      >
-                        Bestätigen
-                      </button>
-                      <button
-                        onClick={() => updateBookingStatus(booking.id, "cancelled")}
-                        className="w-full sm:w-auto px-3 py-1.5 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                      >
-                        Ablehnen
-                      </button>
-                    </>
-                  )}
-                  {booking.status === "confirmed" && (
-                    <button
-                      onClick={() => updateBookingStatus(booking.id, "cancelled")}
-                      className="w-full sm:w-auto px-3 py-1.5 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                    >
-                      Stornieren
-                    </button>
-                  )}
-                  {booking.hasMessages && (
-                    <button
-                      onClick={() => {
-                        setSelectedBooking(booking);
-                        setMessagesModalOpen(true);
-                      }}
-                      className="w-full sm:w-auto px-3 py-1.5 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors flex items-center justify-center gap-1"
-                      title="Nachrichtenverlauf anzeigen"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                      </svg>
-                      Nachrichten
-                    </button>
-                  )}
-                  <button
-                    onClick={() => deleteBooking(booking.id)}
-                    className="w-full sm:w-auto px-3 py-1.5 text-xs bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors sm:mt-2"
-                    title="Buchung löschen"
-                  >
-                    Löschen
-                  </button>
-                </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
