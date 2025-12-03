@@ -14,6 +14,7 @@ const AdminVouchersManager = lazy(() => import("@/components/AdminVouchersManage
 const AdminCoursesManager = lazy(() => import("@/components/AdminCoursesManager").then(m => ({ default: m.default })));
 const AdminUsersManager = lazy(() => import("@/components/AdminUsersManager").then(m => ({ default: m.default })));
 const AdminNewsletterManager = lazy(() => import("@/components/AdminNewsletterManager").then(m => ({ default: m.default })));
+const AdminCalendarView = lazy(() => import("@/components/AdminCalendarView").then(m => ({ default: m.default })));
 
 interface Course {
   id: string;
@@ -43,7 +44,7 @@ export default function AdminPage() {
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [showApplyToAllModal, setShowApplyToAllModal] = useState(false);
   const [applyingToAll, setApplyingToAll] = useState(false);
-  const [activeTab, setActiveTab] = useState<"dashboard" | "bookings" | "courses" | "vouchers" | "courseManagement" | "users" | "newsletter">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "bookings" | "courses" | "vouchers" | "courseManagement" | "users" | "newsletter" | "calendar">("dashboard");
   const supabase = createClient();
 
   useEffect(() => {
@@ -348,6 +349,20 @@ export default function AdminPage() {
                 <span className="hidden sm:inline">Newsletter</span>
                 <span className="sm:hidden">News.</span>
               </button>
+              <button
+                onClick={() => setActiveTab("calendar")}
+                className={`px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors border-b-2 flex items-center gap-1 sm:gap-2 whitespace-nowrap ${
+                  activeTab === "calendar"
+                    ? "border-amber-600 text-amber-600"
+                    : "border-transparent text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="hidden sm:inline">Kalender</span>
+                <span className="sm:hidden">Kal.</span>
+              </button>
             </div>
           </div>
         </div>
@@ -431,6 +446,32 @@ export default function AdminPage() {
                 </div>
               }>
                 <AdminNewsletterManager />
+              </Suspense>
+            </div>
+          )}
+
+          {/* Calendar Tab */}
+          {activeTab === "calendar" && (
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
+              <Suspense fallback={
+                <div className="text-center py-8">
+                  <div className="animate-spin h-8 w-8 border-2 border-amber-600 border-t-transparent rounded-full mx-auto"></div>
+                </div>
+              }>
+                <AdminCalendarView />
+              </Suspense>
+            </div>
+          )}
+
+          {/* Cal.com Import Tab */}
+          {activeTab === "calCom" && (
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
+              <Suspense fallback={
+                <div className="text-center py-8">
+                  <div className="animate-spin h-8 w-8 border-2 border-amber-600 border-t-transparent rounded-full mx-auto"></div>
+                </div>
+              }>
+                <AdminCalComImport />
               </Suspense>
             </div>
           )}
