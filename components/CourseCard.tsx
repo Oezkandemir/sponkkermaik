@@ -89,6 +89,8 @@ export default function CourseCard({ workshop }: CourseCardProps) {
   const [customerEmail, setCustomerEmail] = useState("");
   const [createAccount, setCreateAccount] = useState(false);
   const [password, setPassword] = useState("");
+  const [participants, setParticipants] = useState(1);
+  const [participantNames, setParticipantNames] = useState<string[]>([]);
   const [booking, setBooking] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   
@@ -459,10 +461,46 @@ export default function CourseCard({ workshop }: CourseCardProps) {
     setMessage(null);
     
     try {
-      if (selectedSlot.availablePlaces < 1) {
-        setMessage({ type: "error", text: tBookCourse("errors.noCapacity") });
+      // Validate participants count
+      if (participants < 1) {
+        setMessage({ type: "error", text: "Bitte wählen Sie mindestens 1 Teilnehmer" });
         setBooking(false);
         return;
+      }
+      
+      if (selectedSlot.availablePlaces < participants) {
+        setMessage({ 
+          type: "error", 
+          text: tBookCourse("errors.noCapacity") + ` (${selectedSlot.availablePlaces} Plätze verfügbar, ${participants} gewählt)` 
+        });
+        setBooking(false);
+        return;
+      }
+      
+      if (participants > selectedSlot.availablePlaces) {
+        setMessage({ 
+          type: "error", 
+          text: `Nur ${selectedSlot.availablePlaces} Plätze verfügbar. Bitte reduzieren Sie die Anzahl der Teilnehmer.` 
+        });
+        setBooking(false);
+        return;
+      }
+      
+      // Validate participant names if there are additional participants
+      if (participants > 1) {
+        const missingNames = participantNames
+          .slice(0, participants - 1)
+          .map((name, index) => ({ name: name.trim(), index: index + 2 }))
+          .filter((item) => !item.name);
+        
+        if (missingNames.length > 0) {
+          setMessage({ 
+            type: "error", 
+            text: `Bitte geben Sie die Namen aller Teilnehmer ein. Fehlend: Teilnehmer ${missingNames.map(m => m.index).join(", ")}` 
+          });
+          setBooking(false);
+          return;
+        }
       }
       
       let userId = user?.id || null;
@@ -518,6 +556,20 @@ export default function CourseCard({ workshop }: CourseCardProps) {
       const day = String(bookingDate.getDate()).padStart(2, '0');
       const bookingDateString = `${year}-${month}-${day}`;
       
+      // Build notes with participant names if there are additional participants
+      let finalNotes = notes || "";
+      if (participants > 1 && participantNames.length > 0) {
+        const participantNamesList = participantNames
+          .slice(0, participants - 1)
+          .map((name, index) => `Teilnehmer ${index + 2}: ${name.trim()}`)
+          .join("\n");
+        if (finalNotes) {
+          finalNotes = `${finalNotes}\n\nTeilnehmer:\n${participantNamesList}`;
+        } else {
+          finalNotes = `Teilnehmer:\n${participantNamesList}`;
+        }
+      }
+      
       const { data, error } = await supabase
         .from("bookings")
         .insert({
@@ -527,8 +579,8 @@ export default function CourseCard({ workshop }: CourseCardProps) {
           start_time: selectedSlot.timeSlot.start_time,
           end_time: selectedSlot.timeSlot.end_time,
           status: "confirmed",
-          notes: notes || null,
-          participants: 1,
+          notes: finalNotes || null,
+          participants: participants, // Use selected number of participants
           customer_name: customerName.trim(),
           customer_email: customerEmail.trim(),
         })
@@ -751,6 +803,8 @@ export default function CourseCard({ workshop }: CourseCardProps) {
               setNotes("");
               setCustomerName("");
               setCustomerEmail("");
+              setParticipants(1);
+              setParticipantNames([]);
               setMessage(null);
             }
           }}
@@ -772,6 +826,8 @@ export default function CourseCard({ workshop }: CourseCardProps) {
                   setCustomerEmail("");
                   setCreateAccount(false);
                   setPassword("");
+                  setParticipants(1);
+                  setParticipantNames([]);
                   setMessage(null);
                 }}
                 className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 p-2 -mr-2"
@@ -1006,6 +1062,100 @@ export default function CourseCard({ workshop }: CourseCardProps) {
                         placeholder={tBookCourse("customerEmailPlaceholder")}
                       />
                     </div>
+
+                    {/* Participants Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Anzahl der Teilnehmer <span className="text-red-500">*</span>
+                      </label>
+                      <div className="flex items-center gap-4">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (participants > 1) {
+                              setParticipants(participants - 1);
+                              // Remove last participant name when reducing count
+                              setParticipantNames((prev) => prev.slice(0, participants - 2));
+                            }
+                          }}
+                          disabled={participants <= 1}
+                          className="w-10 h-10 rounded-lg border-2 border-gray-300 flex items-center justify-center text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          aria-label="Teilnehmer reduzieren"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                          </svg>
+                        </button>
+                        <div className="flex-1 text-center">
+                          <span className="text-2xl font-bold text-gray-900">{participants}</span>
+                          <span className="text-sm text-gray-600 ml-2">
+                            {participants === 1 ? "Teilnehmer" : "Teilnehmer"}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const maxParticipants = selectedSlot?.availablePlaces || 1;
+                            if (participants < maxParticipants) {
+                              setParticipants(participants + 1);
+                              // Add empty name field for new participant
+                              setParticipantNames((prev) => [...prev, ""]);
+                            }
+                          }}
+                          disabled={participants >= (selectedSlot?.availablePlaces || 1)}
+                          className="w-10 h-10 rounded-lg border-2 border-gray-300 flex items-center justify-center text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          aria-label="Teilnehmer hinzufügen"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        {selectedSlot && (
+                          <>
+                            {selectedSlot.availablePlaces > 0 ? (
+                              <>
+                                {selectedSlot.availablePlaces} {selectedSlot.availablePlaces === 1 ? "Platz" : "Plätze"} verfügbar
+                                {participants > selectedSlot.availablePlaces && (
+                                  <span className="text-red-600 ml-2">⚠️ Nicht genug Plätze verfügbar</span>
+                                )}
+                              </>
+                            ) : (
+                              <span className="text-red-600">Keine Plätze verfügbar</span>
+                            )}
+                          </>
+                        )}
+                      </p>
+                      
+                      {/* Participant Name Fields - Show for additional participants (2nd, 3rd, etc.) */}
+                      {participants > 1 && (
+                        <div className="mt-4 space-y-3">
+                          <p className="text-sm font-medium text-gray-700 mb-2">
+                            Namen der zusätzlichen Teilnehmer:
+                          </p>
+                          {Array.from({ length: participants - 1 }).map((_, index) => (
+                            <div key={index}>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Teilnehmer {index + 2} <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                value={participantNames[index] || ""}
+                                onChange={(e) => {
+                                  const newNames = [...participantNames];
+                                  newNames[index] = e.target.value;
+                                  setParticipantNames(newNames);
+                                }}
+                                required
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                placeholder={`Name des ${index + 2}. Teilnehmers`}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                     
                     {/* Not logged in notice */}
                     {!user && (
@@ -1105,6 +1255,8 @@ export default function CourseCard({ workshop }: CourseCardProps) {
                         setNotes("");
                         setCustomerName("");
                         setCustomerEmail("");
+                        setParticipants(1);
+                        setParticipantNames([]);
                         setMessage(null);
                       }}
                       className="flex-1 px-4 py-3 text-sm sm:text-base border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
@@ -1113,7 +1265,15 @@ export default function CourseCard({ workshop }: CourseCardProps) {
                     </button>
                     <button
                       onClick={handleBooking}
-                      disabled={booking || !customerName.trim() || !customerEmail.trim() || (createAccount && !user && (!password.trim() || password.length < 6))}
+                      disabled={
+                        booking || 
+                        !customerName.trim() || 
+                        !customerEmail.trim() || 
+                        participants < 1 ||
+                        (selectedSlot && participants > selectedSlot.availablePlaces) ||
+                        (createAccount && !user && (!password.trim() || password.length < 6)) ||
+                        (participants > 1 && participantNames.slice(0, participants - 1).some(name => !name.trim()))
+                      }
                       className="flex-1 px-4 py-3 text-sm sm:text-base bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium"
                     >
                       {booking ? (

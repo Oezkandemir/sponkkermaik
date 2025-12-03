@@ -213,22 +213,23 @@ export default function AdminBookingsManager() {
       )}
 
       {/* Filter Tabs */}
-      <div className="mb-6 border-b border-gray-200">
-        <div className="flex gap-1">
+      <div className="mb-4 sm:mb-6 border-b border-gray-200 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-1 min-w-max sm:min-w-0">
           {filters.map((filter) => (
             <button
               key={filter.id}
               onClick={() => setActiveFilter(filter.id)}
-              className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+              className={`px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors border-b-2 whitespace-nowrap ${
                 activeFilter === filter.id
                   ? "border-amber-600 text-amber-600 bg-amber-50"
                   : "border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300"
               }`}
             >
-              <span className="mr-2">{filter.icon}</span>
-              {filter.label}
+              <span className="mr-1 sm:mr-2">{filter.icon}</span>
+              <span className="hidden sm:inline">{filter.label}</span>
+              <span className="sm:hidden">{filter.label.split(' ')[0]}</span>
               {filter.id !== "recurring" && (
-                <span className="ml-2 px-2 py-0.5 text-xs bg-gray-200 rounded-full">
+                <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 text-xs bg-gray-200 rounded-full">
                   {filter.id === "upcoming"
                     ? bookings.filter(
                         (b) =>
@@ -265,14 +266,14 @@ export default function AdminBookingsManager() {
           {filteredBookings.map((booking) => (
             <div
               key={booking.id}
-              className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+              className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow"
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <h3 className="text-lg font-semibold text-gray-900">{booking.course_title}</h3>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 break-words">{booking.course_title}</h3>
                     <span
-                      className={`px-2 py-1 text-xs font-medium rounded ${
+                      className={`px-2 py-1 text-xs font-medium rounded whitespace-nowrap ${
                         booking.status === "confirmed"
                           ? "bg-green-100 text-green-700"
                           : booking.status === "pending"
@@ -291,7 +292,7 @@ export default function AdminBookingsManager() {
                         : "Abgeschlossen"}
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm text-gray-600">
                     <div>
                       <span className="font-medium">Datum:</span>{" "}
                       {new Date(booking.booking_date).toLocaleDateString("de-DE", {
@@ -316,24 +317,24 @@ export default function AdminBookingsManager() {
                   </div>
                   {booking.notes && (
                     <div className="mt-3 pt-3 border-t border-gray-200">
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 break-words">
                         <span className="font-medium">Notizen:</span> {booking.notes}
                       </p>
                     </div>
                   )}
                 </div>
-                <div className="ml-4 flex flex-col gap-2">
+                <div className="sm:ml-4 flex flex-col gap-2 w-full sm:w-auto">
                   {booking.status === "pending" && (
                     <>
                       <button
                         onClick={() => updateBookingStatus(booking.id, "confirmed")}
-                        className="px-3 py-1.5 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                        className="w-full sm:w-auto px-3 py-1.5 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
                       >
                         Bestätigen
                       </button>
                       <button
                         onClick={() => updateBookingStatus(booking.id, "cancelled")}
-                        className="px-3 py-1.5 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                        className="w-full sm:w-auto px-3 py-1.5 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
                       >
                         Ablehnen
                       </button>
@@ -342,14 +343,14 @@ export default function AdminBookingsManager() {
                   {booking.status === "confirmed" && (
                     <button
                       onClick={() => updateBookingStatus(booking.id, "cancelled")}
-                      className="px-3 py-1.5 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                      className="w-full sm:w-auto px-3 py-1.5 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
                     >
                       Stornieren
                     </button>
                   )}
                   <button
                     onClick={() => deleteBooking(booking.id)}
-                    className="px-3 py-1.5 text-xs bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors mt-2"
+                    className="w-full sm:w-auto px-3 py-1.5 text-xs bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors sm:mt-2"
                     title="Buchung löschen"
                   >
                     Löschen

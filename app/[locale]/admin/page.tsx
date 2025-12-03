@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import CourseScheduleManager from "@/components/CourseScheduleManager";
 import AdminBookingsManager from "@/components/AdminBookingsManager";
+import AdminVouchersManager from "@/components/AdminVouchersManager";
 
 interface Course {
   id: string;
@@ -36,7 +37,7 @@ export default function AdminPage() {
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [showApplyToAllModal, setShowApplyToAllModal] = useState(false);
   const [applyingToAll, setApplyingToAll] = useState(false);
-  const [activeTab, setActiveTab] = useState<"bookings" | "courses">("bookings");
+  const [activeTab, setActiveTab] = useState<"bookings" | "courses" | "vouchers">("bookings");
   const supabase = createClient();
 
   useEffect(() => {
@@ -229,56 +230,81 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
           {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <div className="mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
               Admin Dashboard
             </h1>
-            <p className="text-gray-600">Verwalten Sie Buchungen und Kurse</p>
+            <p className="text-sm sm:text-base text-gray-600">Verwalten Sie Buchungen und Kurse</p>
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex gap-1 border-b border-gray-200">
-            <button
-              onClick={() => setActiveTab("bookings")}
-              className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 ${
-                activeTab === "bookings"
-                  ? "border-amber-600 text-amber-600"
-                  : "border-transparent text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              Buchungen
-            </button>
-            <button
-              onClick={() => setActiveTab("courses")}
-              className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 flex items-center gap-2 ${
-                activeTab === "courses"
-                  ? "border-amber-600 text-amber-600"
-                  : "border-transparent text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-              Kurse
-            </button>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="flex gap-1 border-b border-gray-200 min-w-max sm:min-w-0">
+              <button
+                onClick={() => setActiveTab("bookings")}
+                className={`px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors border-b-2 flex items-center gap-1 sm:gap-2 whitespace-nowrap ${
+                  activeTab === "bookings"
+                    ? "border-amber-600 text-amber-600"
+                    : "border-transparent text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="hidden sm:inline">Buchungen</span>
+                <span className="sm:hidden">Buch.</span>
+              </button>
+              <button
+                onClick={() => setActiveTab("vouchers")}
+                className={`px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors border-b-2 flex items-center gap-1 sm:gap-2 whitespace-nowrap ${
+                  activeTab === "vouchers"
+                    ? "border-amber-600 text-amber-600"
+                    : "border-transparent text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                </svg>
+                <span className="hidden sm:inline">Gutscheine</span>
+                <span className="sm:hidden">Gut.</span>
+              </button>
+              <button
+                onClick={() => setActiveTab("courses")}
+                className={`px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors border-b-2 flex items-center gap-1 sm:gap-2 whitespace-nowrap ${
+                  activeTab === "courses"
+                    ? "border-amber-600 text-amber-600"
+                    : "border-transparent text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                Kurse
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         <div className="max-w-7xl mx-auto">
           {/* Bookings Tab */}
           {activeTab === "bookings" && (
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Buchungen verwalten</h2>
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Buchungen verwalten</h2>
               <AdminBookingsManager />
+            </div>
+          )}
+
+          {/* Vouchers Tab */}
+          {activeTab === "vouchers" && (
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">Gutscheine verwalten</h2>
+              <AdminVouchersManager />
             </div>
           )}
 
@@ -286,11 +312,11 @@ export default function AdminPage() {
           {activeTab === "courses" && (
             <>
               {/* Course Selection */}
-              <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
                   {t("selectCourse")}
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {courses.map((course) => (
                     <button
                       key={course.id}
@@ -328,14 +354,14 @@ export default function AdminPage() {
 
               {/* Course Schedule Manager */}
               {selectedCourseId && (
-                <div className="bg-white rounded-xl shadow-lg p-8">
-                  <div className="mb-6 pb-4 border-b border-gray-200">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h2 className="text-2xl font-bold text-gray-900">
+                <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
+                  <div className="mb-4 sm:mb-6 pb-4 border-b border-gray-200">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">
                           {courses.find((c) => c.id === selectedCourseId)?.title}
                         </h2>
-                        <p className="text-gray-600 mt-1">
+                        <p className="text-sm sm:text-base text-gray-600 mt-1 break-words">
                           {courses.find((c) => c.id === selectedCourseId)?.description}
                         </p>
                       </div>
@@ -343,7 +369,7 @@ export default function AdminPage() {
                         <button
                           onClick={() => setShowApplyToAllModal(true)}
                           disabled={applyingToAll}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
+                          className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap text-sm sm:text-base"
                           title={t("applyToAllCourses")}
                         >
                           <svg
@@ -379,13 +405,13 @@ export default function AdminPage() {
           onClick={() => setShowApplyToAllModal(false)}
         >
           <div 
-            className="bg-white rounded-xl p-6 max-w-md w-full mx-4"
+            className="bg-white rounded-xl p-4 sm:p-6 max-w-md w-full mx-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
               {t("applyToAllCourses")}
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-sm sm:text-base text-gray-600 mb-4">
               {t("applyToAllCoursesConfirm", {
                 courseName: courses.find((c) => c.id === selectedCourseId)?.title || "",
                 courseCount: courses.length - 1

@@ -561,16 +561,16 @@ export default function CourseScheduleManager({ courseId }: { courseId: string }
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-xl font-bold text-gray-900">{t("title")}</h3>
-          <p className="text-gray-600 mt-1">{t("subtitle")}</p>
+    <div className="space-y-4 sm:space-y-6 overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="min-w-0">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900">{t("title")}</h3>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">{t("subtitle")}</p>
         </div>
         <button
           onClick={saveSchedules}
           disabled={saving}
-          className="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
         >
           {saving ? t("saving") : t("save")}
         </button>
@@ -588,15 +588,15 @@ export default function CourseScheduleManager({ courseId }: { courseId: string }
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-4 overflow-x-hidden">
         {schedules.map((schedule) => (
           <div
             key={schedule.dayOfWeek}
-            className="bg-gray-900 rounded-lg p-4 border border-gray-700"
+            className="bg-gray-900 rounded-lg p-3 sm:p-4 border border-gray-700"
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-4 flex-wrap">
-                <span className="text-white font-medium min-w-[120px]">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+              <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+                <span className="text-white font-medium min-w-0 sm:min-w-[120px]">
                   {schedule.dayName}
                 </span>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -641,7 +641,7 @@ export default function CourseScheduleManager({ courseId }: { courseId: string }
                 {schedule.timeSlots.map((slot, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-2 bg-gray-800 rounded-lg p-3"
+                    className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-gray-800 rounded-lg p-3"
                   >
                     <input
                       type="time"
@@ -670,7 +670,7 @@ export default function CourseScheduleManager({ courseId }: { courseId: string }
                       }
                       className="bg-gray-700 text-white rounded px-3 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
                     />
-                    <div className="flex items-center gap-2 ml-auto">
+                    <div className="flex items-center gap-2 sm:ml-auto w-full sm:w-auto justify-end">
                       <button
                         onClick={() => addTimeSlot(schedule.dayOfWeek)}
                         className="text-white hover:text-amber-400 transition-colors"
@@ -763,10 +763,10 @@ export default function CourseScheduleManager({ courseId }: { courseId: string }
 
         {/* First Sunday of Month Schedule - Only for keramik-bemalen-sonntag */}
         {courseId === "keramik-bemalen-sonntag" && (
-          <div className="bg-purple-900 rounded-lg p-4 border-2 border-purple-600 mt-6">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-4">
-                <span className="text-white font-medium min-w-[200px]">
+          <div className="bg-purple-900 rounded-lg p-3 sm:p-4 border-2 border-purple-600 mt-4 sm:mt-6 overflow-x-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+              <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+                <span className="text-white font-medium min-w-0 sm:min-w-[200px]">
                   {t("firstSundayOfMonth")}
                 </span>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -786,7 +786,7 @@ export default function CourseScheduleManager({ courseId }: { courseId: string }
                 {firstSundaySchedule.timeSlots.map((slot, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-2 bg-purple-800 rounded-lg p-3"
+                    className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-purple-800 rounded-lg p-3"
                   >
                     <input
                       type="time"
@@ -805,7 +805,7 @@ export default function CourseScheduleManager({ courseId }: { courseId: string }
                       }
                       className="bg-gray-700 text-white rounded px-3 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
                     />
-                    <div className="flex items-center gap-2 ml-auto">
+                    <div className="flex items-center gap-2 sm:ml-auto w-full sm:w-auto justify-end">
                       <button
                         onClick={addFirstSundayTimeSlot}
                         className="text-white hover:text-purple-300 transition-colors"
@@ -871,7 +871,7 @@ export default function CourseScheduleManager({ courseId }: { courseId: string }
           }}
         >
           <div 
-            className="bg-white rounded-xl p-6 max-w-md w-full mx-4"
+            className="bg-white rounded-xl p-4 sm:p-6 max-w-md w-full mx-4"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-xl font-bold text-gray-900 mb-4">
