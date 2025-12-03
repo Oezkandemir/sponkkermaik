@@ -1,7 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
-import { workshops } from "@/lib/data";
-import CourseCard from "@/components/CourseCard";
+import FeaturedWorkshops from "@/components/FeaturedWorkshops";
 import TrustIndexWidget from "@/components/TrustIndexWidget";
 import HeroSection from "@/components/HeroSection";
 import { Metadata } from "next";
@@ -59,7 +58,6 @@ export default async function Home({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
-  const featuredWorkshops = workshops.filter((w) => w.featured);
 
   return (
     <div className="bg-gray-50" style={{ marginTop: '0', paddingTop: '0' }}>
@@ -154,9 +152,7 @@ export default async function Home({
             {t("home.popularWorkshops")}
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 max-w-5xl mx-auto">
-            {featuredWorkshops.map((workshop) => (
-              <CourseCard key={workshop.id} workshop={workshop} />
-            ))}
+            <FeaturedWorkshops />
             
             {/* Wichtige Termine Card */}
             <div className="bg-gradient-to-br from-amber-50 via-white to-amber-50 rounded-xl shadow-md overflow-hidden border-2 border-amber-200 flex flex-col h-full">

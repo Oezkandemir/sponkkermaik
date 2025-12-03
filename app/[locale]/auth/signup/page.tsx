@@ -92,11 +92,17 @@ export default function SignUpPage() {
 
       const redirectUrl = getRedirectUrl();
 
+      // Reason: Extract email prefix (part before @) to use as default name
+      const emailPrefix = email.split("@")[0] || email;
+
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: redirectUrl,
+          data: {
+            full_name: emailPrefix,
+          },
         },
       });
 

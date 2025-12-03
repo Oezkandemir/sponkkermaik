@@ -12,21 +12,6 @@ interface CourseCardProps {
   workshop: Workshop;
 }
 
-/**
- * Mapping-Funktion: Workshop-ID zu Übersetzungs-Key
- */
-function getWorkshopTranslationKey(workshopId: string): string {
-  const mapping: Record<string, string> = {
-    "workshop-nur-keramik-bemalen-glasieren": "workshop1",
-    "topferscheibe-testen": "workshop2",
-    "aufbau-workshop-1": "workshop3",
-    "keramik-bemalen-sonntag": "workshop4",
-    "aufbau-workshop-2": "workshop5",
-    "einsteiger-kurse-topferscheibe": "workshop6",
-    "gruppen-events-workshops": "workshop7",
-  };
-  return mapping[workshopId] || "workshop1";
-}
 
 const atelierImages = [
   "IMG_5264-1152x1536.webp",
@@ -69,7 +54,6 @@ interface AvailableSlot {
 export default function CourseCard({ workshop }: CourseCardProps) {
   const t = useTranslations("courseCard");
   const tBookCourse = useTranslations("bookCourse");
-  const tWorkshops = useTranslations("workshopsData");
   const router = useRouter();
   const supabase = createClient();
   
@@ -94,17 +78,14 @@ export default function CourseCard({ workshop }: CourseCardProps) {
   const [booking, setBooking] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   
-  // Workshop-Übersetzungs-Key basierend auf ID
-  const workshopKey = getWorkshopTranslationKey(workshop.id);
-  
-  // Übersetzte Workshop-Daten
-  const translatedTitle = tWorkshops(`${workshopKey}.title`);
-  const translatedDescription = tWorkshops(`${workshopKey}.description`);
-  const translatedDuration = tWorkshops(`${workshopKey}.duration`);
-  const translatedPrice = tWorkshops(`${workshopKey}.price`);
-  const translatedBadge = workshop.badgeText ? tWorkshops(`${workshopKey}.badge` as any) : undefined;
-  const translatedDay = workshop.day ? tWorkshops(`${workshopKey}.day` as any) : undefined;
-  const hasBadgeText = translatedBadge !== undefined && translatedBadge !== "";
+  // Use data directly from workshop prop (which already contains merged database + static data)
+  const workshopTitle = workshop.title;
+  const workshopDescription = workshop.description;
+  const workshopDuration = workshop.duration;
+  const workshopPrice = workshop.price;
+  const workshopDay = workshop.day;
+  const workshopBadgeText = workshop.badgeText;
+  const hasBadgeText = workshopBadgeText !== undefined && workshopBadgeText !== "";
   const isFirstWorkshop = workshop.id === "workshop-nur-keramik-bemalen-glasieren";
   const useObjectContain = workshop.id === "workshop-nur-keramik-bemalen-glasieren" || workshop.id === "aufbau-workshop-2" || workshop.id === "einsteiger-kurse-topferscheibe" || workshop.id === "gruppen-events-workshops";
   
@@ -508,12 +489,15 @@ export default function CourseCard({ workshop }: CourseCardProps) {
       // Create account if requested and user is not logged in
       if (createAccount && !user) {
         try {
+          // Reason: Use email prefix as fallback name if customerName is empty
+          const nameToUse = customerName.trim() || customerEmail.split("@")[0] || customerEmail;
+          
           const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
             email: customerEmail.trim(),
             password: password.trim(),
             options: {
               data: {
-                full_name: customerName.trim(),
+                full_name: nameToUse,
               },
             },
           });
@@ -606,7 +590,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
             bookingId: data.id,
             customerName: customerName.trim(),
             customerEmail: customerEmail.trim(),
-            courseTitle: translatedTitle,
+            courseTitle: workshopTitle,
             bookingDate: selectedSlot.formattedDate,
             bookingTime: selectedSlot.formattedTime,
           }),
@@ -653,11 +637,11 @@ export default function CourseCard({ workshop }: CourseCardProps) {
         : "border-gray-100"
     }`}>
       {/* Badge für "Best preis garantie" */}
-      {hasBadgeText && translatedBadge && (
+      {hasBadgeText && workshopBadgeText && (
         <div className="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 text-white text-center py-4 px-6 font-bold text-lg sm:text-xl md:text-2xl shadow-lg border-b-4 border-amber-700">
           <div className="flex items-center justify-center gap-2 sm:gap-3">
             <span className="text-2xl sm:text-3xl">⭐</span>
-            <span className="uppercase tracking-wide">{translatedBadge}</span>
+            <span className="uppercase tracking-wide">{workshopBadgeText}</span>
             <span className="text-2xl sm:text-3xl">⭐</span>
           </div>
         </div>
@@ -674,7 +658,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
             }`}>
               <Image
                 src={image}
-                alt={`${translatedTitle} - Bild ${index + 1}`}
+                alt={`${workshopTitle} - Bild ${index + 1}`}
                 fill
                 className={useObjectContain ? "object-contain" : "object-cover"}
                 sizes="(max-width: 640px) 33vw, 16vw"
@@ -686,7 +670,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
       
       <div className="p-4 sm:p-6 flex-grow flex flex-col">
         <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
-          {translatedTitle}
+          {workshopTitle}
         </h3>
         
         {/* Beschreibung mit besserer Formatierung */}
@@ -705,7 +689,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
                 <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                {translatedDescription}
+                {workshopDescription}
               </p>
             </div>
           </div>
@@ -729,11 +713,11 @@ export default function CourseCard({ workshop }: CourseCardProps) {
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">{t("duration")}</p>
-              <p className="text-sm sm:text-base font-semibold text-gray-900">{translatedDuration}</p>
+              <p className="text-sm sm:text-base font-semibold text-gray-900">{workshopDuration}</p>
             </div>
           </div>
           
-          {translatedDay && (
+          {workshopDay && (
             <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-200">
               <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                 <svg
@@ -750,7 +734,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
               </div>
               <div>
                 <p className="text-xs text-gray-500 font-medium">{t("day")}</p>
-                <p className="text-sm sm:text-base font-semibold text-gray-900">{translatedDay}</p>
+                <p className="text-sm sm:text-base font-semibold text-gray-900">{workshopDay}</p>
               </div>
             </div>
           )}
@@ -771,7 +755,7 @@ export default function CourseCard({ workshop }: CourseCardProps) {
             </div>
             <div>
               <p className="text-xs text-gray-600 font-medium">{t("price")}</p>
-              <p className="text-sm sm:text-base font-bold text-amber-700">{translatedPrice}</p>
+              <p className="text-sm sm:text-base font-bold text-amber-700">{workshopPrice}</p>
             </div>
           </div>
         </div>
@@ -813,8 +797,8 @@ export default function CourseCard({ workshop }: CourseCardProps) {
             {/* Modal Header */}
             <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between">
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{translatedTitle}</h2>
-                <p className="text-sm text-gray-600 mt-1">{translatedPrice}</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">{workshopTitle}</h2>
+                <p className="text-sm text-gray-600 mt-1">{workshopPrice}</p>
               </div>
               <button
                 onClick={() => {

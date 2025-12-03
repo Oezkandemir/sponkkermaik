@@ -806,12 +806,15 @@ export default function BookCoursePage() {
       // Create account if requested and user is not logged in
       if (createAccount && !user) {
         try {
+          // Reason: Use email prefix as fallback name if customerName is empty
+          const nameToUse = customerName.trim() || customerEmail.split("@")[0] || customerEmail;
+          
           const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
             email: customerEmail.trim(),
             password: password.trim(),
             options: {
               data: {
-                full_name: customerName.trim(),
+                full_name: nameToUse,
               },
             },
           });

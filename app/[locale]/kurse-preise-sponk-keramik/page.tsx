@@ -1,6 +1,6 @@
 "use client";
 
-import { workshops } from "@/lib/data";
+import { workshops as staticWorkshops, type Workshop } from "@/lib/data";
 import CourseCard from "@/components/CourseCard";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import enMessages from "@/messages/en.json";
+import { createClient } from "@/lib/supabase/client";
 
 // Atelier Bilder für Header
 const atelierImages = [
@@ -31,9 +32,12 @@ const atelierImages = [
  */
 export default function WorkshopsPage() {
   const [randomHeaderImage, setRandomHeaderImage] = useState<string>("");
+  const [workshops, setWorkshops] = useState<Workshop[]>(staticWorkshops);
+  const [loading, setLoading] = useState(true);
   const t = useTranslations("workshops");
   const params = useParams();
   const currentLocale = (params.locale as string) || "de";
+  const supabase = createClient();
 
   // Setze zufälliges Bild nach dem Mount (verhindert Hydration Mismatch)
   useEffect(() => {
@@ -41,6 +45,68 @@ export default function WorkshopsPage() {
       atelierImages[Math.floor(Math.random() * atelierImages.length)]
     );
   }, []);
+
+  // Load courses from database and merge with static data
+  useEffect(() => {
+    loadCoursesFromDatabase();
+  }, []);
+
+  /**
+   * Loads courses from database and merges with static workshop data
+   */
+  const loadCoursesFromDatabase = async () => {
+    try {
+      setLoading(true);
+      const { data: courses, error } = await supabase
+        .from("courses")
+        .select("*")
+        .eq("is_active", true)
+        .order("title");
+
+      if (error) {
+        console.error("Error loading courses:", error);
+        // Fallback to static workshops if database fails
+        setWorkshops(staticWorkshops);
+        return;
+      }
+
+      // Merge database courses with static workshop data
+      const mergedWorkshops: Workshop[] = (courses || []).map((course) => {
+        // Find matching static workshop by ID
+        const staticWorkshop = staticWorkshops.find((w) => w.id === course.id);
+        
+        // Use database data for title, description, duration, price, day
+        // Use static data for images, badgeText, featured, etc.
+        return {
+          id: course.id,
+          title: course.title,
+          description: course.description,
+          duration: course.duration,
+          price: course.price,
+          day: course.day || staticWorkshop?.day,
+          images: staticWorkshop?.images,
+          badgeText: staticWorkshop?.badgeText,
+          featured: staticWorkshop?.featured,
+          topOffer: staticWorkshop?.topOffer,
+        };
+      });
+
+      // Add static workshops that don't exist in database (for backwards compatibility)
+      staticWorkshops.forEach((staticWorkshop) => {
+        if (!mergedWorkshops.find((w) => w.id === staticWorkshop.id)) {
+          mergedWorkshops.push(staticWorkshop);
+        }
+      });
+
+      setWorkshops(mergedWorkshops);
+    } catch (err) {
+      console.error("Error loading courses:", err);
+      // Fallback to static workshops on error
+      setWorkshops(staticWorkshops);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-gradient-to-br from-gray-50 via-white to-amber-50 min-h-screen">
@@ -115,11 +181,23 @@ export default function WorkshopsPage() {
           </div>
 
           {/* Alle Workshops Grid - Mobile-first */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 mb-8 sm:mb-12">
-            {workshops.map((workshop) => (
-              <CourseCard key={workshop.id} workshop={workshop} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 mb-8 sm:mb-12">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-white rounded-xl shadow-md p-6 animate-pulse">
+                  <div className="h-48 bg-gray-200 rounded-lg mb-4"></div>
+                  <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 mb-8 sm:mb-12">
+              {workshops.map((workshop) => (
+                <CourseCard key={workshop.id} workshop={workshop} />
+              ))}
+            </div>
+          )}
 
           {/* Buchungsinformationen - Mobile optimiert */}
           <div className="bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 mb-6 sm:mb-8">

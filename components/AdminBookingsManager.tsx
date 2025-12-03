@@ -45,10 +45,35 @@ export default function AdminBookingsManager() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [addingParticipant, setAddingParticipant] = useState<Set<string>>(new Set());
   const [newParticipantName, setNewParticipantName] = useState<Record<string, string>>({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCourseFilter, setSelectedCourseFilter] = useState<string>("all");
+  const [dateRangeStart, setDateRangeStart] = useState("");
+  const [dateRangeEnd, setDateRangeEnd] = useState("");
+  const [availableCourses, setAvailableCourses] = useState<Array<{ id: string; title: string }>>([]);
+  const [selectedBookings, setSelectedBookings] = useState<Set<string>>(new Set());
+  const [bulkActionMode, setBulkActionMode] = useState(false);
 
   useEffect(() => {
     loadBookings();
+    loadCourses();
   }, []);
+
+  /**
+   * Loads all available courses for filtering
+   */
+  const loadCourses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("courses")
+        .select("id, title")
+        .order("title");
+
+      if (error) throw error;
+      setAvailableCourses(data || []);
+    } catch (err) {
+      console.error("Error loading courses:", err);
+    }
+  };
 
   /**
    * Loads all bookings from database
@@ -231,6 +256,84 @@ export default function AdminBookingsManager() {
   };
 
   /**
+   * Toggles booking selection for bulk actions
+   */
+  const toggleBookingSelection = (bookingId: string) => {
+    setSelectedBookings((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(bookingId)) {
+        newSet.delete(bookingId);
+      } else {
+        newSet.add(bookingId);
+      }
+      return newSet;
+    });
+  };
+
+  /**
+   * Selects all filtered bookings
+   */
+  const selectAllFiltered = () => {
+    const filtered = getFilteredBookings();
+    setSelectedBookings(new Set(filtered.map((b) => b.id)));
+  };
+
+  /**
+   * Deselects all bookings
+   */
+  const deselectAll = () => {
+    setSelectedBookings(new Set());
+  };
+
+  /**
+   * Handles bulk confirm action
+   */
+  const handleBulkConfirm = async () => {
+    if (selectedBookings.size === 0) return;
+
+    if (!confirm(`Möchten Sie wirklich ${selectedBookings.size} Buchung(en) bestätigen?`)) {
+      return;
+    }
+
+    try {
+      const bookingIds = Array.from(selectedBookings);
+      for (const bookingId of bookingIds) {
+        await updateBookingStatus(bookingId, "confirmed");
+      }
+      setSelectedBookings(new Set());
+      setBulkActionMode(false);
+      setMessage({ type: "success", text: `${bookingIds.length} Buchung(en) erfolgreich bestätigt` });
+    } catch (err) {
+      console.error("Error in bulk confirm:", err);
+      setMessage({ type: "error", text: "Fehler beim Bestätigen der Buchungen" });
+    }
+  };
+
+  /**
+   * Handles bulk cancel action
+   */
+  const handleBulkCancel = async () => {
+    if (selectedBookings.size === 0) return;
+
+    if (!confirm(`Möchten Sie wirklich ${selectedBookings.size} Buchung(en) stornieren?`)) {
+      return;
+    }
+
+    try {
+      const bookingIds = Array.from(selectedBookings);
+      for (const bookingId of bookingIds) {
+        await updateBookingStatus(bookingId, "cancelled");
+      }
+      setSelectedBookings(new Set());
+      setBulkActionMode(false);
+      setMessage({ type: "success", text: `${bookingIds.length} Buchung(en) erfolgreich storniert` });
+    } catch (err) {
+      console.error("Error in bulk cancel:", err);
+      setMessage({ type: "error", text: "Fehler beim Stornieren der Buchungen" });
+    }
+  };
+
+  /**
    * Deletes a booking
    */
   const deleteBooking = async (bookingId: string) => {
@@ -266,35 +369,74 @@ export default function AdminBookingsManager() {
   };
 
   /**
-   * Filters bookings based on active filter
+   * Filters bookings based on active filter, search query, course, and date range
    */
   const getFilteredBookings = (): Booking[] => {
     const today = new Date().toISOString().split("T")[0];
     const now = new Date().toTimeString().split(" ")[0].substring(0, 5);
 
+    let filtered = bookings;
+
+    // Apply status filter
     switch (activeFilter) {
       case "upcoming":
-        return bookings.filter(
+        filtered = filtered.filter(
           (b) =>
             (b.booking_date > today || (b.booking_date === today && b.start_time >= now)) &&
             b.status !== "cancelled"
         );
+        break;
       case "unconfirmed":
-        return bookings.filter((b) => b.status === "pending");
+        filtered = filtered.filter((b) => b.status === "pending");
+        break;
       case "recurring":
         // For now, return empty - can be extended later
-        return [];
+        filtered = [];
+        break;
       case "past":
-        return bookings.filter(
+        filtered = filtered.filter(
           (b) =>
             (b.booking_date < today || (b.booking_date === today && b.start_time < now)) &&
             b.status !== "cancelled"
         );
+        break;
       case "cancelled":
-        return bookings.filter((b) => b.status === "cancelled");
+        filtered = filtered.filter((b) => b.status === "cancelled");
+        break;
       default:
-        return bookings;
+        break;
     }
+
+    // Apply course filter - we need to match by course_id stored in the booking
+    if (selectedCourseFilter !== "all") {
+      const selectedCourse = availableCourses.find((c) => c.id === selectedCourseFilter);
+      if (selectedCourse) {
+        filtered = filtered.filter((b) => b.course_title === selectedCourse.title);
+      }
+    }
+
+    // Apply date range filter
+    if (dateRangeStart) {
+      filtered = filtered.filter((b) => b.booking_date >= dateRangeStart);
+    }
+    if (dateRangeEnd) {
+      filtered = filtered.filter((b) => b.booking_date <= dateRangeEnd);
+    }
+
+    // Apply search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (b) =>
+          b.customer_name?.toLowerCase().includes(query) ||
+          b.customer_email?.toLowerCase().includes(query) ||
+          b.course_title?.toLowerCase().includes(query) ||
+          b.notes?.toLowerCase().includes(query) ||
+          b.booking_date.includes(query)
+      );
+    }
+
+    return filtered;
   };
 
   const filteredBookings = getFilteredBookings();
@@ -328,6 +470,147 @@ export default function AdminBookingsManager() {
           {message.text}
         </div>
       )}
+
+      {/* Search and Advanced Filters */}
+      <div className="mb-4 sm:mb-6 space-y-4">
+        {/* Search Bar */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Suche nach Name, E-Mail, Kurs oder Notizen..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+          />
+          <svg
+            className="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+
+        {/* Advanced Filters */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Course Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Kurs filtern
+            </label>
+            <select
+              value={selectedCourseFilter}
+              onChange={(e) => setSelectedCourseFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            >
+              <option value="all">Alle Kurse</option>
+              {availableCourses.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Date Range Start */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Von Datum
+            </label>
+            <input
+              type="date"
+              value={dateRangeStart}
+              onChange={(e) => setDateRangeStart(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Date Range End */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Bis Datum
+            </label>
+            <input
+              type="date"
+              value={dateRangeEnd}
+              onChange={(e) => setDateRangeEnd(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        {/* Clear Filters Button */}
+        {(searchQuery || selectedCourseFilter !== "all" || dateRangeStart || dateRangeEnd) && (
+          <button
+            onClick={() => {
+              setSearchQuery("");
+              setSelectedCourseFilter("all");
+              setDateRangeStart("");
+              setDateRangeEnd("");
+            }}
+            className="text-sm text-amber-600 hover:text-amber-700 flex items-center gap-1"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Filter zurücksetzen
+          </button>
+        )}
+      </div>
+
+      {/* Bulk Actions Bar */}
+      {bulkActionMode && selectedBookings.size > 0 && (
+        <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700">
+              {selectedBookings.size} {selectedBookings.size === 1 ? "Buchung ausgewählt" : "Buchungen ausgewählt"}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={handleBulkConfirm}
+              className="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+            >
+              Ausgewählte bestätigen
+            </button>
+            <button
+              onClick={handleBulkCancel}
+              className="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            >
+              Ausgewählte stornieren
+            </button>
+            <button
+              onClick={() => {
+                setBulkActionMode(false);
+                setSelectedBookings(new Set());
+              }}
+              className="px-4 py-2 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+            >
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Actions Toggle */}
+      <div className="mb-4 flex items-center justify-between">
+        <div></div>
+        <button
+          onClick={() => {
+            setBulkActionMode(!bulkActionMode);
+            if (bulkActionMode) {
+              setSelectedBookings(new Set());
+            }
+          }}
+          className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          {bulkActionMode ? "Bulk-Aktionen beenden" : "Bulk-Aktionen"}
+        </button>
+      </div>
 
       {/* Filter Tabs */}
       <div className="mb-4 sm:mb-6 border-b border-gray-200 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -380,11 +663,53 @@ export default function AdminBookingsManager() {
         </div>
       ) : (
         <div className="space-y-4">
+          {/* Select All Checkbox */}
+          {bulkActionMode && filteredBookings.length > 0 && (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedBookings.size === filteredBookings.length && filteredBookings.length > 0}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      selectAllFiltered();
+                    } else {
+                      deselectAll();
+                    }
+                  }}
+                  className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  Alle auswählen ({filteredBookings.length})
+                </span>
+              </label>
+            </div>
+          )}
+
           {filteredBookings.map((booking) => (
             <div
               key={booking.id}
-              className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow"
+              className={`bg-white border rounded-lg p-4 sm:p-6 hover:shadow-md transition-shadow ${
+                bulkActionMode && selectedBookings.has(booking.id)
+                  ? "border-amber-600 bg-amber-50"
+                  : "border-gray-200"
+              }`}
             >
+              {/* Bulk Selection Checkbox */}
+              {bulkActionMode && (
+                <div className="mb-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedBookings.has(booking.id)}
+                      onChange={() => toggleBookingSelection(booking.id)}
+                      className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500"
+                    />
+                    <span className="text-sm text-gray-700">Auswählen</span>
+                  </label>
+                </div>
+              )}
+
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
