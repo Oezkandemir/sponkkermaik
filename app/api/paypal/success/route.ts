@@ -176,6 +176,47 @@ async function capturePayPalOrder(
     const voucher = data;
     console.log('✅ Voucher saved successfully!', voucher);
 
+    // Get user details for email
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+    if (!authError && authUser) {
+      // Get user profile for name (optional - may not exist)
+      let customerName = authUser.email?.split("@")[0] || "Kunde";
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", userId)
+          .maybeSingle();
+        
+        if (profile?.full_name) {
+          customerName = profile.full_name;
+        }
+      } catch (profileError) {
+        // Profiles table may not exist - use email fallback
+        console.log("⚠️ Could not fetch profile, using email fallback");
+      }
+      
+      const customerEmail = authUser.email || "";
+
+      // Send confirmation email (non-blocking)
+      if (customerEmail) {
+        sendVoucherConfirmationEmail({
+          voucherId: voucher.id,
+          customerEmail,
+          customerName,
+          voucherCode,
+          amount,
+          paymentMethod: "paypal",
+          status: "active",
+          orderNumber: paypalOrderId,
+          validUntil: expiryDate.toISOString(),
+        }).catch((emailError) => {
+          console.error("❌ Failed to send voucher confirmation email:", emailError);
+          // Don't fail the payment if email fails
+        });
+      }
+    }
+
     return {
       success: true,
       voucher: {
@@ -242,6 +283,45 @@ function generateVoucherCode(): string {
   }
   
   return code;
+}
+
+/**
+ * Send voucher confirmation email
+ * 
+ * Args:
+ *   params: Email parameters
+ */
+async function sendVoucherConfirmationEmail(params: {
+  voucherId: string;
+  customerEmail: string;
+  customerName: string;
+  voucherCode: string;
+  amount: number;
+  paymentMethod: "paypal" | "bank_transfer";
+  status: string;
+  orderNumber?: string;
+  validUntil: string;
+}): Promise<void> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const response = await fetch(`${baseUrl}/api/vouchers/send-confirmation`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to send email");
+    }
+
+    console.log("✅ Voucher confirmation email sent successfully");
+  } catch (error) {
+    console.error("Error sending voucher confirmation email:", error);
+    throw error;
+  }
 }
 
 
