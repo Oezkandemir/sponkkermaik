@@ -1,0 +1,217 @@
+/**
+ * Script to manually send voucher confirmation email
+ * Usage: bun send-voucher-email.mjs
+ * 
+ * Make sure RESEND_API_KEY is set in your environment or .env.local file
+ */
+
+const customerEmail = 'astrid.ruengeler-janski@freenet.de';
+const customerName = 'Astrid Ruengeler-Janski';
+const voucherCode = 'SPONK-3339JBZA';
+const amount = 40.00;
+const paymentMethod = 'bank_transfer';
+const status = 'pending';
+const validUntil = '2026-12-02T15:58:30.883Z';
+const voucherId = 'af5cdb32-3271-4d03-aa16-f8947a1cf0ee';
+
+// Get site URL for logo
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.sponkkeramik.de';
+const logoUrl = `${siteUrl}/images/emaillogo.webp`;
+
+// Format dates
+const validUntilDate = new Date(validUntil).toLocaleDateString('de-DE', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+// Determine payment method display
+const paymentMethodDisplay = paymentMethod === 'paypal' ? 'PayPal' : 'Banküberweisung';
+
+// Determine status display
+const statusDisplay =
+  status === 'active'
+    ? 'Aktiv'
+    : status === 'pending'
+    ? 'Ausstehend (Wird nach Zahlungseingang aktiviert)'
+    : 'Ausstehend';
+
+// Bank details (for bank transfer)
+const bankDetails = `
+      <div class="details" style="background-color: #fff7ed; border-left-color: #f59e0b; margin-top: 20px;">
+        <h3 style="color: #92400e; margin-top: 0;">Bankverbindung für Überweisung:</h3>
+        <p><strong>Bank:</strong> Commerzbank</p>
+        <p><strong>Kontoinhaber:</strong> Sponk Keramik</p>
+        <p><strong>IBAN:</strong> <span style="font-family: monospace;">DE89 3704 0044 0532 0130 00</span></p>
+        <p><strong>BIC:</strong> <span style="font-family: monospace;">COBADEFFXXX</span></p>
+        <p><strong>Verwendungszweck:</strong> <span style="font-family: monospace; font-weight: bold; color: #92400e;">${voucherCode}</span></p>
+        <p style="background-color: #fef3c7; padding: 10px; border-radius: 5px; margin-top: 10px; color: #92400e;">
+          <strong>Wichtig:</strong> Bitte geben Sie den Gutschein-Code als Verwendungszweck bei der Überweisung an. 
+          Der Gutschein wird nach Zahlungseingang aktiviert.
+        </p>
+      </div>
+    `;
+
+// Create email content
+const emailSubject = `Gutschein-Bestätigung: ${voucherCode}`;
+const emailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { padding: 0; text-align: center; border-radius: 8px 8px 0 0; overflow: hidden; }
+    .logo { width: 100%; max-width: 600px; height: auto; display: block; }
+    .content { padding: 20px; background-color: #f9fafb; }
+    .details { background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #d97706; }
+    .voucher-code { background-color: #fff7ed; padding: 15px; border-radius: 5px; margin: 15px 0; text-align: center; border: 2px dashed #f59e0b; }
+    .voucher-code-text { font-size: 24px; font-weight: bold; color: #92400e; font-family: monospace; letter-spacing: 2px; }
+    .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+    h2 { color: #1f2937; margin-top: 0; }
+    h3 { color: #374151; margin-top: 0; }
+    p { margin: 10px 0; }
+    .status-active { color: #059669; font-weight: bold; }
+    .status-pending { color: #d97706; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="${logoUrl}" alt="Sponk Keramik Logo" class="logo" />
+    </div>
+    <div class="content">
+      <h2>Gutschein-Bestätigung</h2>
+      <p>Hallo ${customerName},</p>
+      <p>vielen Dank für deinen Gutschein-Kauf!</p>
+      
+      <div class="voucher-code">
+        <p style="margin: 0 0 10px 0; font-size: 14px; color: #92400e;">Dein Gutschein-Code:</p>
+        <div class="voucher-code-text">${voucherCode}</div>
+      </div>
+
+      <div class="details">
+        <h3>Kaufdetails:</h3>
+        <p><strong>Gutschein-Code:</strong> <span style="font-family: monospace; font-weight: bold;">${voucherCode}</span></p>
+        <p><strong>Betrag:</strong> ${amount.toFixed(2)} €</p>
+        <p><strong>Zahlungsmethode:</strong> ${paymentMethodDisplay}</p>
+        <p><strong>Status:</strong> <span class="${status === 'active' ? 'status-active' : 'status-pending'}">${statusDisplay}</span></p>
+        <p><strong>Gültig bis:</strong> ${validUntilDate}</p>
+      </div>
+      
+      ${bankDetails}
+
+      <div class="details">
+        <h3>So verwendest du deinen Gutschein:</h3>
+        <p>Zeige diesen Code bei deinem nächsten Besuch im Atelier vor oder gib ihn bei der Online-Buchung an.</p>
+        <p>Du findest deinen Gutschein jederzeit in deinem Account unter "Meine Gutscheine".</p>
+      </div>
+      
+      <p>Mit freundlichen Grüßen,<br>Ihr Team von Sponk Keramik</p>
+    </div>
+    <div class="footer">
+      <p>Fürstenplatz 15, 40215 Düsseldorf</p>
+    </div>
+  </div>
+</body>
+</html>
+`.trim();
+
+const emailText = `
+Hallo ${customerName},
+
+vielen Dank für deinen Gutschein-Kauf!
+
+Dein Gutschein-Code: ${voucherCode}
+
+Kaufdetails:
+- Gutschein-Code: ${voucherCode}
+- Betrag: ${amount.toFixed(2)} €
+- Zahlungsmethode: ${paymentMethodDisplay}
+- Status: ${statusDisplay}
+- Gültig bis: ${validUntilDate}
+
+Bankverbindung für Überweisung:
+- Bank: Commerzbank
+- Kontoinhaber: Sponk Keramik
+- IBAN: DE89 3704 0044 0532 0130 00
+- BIC: COBADEFFXXX
+- Verwendungszweck: ${voucherCode}
+
+Wichtig: Bitte geben Sie den Gutschein-Code als Verwendungszweck bei der Überweisung an. 
+Der Gutschein wird nach Zahlungseingang aktiviert.
+
+So verwendest du deinen Gutschein:
+Zeige diesen Code bei deinem nächsten Besuch im Atelier vor oder gib ihn bei der Online-Buchung an.
+Du findest deinen Gutschein jederzeit in deinem Account unter "Meine Gutscheine".
+
+Mit freundlichen Grüßen,
+Ihr Team von Sponk Keramik
+
+Fürstenplatz 15, 40215 Düsseldorf
+`.trim();
+
+// Send email using Resend API
+const resendApiKey = process.env.RESEND_API_KEY;
+const adminEmail = 'sponkkeramik@gmail.com';
+
+if (!resendApiKey) {
+  console.error('❌ RESEND_API_KEY nicht gefunden in .env.local');
+  console.log('\n--- Email Content (nicht versendet) ---');
+  console.log('To:', customerEmail);
+  console.log('CC:', adminEmail);
+  console.log('Subject:', emailSubject);
+  console.log('\n', emailText);
+  process.exit(1);
+}
+
+try {
+  console.log('📧 Versende Gutschein-Bestätigungs-E-Mail...');
+  console.log('An:', customerEmail);
+  console.log('CC:', adminEmail);
+  console.log('Gutschein-Code:', voucherCode);
+  console.log('Betrag:', amount, 'EUR');
+  
+  const resendResponse = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${resendApiKey}`,
+    },
+    body: JSON.stringify({
+      from: 'Sponk Keramik <noreply@sponkkeramik.de>',
+      to: [customerEmail, adminEmail], // Send to both customer and admin
+      subject: emailSubject,
+      html: emailHtml,
+      text: emailText,
+    }),
+  });
+
+  const responseText = await resendResponse.text();
+  
+  if (resendResponse.ok) {
+    let resendData;
+    try {
+      resendData = responseText ? JSON.parse(responseText) : {};
+    } catch (e) {
+      resendData = { message: responseText || 'Email sent successfully' };
+    }
+    console.log('✅ E-Mail erfolgreich versendet!');
+    console.log('Response:', JSON.stringify(resendData, null, 2));
+  } else {
+    let errorData;
+    try {
+      errorData = responseText ? JSON.parse(responseText) : { error: 'Unknown error' };
+    } catch (e) {
+      errorData = { error: responseText || 'Failed to send email' };
+    }
+    console.error('❌ Fehler beim Versenden der E-Mail:');
+    console.error(JSON.stringify(errorData, null, 2));
+    process.exit(1);
+  }
+} catch (error) {
+  console.error('❌ Fehler:', error);
+  process.exit(1);
+}
+

@@ -366,11 +366,26 @@ Fürstenplatz 15, 40215 Düsseldorf
       });
 
       if (resendResponse.ok) {
-        const resendData = await resendResponse.json();
-        console.log("✅ Voucher confirmation email sent via Resend:", resendData);
+        const responseText = await resendResponse.text();
+        if (responseText) {
+          try {
+            const resendData = JSON.parse(responseText);
+            console.log("✅ Voucher confirmation email sent via Resend:", resendData);
+          } catch (e) {
+            console.log("✅ Voucher confirmation email sent via Resend (response:", responseText, ")");
+          }
+        } else {
+          console.log("✅ Voucher confirmation email sent via Resend");
+        }
         return;
       } else {
-        const errorData = await resendResponse.json();
+        const responseText = await resendResponse.text();
+        let errorData;
+        try {
+          errorData = responseText ? JSON.parse(responseText) : { error: "Unknown error" };
+        } catch (e) {
+          errorData = { error: responseText || "Failed to send email" };
+        }
         console.error("❌ Resend API error:", errorData);
         throw new Error(`Resend API error: ${JSON.stringify(errorData)}`);
       }
