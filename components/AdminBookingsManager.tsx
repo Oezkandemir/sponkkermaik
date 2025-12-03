@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import BookingReplyModal from "./BookingReplyModal";
 import BookingMessagesModal from "./BookingMessagesModal";
@@ -31,6 +33,7 @@ type BookingFilter = "upcoming" | "unconfirmed" | "recurring" | "past" | "cancel
  * Allows admins to view and manage all bookings with filters.
  */
 export default function AdminBookingsManager() {
+  const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -295,7 +298,12 @@ export default function AdminBookingsManager() {
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 break-words">{booking.course_title}</h3>
+                    <Link
+                      href={`/bookings/${booking.id}`}
+                      className="text-base sm:text-lg font-semibold text-gray-900 break-words hover:text-amber-600 transition-colors cursor-pointer"
+                    >
+                      {booking.course_title}
+                    </Link>
                     <span
                       className={`px-2 py-1 text-xs font-medium rounded whitespace-nowrap ${
                         booking.status === "confirmed"
@@ -341,28 +349,39 @@ export default function AdminBookingsManager() {
                   </div>
                   {booking.notes && (
                     <div className="mt-3 pt-3 border-t border-gray-200">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm text-gray-600 break-words flex-1">
-                          <span className="font-medium">Notizen:</span> {booking.notes}
-                        </p>
-                        <button
-                          onClick={() => {
-                            setSelectedBooking(booking);
-                            setReplyModalOpen(true);
-                          }}
-                          className="ml-2 px-3 py-1.5 text-xs bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors whitespace-nowrap flex-shrink-0"
-                          title="Auf Notiz antworten"
-                        >
-                          <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                          </svg>
-                          Antworten
-                        </button>
-                      </div>
+                      <p className="text-sm text-gray-600 break-words">
+                        <span className="font-medium">Notizen:</span> {booking.notes}
+                      </p>
                     </div>
                   )}
                 </div>
                 <div className="sm:ml-4 flex flex-col gap-2 w-full sm:w-auto">
+                  <Link
+                    href={`/bookings/${booking.id}`}
+                    className="w-full sm:w-auto px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-1"
+                    title="Details anzeigen"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Details
+                  </Link>
+                  {booking.notes && (
+                    <button
+                      onClick={() => {
+                        setSelectedBooking(booking);
+                        setReplyModalOpen(true);
+                      }}
+                      className="w-full sm:w-auto px-3 py-1.5 text-xs bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors flex items-center justify-center gap-1"
+                      title="Auf Notiz antworten"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                      </svg>
+                      Antworten
+                    </button>
+                  )}
                   {booking.status === "pending" && (
                     <>
                       <button
@@ -393,13 +412,13 @@ export default function AdminBookingsManager() {
                         setSelectedBooking(booking);
                         setMessagesModalOpen(true);
                       }}
-                      className="w-full sm:w-auto px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-1"
+                      className="w-full sm:w-auto px-3 py-1.5 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors flex items-center justify-center gap-1"
                       title="Nachrichtenverlauf anzeigen"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
-                      Nachrichtenverlauf
+                      Nachrichten
                     </button>
                   )}
                   <button

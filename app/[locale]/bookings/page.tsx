@@ -59,6 +59,20 @@ export default function BookingsPage() {
 
       const upcoming: any[] = [];
       const past: any[] = [];
+      const bookingIds = data?.map((b: any) => b.id) || [];
+
+      // Check which bookings have messages
+      let bookingsWithMessages = new Set<string>();
+      if (bookingIds.length > 0) {
+        const { data: messagesData } = await supabase
+          .from("booking_messages")
+          .select("booking_id")
+          .in("booking_id", bookingIds);
+        
+        bookingsWithMessages = new Set(
+          (messagesData || []).map((m: any) => m.booking_id)
+        );
+      }
 
       data?.forEach((booking) => {
         const bookingDate = booking.booking_date;
@@ -74,6 +88,7 @@ export default function BookingsPage() {
           status: booking.status,
           notes: booking.notes,
           booking_date: bookingDate,
+          hasMessages: bookingsWithMessages.has(booking.id),
         };
 
         if (bookingDate >= today) {
@@ -259,14 +274,31 @@ function BookingCard({ booking, t, isPast = false, onCancel }: {
             </div>
           </div>
         </div>
-        {!isPast && booking.status !== "cancelled" && onCancel && (
-          <div className="flex gap-2">
-            <button 
-              onClick={onCancel}
-              className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+        {!isPast && booking.status !== "cancelled" && (
+          <div className="flex flex-col gap-2">
+            <Link
+              href={`/bookings/${booking.id}`}
+              className="px-4 py-2 text-sm bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700 transition-colors flex items-center justify-center gap-2"
             >
-              {t("cancel")}
-            </button>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              Details anzeigen
+              {booking.hasMessages && (
+                <span className="ml-1 px-2 py-0.5 bg-white/20 rounded-full text-xs">
+                  {booking.hasMessages ? "Neu" : ""}
+                </span>
+              )}
+            </Link>
+            {onCancel && (
+              <button 
+                onClick={onCancel}
+                className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                {t("cancel")}
+              </button>
+            )}
           </div>
         )}
       </div>

@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Link } from "@/i18n/navigation";
+import VoucherReplyModal from "./VoucherReplyModal";
+import VoucherMessagesModal from "./VoucherMessagesModal";
 
 interface Voucher {
   id: string;
@@ -17,6 +20,7 @@ interface Voucher {
   user_email?: string;
   customer_name?: string;
   payment_method?: "paypal" | "bank_transfer";
+  hasMessages?: boolean;
 }
 
 type VoucherFilter = "all" | "active" | "pending" | "used" | "expired" | "blocked";
@@ -33,6 +37,9 @@ export default function AdminVouchersManager() {
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [activeFilter, setActiveFilter] = useState<VoucherFilter>("all");
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [replyModalOpen, setReplyModalOpen] = useState(false);
+  const [messagesModalOpen, setMessagesModalOpen] = useState(false);
+  const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
 
   useEffect(() => {
     loadVouchers();
@@ -176,8 +183,26 @@ export default function AdminVouchersManager() {
           user_email: userEmail,
           customer_name: customerName,
           payment_method: paymentMethod,
+          hasMessages: false, // Will be updated below
         };
       });
+      
+      // Check which vouchers have messages
+      const voucherIds = vouchersWithDetails.map((v) => v.id);
+      if (voucherIds.length > 0) {
+        const { data: messagesData } = await supabase
+          .from("voucher_messages")
+          .select("voucher_id")
+          .in("voucher_id", voucherIds);
+
+        const vouchersWithMessages = new Set(
+          (messagesData || []).map((m: any) => m.voucher_id)
+        );
+
+        vouchersWithDetails.forEach((voucher) => {
+          voucher.hasMessages = vouchersWithMessages.has(voucher.id);
+        });
+      }
       
       console.log(`✅ Mapped ${vouchersWithDetails.length} vouchers with user data`);
 
@@ -501,6 +526,19 @@ export default function AdminVouchersManager() {
                   </div>
                 </div>
                 <div className="sm:ml-4 flex flex-col gap-2 w-full sm:w-auto">
+                  {/* Details Button */}
+                  <Link
+                    href={`/vouchers/${voucher.id}`}
+                    className="w-full sm:w-auto px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-1"
+                    title="Details anzeigen"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Details
+                  </Link>
+                  
                   {/* Status Change Dropdown */}
                   <select
                     onChange={(e) => {
@@ -518,6 +556,38 @@ export default function AdminVouchersManager() {
                     <option value="expired">Abgelaufen</option>
                     <option value="blocked">Gesperrt</option>
                   </select>
+                  
+                  {/* Reply Button */}
+                  <button
+                    onClick={() => {
+                      setSelectedVoucher(voucher);
+                      setReplyModalOpen(true);
+                    }}
+                    className="w-full sm:w-auto px-3 py-1.5 text-xs bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors flex items-center justify-center gap-1"
+                    title="Antwort senden"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                    </svg>
+                    Antworten
+                  </button>
+                  
+                  {/* Messages Button (if messages exist) */}
+                  {voucher.hasMessages && (
+                    <button
+                      onClick={() => {
+                        setSelectedVoucher(voucher);
+                        setMessagesModalOpen(true);
+                      }}
+                      className="w-full sm:w-auto px-3 py-1.5 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors flex items-center justify-center gap-1"
+                      title="Nachrichtenverlauf anzeigen"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                      Nachrichten
+                    </button>
+                  )}
                   
                   {/* Block Button (only if not already blocked) */}
                   {voucher.status !== "blocked" && (
@@ -543,6 +613,39 @@ export default function AdminVouchersManager() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Reply Modal */}
+      {selectedVoucher && (
+        <VoucherReplyModal
+          isOpen={replyModalOpen}
+          onClose={() => {
+            setReplyModalOpen(false);
+            setSelectedVoucher(null);
+          }}
+          voucherId={selectedVoucher.id}
+          customerEmail={selectedVoucher.user_email || ""}
+          customerName={selectedVoucher.customer_name || "Kunde"}
+          voucherCode={selectedVoucher.code}
+          voucherValue={selectedVoucher.value}
+          validUntil={selectedVoucher.valid_until}
+          onSuccess={() => {
+            // Reload vouchers to update hasMessages flag
+            loadVouchers();
+          }}
+        />
+      )}
+
+      {/* Messages Modal */}
+      {selectedVoucher && (
+        <VoucherMessagesModal
+          isOpen={messagesModalOpen}
+          onClose={() => {
+            setMessagesModalOpen(false);
+            setSelectedVoucher(null);
+          }}
+          voucherId={selectedVoucher.id}
+        />
       )}
     </div>
   );

@@ -1,0 +1,426 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
+
+interface BookingMessage {
+  id: string;
+  sender_type: "customer" | "admin";
+  sender_id: string | null;
+  message: string;
+  created_at: string;
+}
+
+/**
+ * Booking Details Page Component
+ * 
+ * Displays detailed information about a specific booking including messages.
+ * Allows customers to reply to admin messages.
+ */
+export default function BookingDetailsPage() {
+  const router = useRouter();
+  const params = useParams();
+  const bookingId = params.id as string;
+  const t = useTranslations("bookings");
+  const supabase = createClient();
+  
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [booking, setBooking] = useState<any>(null);
+  const [messages, setMessages] = useState<BookingMessage[]>([]);
+  const [courseTitle, setCourseTitle] = useState<string>("Kurs");
+  const [replyMessage, setReplyMessage] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
+  const [replyError, setReplyError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    async function loadData() {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        router.push("/auth/signin");
+        return;
+      }
+      
+      setUser(user);
+      
+      // Load booking first to verify ownership
+      try {
+        const { data: bookingData, error: bookingError } = await supabase
+          .from("bookings")
+          .select(`
+            *,
+            course_schedule:course_schedule_id (
+              course_id
+            )
+          `)
+          .eq("id", bookingId)
+          .single();
+
+        if (bookingError) throw bookingError;
+
+        // Verify ownership or admin access
+        const { data: adminData } = await supabase
+          .from("admins")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        const userIsAdmin = !!adminData;
+        const isOwner = bookingData.user_id === user.id;
+
+        if (!userIsAdmin && !isOwner) {
+          router.push("/bookings");
+          return;
+        }
+
+        setIsAdmin(userIsAdmin);
+
+        setBooking(bookingData);
+
+        // Load course title
+        if (bookingData.course_schedule?.course_id) {
+          const { data: course } = await supabase
+            .from("courses")
+            .select("title")
+            .eq("id", bookingData.course_schedule.course_id)
+            .single();
+
+          if (course?.title) {
+            setCourseTitle(course.title);
+          }
+        }
+      } catch (err) {
+        console.error("Error loading booking:", err);
+        router.push("/bookings");
+        return;
+      }
+      
+      await loadMessages();
+      setLoading(false);
+    }
+
+    if (bookingId) {
+      loadData();
+    }
+  }, [bookingId]);
+
+
+  /**
+   * Loads messages for the booking
+   */
+  const loadMessages = async () => {
+    try {
+      const response = await fetch(`/api/bookings/messages?bookingId=${bookingId}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessages(data.messages || []);
+      }
+    } catch (err) {
+      console.error("Error loading messages:", err);
+    }
+  };
+
+  /**
+   * Handles sending a reply (works for both admin and customer)
+   */
+  const handleSendReply = async () => {
+    if (!replyMessage.trim()) {
+      setReplyError("Bitte geben Sie eine Nachricht ein.");
+      return;
+    }
+
+    setSendingReply(true);
+    setReplyError(null);
+
+    try {
+      let response;
+      
+      if (isAdmin) {
+        // Admin uses admin reply API
+        response = await fetch("/api/bookings/send-reply", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            bookingId,
+            message: replyMessage.trim(),
+            customerEmail: booking.customer_email || booking.user_email || "",
+            customerName: booking.customer_name || "Kunde",
+            courseTitle: courseTitle,
+            bookingDate: bookingDate,
+            bookingTime: `${booking.start_time} - ${booking.end_time}`,
+          }),
+        });
+      } else {
+        // Customer uses customer reply API
+        response = await fetch("/api/bookings/send-customer-reply", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            bookingId,
+            message: replyMessage.trim(),
+          }),
+        });
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Fehler beim Senden der Nachricht");
+      }
+
+      // Success - clear reply and reload messages
+      setReplyMessage("");
+      setReplyError(null);
+      await loadMessages();
+    } catch (err) {
+      console.error("Error sending reply:", err);
+      setReplyError(err instanceof Error ? err.message : "Fehler beim Senden der Nachricht");
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("de-DE", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-4xl mx-auto">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+            <div className="h-64 bg-gray-200 rounded-xl mb-6"></div>
+            <div className="h-32 bg-gray-200 rounded-xl"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!booking) {
+    return null;
+  }
+
+  // Format booking date for display and API
+  const bookingDate = booking.booking_date 
+    ? new Date(booking.booking_date).toLocaleDateString("de-DE", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "";
+
+  return (
+    <div className="container mx-auto px-4 py-16">
+      <div className="max-w-4xl mx-auto">
+        {/* Back Button */}
+        <Link
+          href={isAdmin ? "/admin" : "/bookings"}
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          {isAdmin ? "Zurück zum Admin-Dashboard" : "Zurück zu Meine Buchungen"}
+        </Link>
+
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Buchungsdetails</h1>
+          <p className="text-gray-600">{courseTitle}</p>
+        </div>
+
+        {/* Booking Information Card */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Buchungsinformationen</h2>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="text-sm font-medium text-gray-500">Kurs</label>
+              <p className="text-lg text-gray-900 mt-1">{courseTitle}</p>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium text-gray-500">Status</label>
+              <p className="mt-1">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  booking.status === "confirmed"
+                    ? "bg-green-100 text-green-800"
+                    : booking.status === "pending"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : booking.status === "cancelled"
+                    ? "bg-red-100 text-red-800"
+                    : "bg-gray-100 text-gray-800"
+                }`}>
+                  {booking.status === "confirmed" ? "Bestätigt" : 
+                   booking.status === "pending" ? "Unbestätigt" : 
+                   booking.status === "cancelled" ? "Abgesagt" : "Abgeschlossen"}
+                </span>
+              </p>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium text-gray-500">Datum</label>
+              <p className="text-lg text-gray-900 mt-1">{bookingDate}</p>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium text-gray-500">Zeit</label>
+              <p className="text-lg text-gray-900 mt-1">{booking.start_time} - {booking.end_time}</p>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium text-gray-500">Teilnehmer</label>
+              <p className="text-lg text-gray-900 mt-1">{booking.participants}</p>
+            </div>
+            
+            {booking.customer_name && (
+              <div>
+                <label className="text-sm font-medium text-gray-500">Name</label>
+                <p className="text-lg text-gray-900 mt-1">{booking.customer_name}</p>
+              </div>
+            )}
+            
+            {booking.customer_email && (
+              <div>
+                <label className="text-sm font-medium text-gray-500">E-Mail</label>
+                <p className="text-lg text-gray-900 mt-1">{booking.customer_email}</p>
+              </div>
+            )}
+          </div>
+
+          {booking.notes && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <label className="text-sm font-medium text-gray-500">Ihre Notizen</label>
+              <p className="text-gray-700 mt-2 whitespace-pre-wrap">{booking.notes}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Messages Section - Chat Style */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Nachrichten</h2>
+          
+          {messages.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>Noch keine Nachrichten vorhanden.</p>
+              {booking.notes && !isAdmin && (
+                <p className="mt-2 text-sm">Sie haben eine Notiz bei der Buchung hinterlassen. Der Admin wird sich bei Bedarf bei Ihnen melden.</p>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Chat Messages */}
+              <div className="space-y-4 mb-6 max-h-96 overflow-y-auto pr-2">
+                {messages.map((msg) => {
+                  const isCurrentUser = (isAdmin && msg.sender_type === "admin") || (!isAdmin && msg.sender_type === "customer");
+                  return (
+                    <div
+                      key={msg.id}
+                      className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}
+                    >
+                      <div
+                        className={`max-w-[80%] p-4 rounded-lg ${
+                          isCurrentUser
+                            ? isAdmin
+                              ? "bg-amber-600 text-white rounded-br-none"
+                              : "bg-gray-600 text-white rounded-br-none"
+                            : isAdmin
+                            ? "bg-gray-100 text-gray-900 rounded-bl-none"
+                            : "bg-amber-100 text-gray-900 rounded-bl-none"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-xs font-medium ${
+                            isCurrentUser ? "text-white/80" : "text-gray-600"
+                          }`}>
+                            {msg.sender_type === "admin" ? "Admin" : isAdmin ? "Kunde" : "Sie"}
+                          </span>
+                          <span className={`text-xs ${
+                            isCurrentUser ? "text-white/60" : "text-gray-500"
+                          }`}>
+                            {formatDate(msg.created_at)}
+                          </span>
+                        </div>
+                        <p className={`text-sm whitespace-pre-wrap ${
+                          isCurrentUser ? "text-white" : "text-gray-700"
+                        }`}>
+                          {msg.message}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {/* Chat Input Section (always visible for both admin and customer) */}
+          <div className="border-t border-gray-200 pt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {isAdmin ? "Nachricht senden" : "Antwort schreiben"}
+            </h3>
+            <div className="mb-4">
+              <textarea
+                value={replyMessage}
+                onChange={(e) => setReplyMessage(e.target.value)}
+                rows={4}
+                disabled={sendingReply}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                placeholder={isAdmin ? "Schreiben Sie hier eine Nachricht an den Kunden..." : "Schreiben Sie hier Ihre Antwort..."}
+              />
+            </div>
+            {replyError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                {replyError}
+              </div>
+            )}
+            <button
+              onClick={handleSendReply}
+              disabled={sendingReply || !replyMessage.trim()}
+              className="px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg hover:from-amber-700 hover:to-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {sendingReply ? (
+                <>
+                  <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Wird gesendet...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                  {isAdmin ? "Nachricht senden" : "Antwort senden"}
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
