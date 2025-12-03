@@ -27,11 +27,12 @@ interface DashboardStats {
   totalRevenue: number;
   weeklyBookings: number;
   monthlyBookings: number;
-  bookingsTrend: Record<string, number>;
+  bookingsTrend: Record<string, { bookings: number; participants: number }>;
   popularCourses: Array<{
     id: string;
     title: string;
     bookings: number;
+    participants: number;
   }>;
 }
 
@@ -99,11 +100,12 @@ export default function AdminDashboardOverview() {
     return null;
   }
 
-  // Prepare trend data for chart
+  // Prepare trend data for chart (with bookings and participants)
   const trendData = Object.entries(stats.bookingsTrend)
-    .map(([date, count]) => ({
+    .map(([date, data]) => ({
       date: new Date(date).toLocaleDateString("de-DE", { month: "short", day: "numeric" }),
-      bookings: count,
+      bookings: data.bookings,
+      participants: data.participants,
     }))
     .sort((a, b) => {
       const dateA = Object.keys(stats.bookingsTrend).find(
@@ -115,10 +117,11 @@ export default function AdminDashboardOverview() {
       return dateA && dateB ? dateA.localeCompare(dateB) : 0;
     });
 
-  // Prepare popular courses data for chart
+  // Prepare popular courses data for chart (with bookings and participants)
   const coursesData = stats.popularCourses.map((course) => ({
     name: course.title.length > 20 ? course.title.substring(0, 20) + "..." : course.title,
     bookings: course.bookings,
+    participants: course.participants,
   }));
 
   return (
@@ -201,7 +204,8 @@ export default function AdminDashboardOverview() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="bookings" stroke="#f59e0b" strokeWidth={2} />
+                <Line type="monotone" dataKey="bookings" stroke="#f59e0b" strokeWidth={2} name="Buchungen" />
+                <Line type="monotone" dataKey="participants" stroke="#10b981" strokeWidth={2} name="Teilnehmer" />
               </LineChart>
             </ResponsiveContainer>
           ) : (
@@ -222,7 +226,8 @@ export default function AdminDashboardOverview() {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="bookings" fill="#f59e0b" />
+                <Bar dataKey="bookings" fill="#f59e0b" name="Buchungen" />
+                <Bar dataKey="participants" fill="#10b981" name="Teilnehmer" />
               </BarChart>
             </ResponsiveContainer>
           ) : (

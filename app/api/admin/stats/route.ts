@@ -177,24 +177,28 @@ export async function GET() {
 
     const { data: recentBookings, error: recentError } = await supabase
       .from("bookings")
-      .select("booking_date, status, created_at")
+      .select("booking_date, status, created_at, participants")
       .gte("booking_date", sevenDaysAgoStr)
       .neq("status", "cancelled");
 
     if (recentError) throw recentError;
 
-    // Group bookings by date for trend
-    const bookingsByDate: Record<string, number> = {};
-    recentBookings?.forEach((booking) => {
+    // Group bookings by date for trend (count bookings and participants)
+    const bookingsByDate: Record<string, { bookings: number; participants: number }> = {};
+    recentBookings?.forEach((booking: any) => {
       const date = booking.booking_date;
-      bookingsByDate[date] = (bookingsByDate[date] || 0) + 1;
+      if (!bookingsByDate[date]) {
+        bookingsByDate[date] = { bookings: 0, participants: 0 };
+      }
+      bookingsByDate[date].bookings += 1;
+      bookingsByDate[date].participants += booking.participants || 1;
     });
 
-    // Get popular courses
+    // Get popular courses (count bookings and participants)
     const { data: allBookings, error: allBookingsError } = await supabase
       .from("bookings")
       .select(`
-        course_schedule_id,
+        participants,
         course_schedule:course_schedule_id (
           course_id
         )
@@ -203,11 +207,15 @@ export async function GET() {
 
     if (allBookingsError) throw allBookingsError;
 
-    const courseCounts: Record<string, number> = {};
+    const courseCounts: Record<string, { bookings: number; participants: number }> = {};
     allBookings?.forEach((booking: any) => {
       const courseId = booking.course_schedule?.course_id;
       if (courseId) {
-        courseCounts[courseId] = (courseCounts[courseId] || 0) + 1;
+        if (!courseCounts[courseId]) {
+          courseCounts[courseId] = { bookings: 0, participants: 0 };
+        }
+        courseCounts[courseId].bookings += 1;
+        courseCounts[courseId].participants += booking.participants || 1;
       }
     });
 
@@ -220,11 +228,15 @@ export async function GET() {
 
     if (coursesError) throw coursesError;
 
-    const popularCourses = courses?.map((course) => ({
-      id: course.id,
-      title: course.title,
-      bookings: courseCounts[course.id] || 0,
-    })).sort((a, b) => b.bookings - a.bookings).slice(0, 5) || [];
+    const popularCourses = courses?.map((course) => {
+      const counts = courseCounts[course.id] || { bookings: 0, participants: 0 };
+      return {
+        id: course.id,
+        title: course.title,
+        bookings: counts.bookings,
+        participants: counts.participants,
+      };
+    }).sort((a, b) => b.participants - a.participants).slice(0, 5) || [];
 
     // Get weekly bookings
     const { data: weeklyBookings, error: weeklyError } = await supabase

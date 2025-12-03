@@ -77,3 +77,14 @@
 ## Entdeckt während der Arbeit
 _(Hier werden neue Aufgaben hinzugefügt, die während der Entwicklung entdeckt werden)_
 
+### 2025-01-XX - Bug Fix: Buchungsanzahl in Benutzerverwaltung
+- [x] Problem behoben: Buchungen ohne `user_id` aber mit `customer_email` die zu einem Account gehören wurden nicht gezählt
+- [x] API Route `/api/admin/users` aktualisiert: Buchungen werden jetzt auch per E-Mail-Adresse zugeordnet, wenn `user_id` null ist
+
+### 2025-01-XX - Verbesserung: Teilnehmer in Statistiken berücksichtigen
+- [x] Dashboard Statistiken erweitert: Teilnehmer werden jetzt in allen relevanten Bereichen berücksichtigt
+- [x] Popular Courses: Zeigt jetzt sowohl Buchungen als auch Teilnehmeranzahl
+- [x] Booking Trends: Zeigt jetzt sowohl Buchungen als auch Teilnehmer pro Tag
+- [x] Freie Plätze/Kapazität: Bereits korrekt implementiert (verwendet `participants`)
+- [x] Umsatz-Berechnung: Bereits korrekt implementiert (multipliziert mit `participants`)
+

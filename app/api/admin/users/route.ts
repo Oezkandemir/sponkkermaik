@@ -148,29 +148,49 @@ export async function GET(request: Request) {
       .from("vouchers")
       .select("user_id");
 
-    // Create maps for quick lookup (users with accounts)
-    const bookingsByUserId: Record<string, { count: number; name: string | null; email: string | null }> = {};
-    bookings?.forEach((b) => {
-      if (b.user_id) {
-        if (!bookingsByUserId[b.user_id]) {
-          bookingsByUserId[b.user_id] = { count: 0, name: null, email: null };
-        }
-        bookingsByUserId[b.user_id].count++;
-        if (b.customer_name && !bookingsByUserId[b.user_id].name) {
-          bookingsByUserId[b.user_id].name = b.customer_name;
-        }
-        if (b.customer_email && !bookingsByUserId[b.user_id].email) {
-          bookingsByUserId[b.user_id].email = b.customer_email;
-        }
-      }
-    });
-
-    // Create a map of all auth user emails (normalized for comparison)
+    // Create a map of all auth user emails to user IDs (normalized for comparison)
     const authUserEmailsMap = new Map<string, string>(); // normalized email -> original email
+    const emailToUserIdMap = new Map<string, string>(); // normalized email -> user_id
     allAuthUsers.forEach((authUser) => {
       if (authUser.email) {
         const normalized = authUser.email.toLowerCase().trim();
         authUserEmailsMap.set(normalized, authUser.email);
+        emailToUserIdMap.set(normalized, authUser.id);
+      }
+    });
+
+    // Create maps for quick lookup (users with accounts)
+    // Count bookings by user_id OR by matching customer_email to user account
+    const bookingsByUserId: Record<string, { count: number; name: string | null; email: string | null }> = {};
+    const processedBookingIds = new Set<string>(); // Track processed bookings to avoid double-counting
+    
+    bookings?.forEach((b) => {
+      let targetUserId: string | null = null;
+      
+      // First, try to match by user_id
+      if (b.user_id) {
+        targetUserId = b.user_id;
+      }
+      // If no user_id but has customer_email, try to match by email
+      else if (b.customer_email) {
+        const normalizedEmail = b.customer_email.toLowerCase().trim();
+        if (emailToUserIdMap.has(normalizedEmail)) {
+          targetUserId = emailToUserIdMap.get(normalizedEmail)!;
+        }
+      }
+      
+      // Count booking for the matched user
+      if (targetUserId) {
+        if (!bookingsByUserId[targetUserId]) {
+          bookingsByUserId[targetUserId] = { count: 0, name: null, email: null };
+        }
+        bookingsByUserId[targetUserId].count++;
+        if (b.customer_name && !bookingsByUserId[targetUserId].name) {
+          bookingsByUserId[targetUserId].name = b.customer_name;
+        }
+        if (b.customer_email && !bookingsByUserId[targetUserId].email) {
+          bookingsByUserId[targetUserId].email = b.customer_email;
+        }
       }
     });
 
