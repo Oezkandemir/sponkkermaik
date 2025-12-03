@@ -50,8 +50,6 @@ function AdminBookingsManager() {
   const [dateRangeStart, setDateRangeStart] = useState("");
   const [dateRangeEnd, setDateRangeEnd] = useState("");
   const [availableCourses, setAvailableCourses] = useState<Array<{ id: string; title: string }>>([]);
-  const [selectedBookings, setSelectedBookings] = useState<Set<string>>(new Set());
-  const [bulkActionMode, setBulkActionMode] = useState(false);
   const [expandedBookings, setExpandedBookings] = useState<Set<string>>(new Set());
 
   /**
@@ -207,21 +205,6 @@ function AdminBookingsManager() {
   };
 
   /**
-   * Toggles booking selection for bulk actions
-   */
-  const toggleBookingSelection = (bookingId: string) => {
-    setSelectedBookings((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(bookingId)) {
-        newSet.delete(bookingId);
-      } else {
-        newSet.add(bookingId);
-      }
-      return newSet;
-    });
-  };
-
-  /**
    * Toggles accordion expansion for a booking
    */
   const toggleBookingExpansion = (bookingId: string) => {
@@ -236,68 +219,6 @@ function AdminBookingsManager() {
     });
   };
 
-  /**
-   * Selects all filtered bookings
-   */
-  const selectAllFiltered = () => {
-    const filtered = getFilteredBookings();
-    setSelectedBookings(new Set(filtered.map((b) => b.id)));
-  };
-
-  /**
-   * Deselects all bookings
-   */
-  const deselectAll = () => {
-    setSelectedBookings(new Set());
-  };
-
-  /**
-   * Handles bulk confirm action
-   */
-  const handleBulkConfirm = async () => {
-    if (selectedBookings.size === 0) return;
-
-    if (!confirm(`Möchten Sie wirklich ${selectedBookings.size} Buchung(en) bestätigen?`)) {
-      return;
-    }
-
-    try {
-      const bookingIds = Array.from(selectedBookings);
-      for (const bookingId of bookingIds) {
-        await updateBookingStatus(bookingId, "confirmed");
-      }
-      setSelectedBookings(new Set());
-      setBulkActionMode(false);
-      setMessage({ type: "success", text: `${bookingIds.length} Buchung(en) erfolgreich bestätigt` });
-    } catch (err) {
-      console.error("Error in bulk confirm:", err);
-      setMessage({ type: "error", text: "Fehler beim Bestätigen der Buchungen" });
-    }
-  };
-
-  /**
-   * Handles bulk cancel action
-   */
-  const handleBulkCancel = async () => {
-    if (selectedBookings.size === 0) return;
-
-    if (!confirm(`Möchten Sie wirklich ${selectedBookings.size} Buchung(en) stornieren?`)) {
-      return;
-    }
-
-    try {
-      const bookingIds = Array.from(selectedBookings);
-      for (const bookingId of bookingIds) {
-        await updateBookingStatus(bookingId, "cancelled");
-      }
-      setSelectedBookings(new Set());
-      setBulkActionMode(false);
-      setMessage({ type: "success", text: `${bookingIds.length} Buchung(en) erfolgreich storniert` });
-    } catch (err) {
-      console.error("Error in bulk cancel:", err);
-      setMessage({ type: "error", text: "Fehler beim Stornieren der Buchungen" });
-    }
-  };
 
   /**
    * Deletes a booking
@@ -524,59 +445,6 @@ function AdminBookingsManager() {
         )}
       </div>
 
-      {/* Bulk Actions Bar */}
-      {bulkActionMode && selectedBookings.size > 0 && (
-        <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">
-              {selectedBookings.size} {selectedBookings.size === 1 ? "Buchung ausgewählt" : "Buchungen ausgewählt"}
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={handleBulkConfirm}
-              className="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-            >
-              Ausgewählte bestätigen
-            </button>
-            <button
-              onClick={handleBulkCancel}
-              className="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-            >
-              Ausgewählte stornieren
-            </button>
-            <button
-              onClick={() => {
-                setBulkActionMode(false);
-                setSelectedBookings(new Set());
-              }}
-              className="px-4 py-2 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
-            >
-              Abbrechen
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Bulk Actions Toggle */}
-      <div className="mb-4 flex items-center justify-between">
-        <div></div>
-        <button
-          onClick={() => {
-            setBulkActionMode(!bulkActionMode);
-            if (bulkActionMode) {
-              setSelectedBookings(new Set());
-            }
-          }}
-          className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-          </svg>
-          {bulkActionMode ? "Bulk-Aktionen beenden" : "Bulk-Aktionen"}
-        </button>
-      </div>
-
       {/* Filter Tabs */}
       <div className="mb-4 sm:mb-6 border-b border-gray-200 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
         <div className="flex gap-1 min-w-max sm:min-w-0">
@@ -628,40 +496,14 @@ function AdminBookingsManager() {
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Select All Checkbox */}
-          {bulkActionMode && filteredBookings.length > 0 && (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={selectedBookings.size === filteredBookings.length && filteredBookings.length > 0}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      selectAllFiltered();
-                    } else {
-                      deselectAll();
-                    }
-                  }}
-                  className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500"
-                />
-                <span className="text-sm font-medium text-gray-700">
-                  Alle auswählen ({filteredBookings.length})
-                </span>
-              </label>
-            </div>
-          )}
-
           {filteredBookings.map((booking) => {
             const isExpanded = expandedBookings.has(booking.id);
-            const isSelected = bulkActionMode && selectedBookings.has(booking.id);
             
             return (
               <div
                 key={booking.id}
                 className={`bg-white border-2 rounded-lg transition-all ${
-                  isSelected
-                    ? "border-amber-600 bg-amber-50 shadow-lg"
-                    : booking.status === "pending"
+                  booking.status === "pending"
                     ? "border-yellow-300 hover:border-yellow-400"
                     : booking.status === "confirmed"
                     ? "border-green-300 hover:border-green-400"
@@ -679,24 +521,6 @@ function AdminBookingsManager() {
                     {/* Left Side - Main Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
-                        {/* Bulk Selection Checkbox */}
-                        {bulkActionMode && (
-                          <div
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleBookingSelection(booking.id);
-                            }}
-                            className="flex items-center"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selectedBookings.has(booking.id)}
-                              onChange={() => toggleBookingSelection(booking.id)}
-                              onClick={(e) => e.stopPropagation()}
-                              className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500"
-                            />
-                          </div>
-                        )}
                         
                         <h3 className="text-base sm:text-lg font-semibold text-gray-900 break-words">
                           {booking.course_title}

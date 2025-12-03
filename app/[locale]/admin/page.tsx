@@ -13,6 +13,7 @@ const AdminBookingsManager = lazy(() => import("@/components/AdminBookingsManage
 const AdminVouchersManager = lazy(() => import("@/components/AdminVouchersManager").then(m => ({ default: m.default })));
 const AdminCoursesManager = lazy(() => import("@/components/AdminCoursesManager").then(m => ({ default: m.default })));
 const AdminUsersManager = lazy(() => import("@/components/AdminUsersManager").then(m => ({ default: m.default })));
+const AdminNewsletterManager = lazy(() => import("@/components/AdminNewsletterManager").then(m => ({ default: m.default })));
 
 interface Course {
   id: string;
@@ -42,7 +43,7 @@ export default function AdminPage() {
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [showApplyToAllModal, setShowApplyToAllModal] = useState(false);
   const [applyingToAll, setApplyingToAll] = useState(false);
-  const [activeTab, setActiveTab] = useState<"dashboard" | "bookings" | "courses" | "vouchers" | "courseManagement" | "users">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "bookings" | "courses" | "vouchers" | "courseManagement" | "users" | "newsletter">("dashboard");
   const supabase = createClient();
 
   useEffect(() => {
@@ -333,6 +334,20 @@ export default function AdminPage() {
                 <span className="hidden sm:inline">Benutzer</span>
                 <span className="sm:hidden">User</span>
               </button>
+              <button
+                onClick={() => setActiveTab("newsletter")}
+                className={`px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors border-b-2 flex items-center gap-1 sm:gap-2 whitespace-nowrap ${
+                  activeTab === "newsletter"
+                    ? "border-amber-600 text-amber-600"
+                    : "border-transparent text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span className="hidden sm:inline">Newsletter</span>
+                <span className="sm:hidden">News.</span>
+              </button>
             </div>
           </div>
         </div>
@@ -403,6 +418,19 @@ export default function AdminPage() {
                 </div>
               }>
                 <AdminUsersManager />
+              </Suspense>
+            </div>
+          )}
+
+          {/* Newsletter Tab */}
+          {activeTab === "newsletter" && (
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
+              <Suspense fallback={
+                <div className="text-center py-8">
+                  <div className="animate-spin h-8 w-8 border-2 border-amber-600 border-t-transparent rounded-full mx-auto"></div>
+                </div>
+              }>
+                <AdminNewsletterManager />
               </Suspense>
             </div>
           )}

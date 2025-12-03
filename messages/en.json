@@ -724,6 +724,16 @@
     "linkLiabilityText": "Our offer contains links to external websites of third parties, on whose contents we have no influence. Therefore, we cannot assume any liability for these external contents. The respective provider or operator of the pages is always responsible for the contents of the linked pages.",
     "copyrightTitle": "Copyright",
     "copyrightText": "The content and works created by the site operators on these pages are subject to German copyright law. The duplication, processing, distribution and any kind of exploitation outside the limits of copyright require the written consent of the respective author or creator."
+  },
+  "newsletter": {
+    "title": "Subscribe to Newsletter",
+    "description": "Stay up to date on new courses, offers, and creative inspiration.",
+    "emailPlaceholder": "Your email address",
+    "subscribe": "Subscribe",
+    "subscribing": "Subscribing...",
+    "subscriptionSuccess": "Thank you for subscribing! Please check your emails for confirmation.",
+    "subscriptionFailed": "Subscription failed. Please try again later.",
+    "invalidEmail": "Please enter a valid email address."
   }
 }
 

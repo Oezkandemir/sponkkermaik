@@ -3,6 +3,7 @@ import Image from "next/image";
 import FeaturedWorkshops from "@/components/FeaturedWorkshops";
 import TrustIndexWidget from "@/components/TrustIndexWidget";
 import HeroSection from "@/components/HeroSection";
+import NewsletterSignup from "@/components/NewsletterSignup";
 import { Metadata } from "next";
 import { getTranslations } from 'next-intl/server';
 
@@ -255,6 +256,15 @@ export default async function Home({
             >
               {t("home.getInTouch")}
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Signup Section */}
+      <section className="py-12 sm:py-16 bg-gray-50">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="max-w-2xl mx-auto">
+            <NewsletterSignup />
           </div>
         </div>
       </section>
