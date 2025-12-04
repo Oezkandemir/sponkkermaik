@@ -1,6 +1,6 @@
 "use client";
 
-import { workshops as staticWorkshops, type Workshop } from "@/lib/data";
+import { workshops as staticWorkshops, sortWorkshops, type Workshop } from "@/lib/data";
 import CourseCard from "@/components/CourseCard";
 import Link from "next/link";
 import Image from "next/image";
@@ -66,7 +66,7 @@ export default function WorkshopsPage() {
       if (error) {
         console.error("Error loading courses:", error);
         // Fallback to static workshops if database fails
-        setWorkshops(staticWorkshops);
+        setWorkshops(sortWorkshops(staticWorkshops));
         return;
       }
 
@@ -98,11 +98,12 @@ export default function WorkshopsPage() {
         }
       });
 
-      setWorkshops(mergedWorkshops);
+      // Sort workshops according to defined order
+      setWorkshops(sortWorkshops(mergedWorkshops));
     } catch (err) {
       console.error("Error loading courses:", err);
       // Fallback to static workshops on error
-      setWorkshops(staticWorkshops);
+      setWorkshops(sortWorkshops(staticWorkshops));
     } finally {
       setLoading(false);
     }

@@ -39,20 +39,29 @@ export const contactInfo: ContactInfo = {
   vatId: "DE364014744",
 };
 
+// Workshop sort order: defines the display order of workshops
+const workshopOrder: Record<string, number> = {
+  "workshop-nur-keramik-bemalen-glasieren": 1, // Bestpreis Kurs
+  "topferscheibe-testen": 2, // Töpferscheibe TESTEN
+  "aufbau-workshop-1": 3, // Aufbau-Workshop 1
+  "keramik-bemalen-sonntag": 4, // Sonntags malen
+  "einsteiger-kurse-topferscheibe": 5, // Einsteiger Töpferscheibe
+  "aufbau-workshop-2": 6,
+  "gruppen-events-workshops": 7, // Gruppen Events (letzter Platz)
+};
+
+/**
+ * Sorts workshops according to the defined order
+ */
+export function sortWorkshops(workshops: Workshop[]): Workshop[] {
+  return [...workshops].sort((a, b) => {
+    const orderA = workshopOrder[a.id] ?? 999;
+    const orderB = workshopOrder[b.id] ?? 999;
+    return orderA - orderB;
+  });
+}
+
 export const workshops: Workshop[] = [
-  {
-    id: "workshop-nur-keramik-bemalen-glasieren",
-    title: "Workshop nur Keramik Bemalen-Glasieren",
-    description:
-      "Sonntag keine Eigenen Werke malen! Glasieren (Keramik bemalen) an einem Rohling – pro Person 39 Euro. Wähle aus verschiedenen Rohlingsformen wie Kaffeetassen, Müslischalen usw. ",
-    duration: "90 Minuten",
-    price: "39 € pro Person",
-    badgeText: "Best preis garantie in düsseldorf",
-    featured: true,
-    images: [
-      "/images/workshops/IMG_4035-738x1024.webp",
-    ],
-  },
   {
     id: "topferscheibe-testen",
     title: "Töpferscheibe TESTEN",
@@ -118,6 +127,19 @@ export const workshops: Workshop[] = [
     topOffer: true,
     images: [
       "/images/workshops/IMG_3906-712x1024 (1).webp",
+    ],
+  },
+  {
+    id: "workshop-nur-keramik-bemalen-glasieren",
+    title: "Workshop nur Keramik Bemalen-Glasieren",
+    description:
+      "Sonntag keine Eigenen Werke malen! Glasieren (Keramik bemalen) an einem Rohling – pro Person 39 Euro. Wähle aus verschiedenen Rohlingsformen wie Kaffeetassen, Müslischalen usw. ",
+    duration: "90 Minuten",
+    price: "39 € pro Person",
+    badgeText: "Best preis garantie in düsseldorf",
+    featured: true,
+    images: [
+      "/images/workshops/IMG_4035-738x1024.webp",
     ],
   },
   {

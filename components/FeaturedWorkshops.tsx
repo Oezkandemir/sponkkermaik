@@ -1,6 +1,6 @@
 "use client";
 
-import { workshops as staticWorkshops, type Workshop } from "@/lib/data";
+import { workshops as staticWorkshops, sortWorkshops, type Workshop } from "@/lib/data";
 import CourseCard from "@/components/CourseCard";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -34,7 +34,7 @@ export default function FeaturedWorkshops() {
         console.error("Error loading courses:", error);
         // Fallback to static featured workshops if database fails
         const featured = staticWorkshops.filter((w) => w.featured);
-        setWorkshops(featured);
+        setWorkshops(sortWorkshops(featured));
         return;
       }
 
@@ -65,15 +65,15 @@ export default function FeaturedWorkshops() {
       // If no featured workshops from database, fallback to static featured workshops
       if (featuredWorkshops.length === 0) {
         const staticFeatured = staticWorkshops.filter((w) => w.featured);
-        setWorkshops(staticFeatured);
+        setWorkshops(sortWorkshops(staticFeatured));
       } else {
-        setWorkshops(featuredWorkshops);
+        setWorkshops(sortWorkshops(featuredWorkshops));
       }
     } catch (err) {
       console.error("Error loading courses:", err);
       // Fallback to static featured workshops on error
       const featured = staticWorkshops.filter((w) => w.featured);
-      setWorkshops(featured);
+      setWorkshops(sortWorkshops(featured));
     } finally {
       setLoading(false);
     }
