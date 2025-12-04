@@ -20,3 +20,4 @@ COMMENT ON COLUMN bookings.source IS 'Source of the booking: internal (our syste
 COMMENT ON COLUMN bookings.cal_com_booking_id IS 'Original booking ID from Cal.com for reference';
 
 
+

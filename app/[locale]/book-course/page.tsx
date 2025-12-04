@@ -183,6 +183,11 @@ export default function BookCoursePage() {
       const courseSpecificSlots = courseSpecificResult.data || [];
       let globalSlots = globalResult.data || [];
       
+      // IMPORTANT: If a course has its own specific slots, use ONLY those and ignore global slots
+      // Global slots should only be used as fallback for courses without specific slots
+      // This ensures courses like "topferscheibe-testen" show their custom 2.5h slots, not the global 3h slots
+      const hasCourseSpecificSlots = courseSpecificSlots.length > 0;
+      
       // Special handling for "keramik-bemalen-sonntag": only load Sunday slots (day_of_week = 0)
       const isSundayWorkshop = courseId === "keramik-bemalen-sonntag";
       if (isSundayWorkshop) {
@@ -191,14 +196,41 @@ export default function BookCoursePage() {
         console.log(`[loadTimeSlots] Sonntags-Workshop erkannt: Filtere globale Slots auf Sonntage (day_of_week=0)`);
       }
       
-      const allSlots = [...courseSpecificSlots, ...globalSlots].sort((a, b) => {
-        // First sort by day_of_week
-        if (a.day_of_week !== b.day_of_week) {
-          return a.day_of_week - b.day_of_week;
+      // Use course-specific slots if available, otherwise fall back to global slots
+      // CRITICAL: Only use course-specific slots if they exist, completely ignore global slots
+      const allSlots = hasCourseSpecificSlots 
+        ? courseSpecificSlots.sort((a, b) => {
+            // First sort by day_of_week
+            if (a.day_of_week !== b.day_of_week) {
+              return a.day_of_week - b.day_of_week;
+            }
+            // Then sort by start_time
+            return a.start_time.localeCompare(b.start_time);
+          })
+        : globalSlots.sort((a, b) => {
+            // First sort by day_of_week
+            if (a.day_of_week !== b.day_of_week) {
+              return a.day_of_week - b.day_of_week;
+            }
+            // Then sort by start_time
+            return a.start_time.localeCompare(b.start_time);
+          });
+      
+      if (hasCourseSpecificSlots && globalSlots.length > 0) {
+        console.log(`[loadTimeSlots] ✅ Kurs hat eigene Slots (${courseSpecificSlots.length}), ignoriere globale Slots (${globalSlots.length})`);
+        console.log(`[loadTimeSlots] ✅ Verwende NUR kurs-spezifische Slots - globale Slots werden komplett ignoriert`);
+      }
+      
+      // Additional validation: ensure we're not mixing slots
+      if (hasCourseSpecificSlots) {
+        const allSlotsCourseIds = [...new Set(allSlots.map(s => s.course_id))];
+        if (allSlotsCourseIds.length > 1 || (allSlotsCourseIds.length === 1 && allSlotsCourseIds[0] !== courseId)) {
+          console.error(`[loadTimeSlots] ⚠️ FEHLER: Slots gemischt! courseIds in allSlots:`, allSlotsCourseIds);
+          console.error(`[loadTimeSlots] Erwartet: nur "${courseId}"`);
+        } else {
+          console.log(`[loadTimeSlots] ✅ Validierung: Alle Slots gehören zu Kurs "${courseId}"`);
         }
-        // Then sort by start_time
-        return a.start_time.localeCompare(b.start_time);
-      });
+      }
 
       // Debug: Log slots by day with day names
       const dayNames: Record<number, string> = {
@@ -220,7 +252,12 @@ export default function BookCoursePage() {
       console.log(`\n=== Zeitslots für Kurs: ${courseId} ===`);
       console.log(`Gesamt: ${allSlots.length} Zeitslots`);
       console.log(`  - Kurs-spezifisch: ${courseSpecificSlots.length}`);
-      console.log(`  - Global: ${globalSlots.length}`);
+      console.log(`  - Global verfügbar: ${globalSlots.length}`);
+      if (hasCourseSpecificSlots) {
+        console.log(`  ✅ Verwende NUR kurs-spezifische Slots (globale Slots werden ignoriert)`);
+      } else if (globalSlots.length > 0) {
+        console.log(`  ✅ Verwende globale Slots als Fallback (keine kurs-spezifischen Slots gefunden)`);
+      }
       
       if (courseSpecificSlots.length === 0 && globalSlots.length === 0) {
         console.warn(`⚠️ WARNUNG: Keine Zeitslots gefunden für Kurs ${courseId}!`);

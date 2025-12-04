@@ -75,3 +75,4 @@ CREATE TRIGGER update_newsletter_subscribers_updated_at
   EXECUTE FUNCTION update_newsletter_subscribers_updated_at();
 
 
+

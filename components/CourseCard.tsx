@@ -183,17 +183,27 @@ export default function CourseCard({ workshop }: CourseCardProps) {
       const courseSpecificSlots = courseSpecificResult.data || [];
       let globalSlots = globalResult.data || [];
       
+      // IMPORTANT: If a course has its own specific slots, use ONLY those and ignore global slots
+      // Global slots should only be used as fallback for courses without specific slots
+      // This ensures courses like "topferscheibe-testen" show their custom 2.5h slots, not the global 3h slots
+      const hasCourseSpecificSlots = courseSpecificSlots.length > 0;
+      
       const isSundayWorkshop = workshop.id === "keramik-bemalen-sonntag";
       if (isSundayWorkshop) {
         globalSlots = globalSlots.filter((slot) => slot.day_of_week === 0);
       }
       
-      const allSlots = [...courseSpecificSlots, ...globalSlots].sort((a, b) => {
+      // Use course-specific slots if available, otherwise fall back to global slots
+      const allSlots = (hasCourseSpecificSlots ? courseSpecificSlots : globalSlots).sort((a, b) => {
         if (a.day_of_week !== b.day_of_week) {
           return a.day_of_week - b.day_of_week;
         }
         return a.start_time.localeCompare(b.start_time);
       });
+      
+      if (hasCourseSpecificSlots && globalSlots.length > 0) {
+        console.log(`[CourseCard.loadTimeSlots] ✅ Kurs "${workshop.id}" hat eigene Slots (${courseSpecificSlots.length}), ignoriere globale Slots (${globalSlots.length})`);
+      }
       
       setTimeSlots(allSlots);
     } catch (err) {

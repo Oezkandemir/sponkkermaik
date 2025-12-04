@@ -321,7 +321,7 @@ export default function CourseScheduleManager({ courseId }: { courseId: string }
       // Get all existing schedules for this course to delete inactive ones and removed slots
       const { data: existing } = await supabase
         .from("course_schedule")
-        .select("id, day_of_week")
+        .select("id, day_of_week, start_time, end_time")
         .eq("course_id", courseId);
 
       const toDelete: string[] = [];
@@ -357,6 +357,29 @@ export default function CourseScheduleManager({ courseId }: { courseId: string }
 
         schedule.timeSlots.forEach((slot) => {
           if (slot.id) {
+            // Check if this slot's time has changed - if so, we need to delete old entries with same times
+            const existingSlot = existing?.find(
+              (e) => e.id === slot.id
+            );
+            
+            // If the times have changed, mark any other entries with the old times for deletion
+            if (existingSlot && 
+                (existingSlot.start_time !== slot.start_time || existingSlot.end_time !== slot.end_time)) {
+              // Find and mark duplicate entries with the new times (but different IDs) for deletion
+              existing
+                ?.filter((e) => 
+                  e.day_of_week === schedule.dayOfWeek &&
+                  e.id !== slot.id &&
+                  e.start_time === slot.start_time &&
+                  e.end_time === slot.end_time
+                )
+                .forEach((e) => {
+                  if (!toDelete.includes(e.id)) {
+                    toDelete.push(e.id);
+                  }
+                });
+            }
+            
             // Update existing
             toUpdate.push({
               id: slot.id,
@@ -367,14 +390,39 @@ export default function CourseScheduleManager({ courseId }: { courseId: string }
               is_active: true,
             });
           } else {
-            // Insert new
-            toInsert.push({
-              course_id: courseId,
-              day_of_week: schedule.dayOfWeek,
-              start_time: slot.start_time,
-              end_time: slot.end_time,
-              is_active: true,
-            });
+            // Before inserting new, check if there's already an entry with these exact times
+            // If so, delete it first to avoid duplicates
+            const duplicateEntry = existing?.find(
+              (e) =>
+                e.day_of_week === schedule.dayOfWeek &&
+                e.start_time === slot.start_time &&
+                e.end_time === slot.end_time
+            );
+            
+            if (duplicateEntry) {
+              // Mark duplicate for deletion instead of inserting
+              if (!toDelete.includes(duplicateEntry.id)) {
+                toDelete.push(duplicateEntry.id);
+              }
+              // Then update it instead of inserting
+              toUpdate.push({
+                id: duplicateEntry.id,
+                course_id: courseId,
+                day_of_week: schedule.dayOfWeek,
+                start_time: slot.start_time,
+                end_time: slot.end_time,
+                is_active: true,
+              });
+            } else {
+              // Insert new
+              toInsert.push({
+                course_id: courseId,
+                day_of_week: schedule.dayOfWeek,
+                start_time: slot.start_time,
+                end_time: slot.end_time,
+                is_active: true,
+              });
+            }
           }
         });
         
