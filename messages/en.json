@@ -362,9 +362,51 @@
     "uploading": "Uploading...",
     "avatarHint": "Max. 5MB, JPG, PNG, WebP or GIF",
     "memberSince": "Member Since",
+    "stats": {
+      "title": "Overview",
+      "upcomingBookings": "Upcoming Bookings",
+      "activeVouchers": "Active Vouchers",
+      "pastBookings": "Past Bookings",
+      "voucherValue": "Voucher Value"
+    },
+    "quickLinks": {
+      "title": "Quick Access",
+      "myBookings": "My Bookings",
+      "myVouchers": "My Vouchers",
+      "settings": "Settings"
+    },
+    "emailVerification": {
+      "verified": "Email Verified",
+      "notVerified": "Email Not Verified",
+      "resend": "Resend Verification Email",
+      "sending": "Sending...",
+      "sent": "Email sent!",
+      "error": "Error sending email"
+    },
+    "profileCompletion": {
+      "title": "Profile Completion",
+      "complete": "Profile Complete",
+      "incomplete": "Complete Profile",
+      "missingFields": "Missing Fields",
+      "name": "Name",
+      "phone": "Phone",
+      "avatar": "Avatar"
+    },
+    "recentActivity": {
+      "title": "Recent Activity",
+      "recentBookings": "Recent Bookings",
+      "recentVouchers": "Recently Purchased Vouchers",
+      "viewAll": "View All",
+      "noActivity": "No activity yet",
+      "booking": "Booking",
+      "bookings": "Bookings",
+      "voucher": "Voucher",
+      "vouchers": "Vouchers"
+    },
     "success": {
       "profileUpdated": "Profile updated successfully!",
-      "avatarUpdated": "Avatar updated successfully!"
+      "avatarUpdated": "Avatar updated successfully!",
+      "verificationEmailSent": "Verification email sent!"
     },
     "errors": {
       "invalidFileType": "Please select an image file.",

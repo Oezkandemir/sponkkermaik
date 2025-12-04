@@ -362,9 +362,51 @@
     "uploading": "Wird hochgeladen...",
     "avatarHint": "Max. 5MB, JPG, PNG, WebP oder GIF",
     "memberSince": "Mitglied seit",
+    "stats": {
+      "title": "Übersicht",
+      "upcomingBookings": "Bevorstehende Buchungen",
+      "activeVouchers": "Aktive Gutscheine",
+      "pastBookings": "Vergangene Buchungen",
+      "voucherValue": "Gutscheinwert"
+    },
+    "quickLinks": {
+      "title": "Schnellzugriff",
+      "myBookings": "Meine Buchungen",
+      "myVouchers": "Meine Gutscheine",
+      "settings": "Einstellungen"
+    },
+    "emailVerification": {
+      "verified": "E-Mail verifiziert",
+      "notVerified": "E-Mail nicht verifiziert",
+      "resend": "Verifizierungs-E-Mail erneut senden",
+      "sending": "Wird gesendet...",
+      "sent": "E-Mail wurde gesendet!",
+      "error": "Fehler beim Senden der E-Mail"
+    },
+    "profileCompletion": {
+      "title": "Profil-Vervollständigung",
+      "complete": "Profil vollständig",
+      "incomplete": "Profil vervollständigen",
+      "missingFields": "Fehlende Felder",
+      "name": "Name",
+      "phone": "Telefon",
+      "avatar": "Profilbild"
+    },
+    "recentActivity": {
+      "title": "Letzte Aktivität",
+      "recentBookings": "Kürzliche Buchungen",
+      "recentVouchers": "Kürzlich gekaufte Gutscheine",
+      "viewAll": "Alle anzeigen",
+      "noActivity": "Noch keine Aktivität",
+      "booking": "Buchung",
+      "bookings": "Buchungen",
+      "voucher": "Gutschein",
+      "vouchers": "Gutscheine"
+    },
     "success": {
       "profileUpdated": "Profil erfolgreich aktualisiert!",
-      "avatarUpdated": "Profilbild erfolgreich aktualisiert!"
+      "avatarUpdated": "Profilbild erfolgreich aktualisiert!",
+      "verificationEmailSent": "Verifizierungs-E-Mail wurde gesendet!"
     },
     "errors": {
       "invalidFileType": "Bitte wählen Sie eine Bilddatei aus.",
