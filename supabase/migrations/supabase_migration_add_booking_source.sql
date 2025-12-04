@@ -19,3 +19,4 @@ CREATE INDEX IF NOT EXISTS idx_bookings_cal_com_booking_id ON bookings(cal_com_b
 COMMENT ON COLUMN bookings.source IS 'Source of the booking: internal (our system) or cal.com';
 COMMENT ON COLUMN bookings.cal_com_booking_id IS 'Original booking ID from Cal.com for reference';
 
+
