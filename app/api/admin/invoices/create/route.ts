@@ -127,11 +127,15 @@ export async function POST(request: NextRequest) {
         }
 
         // Get course price if not provided
-        if (!bookingCoursePrice && bookingData.course_schedule?.course_id) {
+        const courseSchedule = Array.isArray(bookingData.course_schedule) 
+          ? bookingData.course_schedule[0] 
+          : bookingData.course_schedule;
+        
+        if (!bookingCoursePrice && courseSchedule?.course_id) {
           const { data: courseData } = await supabase
             .from("courses")
             .select("price")
-            .eq("id", bookingData.course_schedule.course_id)
+            .eq("id", courseSchedule.course_id)
             .single();
 
           if (courseData?.price) {

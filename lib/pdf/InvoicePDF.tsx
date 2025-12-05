@@ -242,7 +242,7 @@ interface Invoice {
 /**
  * Extracts participant data from notes field
  */
-function extractParticipantData(notes: string | null): {
+function extractParticipantData(notes: string | null | undefined): {
   participants: number;
   participant_names: string[];
   course_price_per_person: number;
@@ -266,7 +266,7 @@ function extractParticipantData(notes: string | null): {
  * Cleans notes by removing participant data JSON and participant list
  * when participants are already shown in invoice items
  */
-function cleanNotesForDisplay(notes: string | null, hasMultipleParticipants: boolean): string | null {
+function cleanNotesForDisplay(notes: string | null | undefined, hasMultipleParticipants: boolean): string | null {
   if (!notes) return null;
   
   let cleaned = notes;
@@ -310,7 +310,7 @@ function cleanNotesForDisplay(notes: string | null, hasMultipleParticipants: boo
 export const InvoiceDocument = ({ invoice }: { invoice: Invoice }) => {
   // Extract participant data from notes
   const participantData = extractParticipantData(invoice.notes);
-  const hasMultipleParticipants = participantData && participantData.participants > 1;
+  const hasMultipleParticipants = Boolean(participantData && participantData.participants > 1);
   
   // Clean notes for display (remove participant data and participant list)
   const cleanedNotes = cleanNotesForDisplay(invoice.notes, hasMultipleParticipants);

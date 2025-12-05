@@ -60,7 +60,10 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const isPreview = searchParams.get("preview") === "true";
 
-    return new NextResponse(pdfBuffer, {
+    // Convert Buffer to Uint8Array for NextResponse
+    const uint8Array = new Uint8Array(pdfBuffer);
+
+    return new NextResponse(uint8Array, {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": isPreview 

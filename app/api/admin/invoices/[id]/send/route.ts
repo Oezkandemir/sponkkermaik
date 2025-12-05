@@ -51,8 +51,9 @@ export async function POST(
     }
 
     // Generate PDF using @react-pdf/renderer
+    // Type assertion needed because renderToBuffer expects DocumentProps but InvoiceDocument is a function component
     const pdfBuffer = await renderToBuffer(
-      React.createElement(InvoiceDocument, { invoice })
+      React.createElement(InvoiceDocument, { invoice }) as any
     );
 
     // Convert PDF to base64 for email attachment
