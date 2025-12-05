@@ -51,8 +51,9 @@ export async function GET(
     }
 
     // Generate PDF using @react-pdf/renderer
+    // Type assertion needed because renderToBuffer expects DocumentProps but InvoiceDocument is a function component
     const pdfBuffer = await renderToBuffer(
-      React.createElement(InvoiceDocument, { invoice })
+      React.createElement(InvoiceDocument, { invoice }) as any
     );
 
     // Check if this is a preview request (from iframe) or download request
