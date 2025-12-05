@@ -47,6 +47,7 @@ export default function CourseScheduleManager({ courseId }: { courseId: string }
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [sourceDayForApply, setSourceDayForApply] = useState<number | null>(null);
+  const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set());
   const [firstSundaySchedule, setFirstSundaySchedule] = useState<FirstSundaySchedule>({
     isActive: false,
     timeSlots: [],
@@ -143,6 +144,21 @@ export default function CourseScheduleManager({ courseId }: { courseId: string }
     } finally {
       setLoading(false);
     }
+  };
+
+  /**
+   * Toggles day expansion
+   */
+  const toggleDayExpansion = (dayOfWeek: number) => {
+    setExpandedDays((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(dayOfWeek)) {
+        newSet.delete(dayOfWeek);
+      } else {
+        newSet.add(dayOfWeek);
+      }
+      return newSet;
+    });
   };
 
   /**
@@ -637,130 +653,201 @@ export default function CourseScheduleManager({ courseId }: { courseId: string }
       )}
 
       <div className="space-y-4 overflow-x-hidden">
-        {schedules.map((schedule) => (
-          <div
-            key={schedule.dayOfWeek}
-            className="bg-gray-900 rounded-lg p-3 sm:p-4 border border-gray-700"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
-              <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
-                <span className="text-white font-medium min-w-0 sm:min-w-[120px]">
-                  {schedule.dayName}
-                </span>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={schedule.isActive}
-                    onChange={() => toggleDay(schedule.dayOfWeek)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-white"></div>
-                </label>
-                {schedule.isActive && schedule.timeSlots.length > 0 && (
-                  <button
-                    onClick={() => {
-                      setSourceDayForApply(schedule.dayOfWeek);
-                      setShowApplyModal(true);
-                    }}
-                    className="px-3 py-1.5 text-sm bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center gap-2"
-                    title={t("applyToOtherDays")}
-                  >
+        {schedules.map((schedule) => {
+          const isExpanded = expandedDays.has(schedule.dayOfWeek);
+          
+          return (
+            <div
+              key={schedule.dayOfWeek}
+              className={`bg-white border-2 rounded-lg transition-all ${
+                schedule.isActive
+                  ? "border-green-300 hover:border-green-400"
+                  : "border-gray-300 hover:border-gray-400"
+              } ${isExpanded ? "shadow-md" : "hover:shadow-sm"}`}
+            >
+              {/* Accordion Header - Always Visible */}
+              <button
+                onClick={() => toggleDayExpansion(schedule.dayOfWeek)}
+                className="w-full p-4 sm:p-5 text-left focus:outline-none focus:ring-2 focus:ring-amber-500 rounded-lg"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  {/* Left Side - Main Info */}
+                  <div className="flex-1 min-w-0 flex items-center gap-3 sm:gap-4 flex-wrap">
+                    <span className="text-base sm:text-lg font-semibold text-gray-900 min-w-0 sm:min-w-[120px]">
+                      {schedule.dayName}
+                    </span>
+                    <label 
+                      className="relative inline-flex items-center cursor-pointer"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={schedule.isActive}
+                        onChange={() => toggleDay(schedule.dayOfWeek)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                      <span className="ml-2 text-sm text-gray-600">
+                        {schedule.isActive ? "Aktiv" : "Inaktiv"}
+                      </span>
+                    </label>
+                    {schedule.isActive && schedule.timeSlots.length > 0 && (
+                      <span className="px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
+                        {schedule.timeSlots.length} Zeit{schedule.timeSlots.length !== 1 ? "fenster" : "fenster"}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Right Side - Expand Icon */}
+                  <div className="flex-shrink-0">
                     <svg
-                      className="w-4 h-4"
+                      className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
-                    {t("applyToOtherDays")}
-                  </button>
-                )}
-              </div>
-            </div>
+                  </div>
+                </div>
+              </button>
 
-            {schedule.isActive && (
-              <div className="space-y-2 mt-4">
-                {schedule.timeSlots.map((slot, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-gray-800 rounded-lg p-3"
-                  >
-                    <input
-                      type="time"
-                      value={slot.start_time}
-                      onChange={(e) =>
-                        updateTimeSlot(
-                          schedule.dayOfWeek,
-                          index,
-                          "start_time",
-                          e.target.value
-                        )
-                      }
-                      className="bg-gray-700 text-white rounded px-3 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                    <span className="text-white">-</span>
-                    <input
-                      type="time"
-                      value={slot.end_time}
-                      onChange={(e) =>
-                        updateTimeSlot(
-                          schedule.dayOfWeek,
-                          index,
-                          "end_time",
-                          e.target.value
-                        )
-                      }
-                      className="bg-gray-700 text-white rounded px-3 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                    <div className="flex items-center gap-2 sm:ml-auto w-full sm:w-auto justify-end">
-                      <button
-                        onClick={() => addTimeSlot(schedule.dayOfWeek)}
-                        className="text-white hover:text-amber-400 transition-colors"
-                        title={t("addTimeSlot")}
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
+              {/* Accordion Content - Expandable */}
+              {isExpanded && (
+                <div className="px-4 sm:px-5 pb-4 sm:pb-5 border-t border-gray-200 pt-4 space-y-4">
+                  {schedule.isActive && (
+                    <div className="space-y-2">
+                      {schedule.timeSlots.map((slot, index) => (
+                        <div
+                          key={index}
+                          className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-gray-50 rounded-lg p-3 border border-gray-200"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 4v16m8-8H4"
+                          <input
+                            type="time"
+                            value={slot.start_time}
+                            onChange={(e) =>
+                              updateTimeSlot(
+                                schedule.dayOfWeek,
+                                index,
+                                "start_time",
+                                e.target.value
+                              )
+                            }
+                            className="bg-white text-gray-900 rounded px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500"
                           />
-                        </svg>
-                      </button>
-                      {schedules.some(
-                        (s) =>
-                          s.dayOfWeek !== schedule.dayOfWeek &&
-                          s.isActive &&
-                          s.timeSlots.length > 0
-                      ) && (
-                        <button
-                          onClick={() => {
-                            const sourceDay = schedules.find(
+                          <span className="text-gray-600 self-center">-</span>
+                          <input
+                            type="time"
+                            value={slot.end_time}
+                            onChange={(e) =>
+                              updateTimeSlot(
+                                schedule.dayOfWeek,
+                                index,
+                                "end_time",
+                                e.target.value
+                              )
+                            }
+                            className="bg-white text-gray-900 rounded px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          />
+                          <div className="flex items-center gap-2 sm:ml-auto w-full sm:w-auto justify-end">
+                            <button
+                              onClick={() => addTimeSlot(schedule.dayOfWeek)}
+                              className="text-gray-600 hover:text-amber-600 transition-colors"
+                              title={t("addTimeSlot")}
+                            >
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 4v16m8-8H4"
+                                />
+                              </svg>
+                            </button>
+                            {schedules.some(
                               (s) =>
                                 s.dayOfWeek !== schedule.dayOfWeek &&
                                 s.isActive &&
                                 s.timeSlots.length > 0
-                            )?.dayOfWeek;
-                            if (sourceDay !== undefined) {
-                              copyTimeSlots(sourceDay, schedule.dayOfWeek);
-                            }
+                            ) && (
+                              <button
+                                onClick={() => {
+                                  const sourceDay = schedules.find(
+                                    (s) =>
+                                      s.dayOfWeek !== schedule.dayOfWeek &&
+                                      s.isActive &&
+                                      s.timeSlots.length > 0
+                                  )?.dayOfWeek;
+                                  if (sourceDay !== undefined) {
+                                    copyTimeSlots(sourceDay, schedule.dayOfWeek);
+                                  }
+                                }}
+                                className="text-gray-600 hover:text-amber-600 transition-colors"
+                                title={t("copyTimeSlots")}
+                              >
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                  />
+                                </svg>
+                              </button>
+                            )}
+                            {schedule.timeSlots.length > 1 && (
+                              <button
+                                onClick={() => removeTimeSlot(schedule.dayOfWeek, index)}
+                                className="text-gray-600 hover:text-red-600 transition-colors"
+                                title={t("removeTimeSlot")}
+                              >
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                  />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      {schedule.timeSlots.length === 0 && (
+                        <button
+                          onClick={() => addTimeSlot(schedule.dayOfWeek)}
+                          className="w-full bg-gray-50 text-gray-700 rounded-lg p-3 hover:bg-gray-100 transition-colors border border-dashed border-gray-300"
+                        >
+                          {t("addFirstTimeSlot")}
+                        </button>
+                      )}
+                      {schedule.isActive && schedule.timeSlots.length > 0 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSourceDayForApply(schedule.dayOfWeek);
+                            setShowApplyModal(true);
                           }}
-                          className="text-white hover:text-amber-400 transition-colors"
-                          title={t("copyTimeSlots")}
+                          className="w-full px-3 py-2 text-sm bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center gap-2"
                         >
                           <svg
-                            className="w-5 h-5"
+                            className="w-4 h-4"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -769,45 +856,24 @@ export default function CourseScheduleManager({ courseId }: { courseId: string }
                               strokeLinecap="round"
                               strokeLinejoin="round"
                               strokeWidth={2}
-                              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
                             />
                           </svg>
+                          {t("applyToOtherDays")}
                         </button>
                       )}
-                      <button
-                        onClick={() => removeTimeSlot(schedule.dayOfWeek, index)}
-                        className="text-white hover:text-red-400 transition-colors"
-                        title={t("removeTimeSlot")}
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                      </button>
                     </div>
-                  </div>
-                ))}
-                {schedule.timeSlots.length === 0 && (
-                  <button
-                    onClick={() => addTimeSlot(schedule.dayOfWeek)}
-                    className="w-full bg-gray-800 text-white rounded-lg p-3 hover:bg-gray-700 transition-colors border border-dashed border-gray-600"
-                  >
-                    {t("addFirstTimeSlot")}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
+                  )}
+                  {!schedule.isActive && (
+                    <div className="text-sm text-gray-500 text-center py-2">
+                      Tag ist deaktiviert. Aktivieren Sie den Tag, um Zeitfenster hinzuzufügen.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
 
         {/* First Sunday of Month Schedule - Only for keramik-bemalen-sonntag */}
         {courseId === "keramik-bemalen-sonntag" && (

@@ -35,6 +35,7 @@ export default function AdminCoursesManager() {
   const [filterBy, setFilterBy] = useState<"all" | "active" | "inactive">("all");
   const [sortBy, setSortBy] = useState<"title" | "price" | "bookings" | "created">("title");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
 
   // Form state
   const [formData, setFormData] = useState({
@@ -246,6 +247,21 @@ export default function AdminCoursesManager() {
   };
 
   /**
+   * Toggles course expansion
+   */
+  const toggleCourseExpansion = (courseId: string) => {
+    setExpandedCourses((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(courseId)) {
+        newSet.delete(courseId);
+      } else {
+        newSet.add(courseId);
+      }
+      return newSet;
+    });
+  };
+
+  /**
    * Toggles course active status
    */
   const toggleCourseStatus = async (course: Course) => {
@@ -442,110 +458,160 @@ export default function AdminCoursesManager() {
         </div>
       </div>
 
-      {/* Courses Grid */}
+      {/* Courses List with Accordion */}
       {filteredAndSortedCourses.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <p className="text-gray-500">{t("noCourses")}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredAndSortedCourses.map((course) => (
-            <div
-              key={course.id}
-              className={`bg-white rounded-lg shadow-md p-6 border-2 transition-all hover:shadow-lg ${
-                course.is_active
-                  ? "border-green-200 hover:border-green-300"
-                  : "border-gray-300 bg-gray-50"
-              }`}
-            >
-              {/* Course Header */}
-              <div className="flex items-start justify-between mb-3">
-                <h3 className="text-lg font-semibold text-gray-900 flex-1 pr-2">
-                  {course.title}
-                </h3>
-                <div className="flex flex-col gap-1 items-end">
-                  <span
-                    className={`px-2 py-1 text-xs font-medium rounded whitespace-nowrap ${
-                      course.is_active
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    {course.is_active ? t("active") : t("inactive")}
-                  </span>
-                  {course.bookings_count !== undefined && course.bookings_count > 0 && (
-                    <span className="px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
-                      {course.bookings_count} Buchung{course.bookings_count !== 1 ? "en" : ""}
-                    </span>
-                  )}
-                </div>
-              </div>
+        <div className="space-y-4">
+          {filteredAndSortedCourses.map((course) => {
+            const isExpanded = expandedCourses.has(course.id);
+            
+            return (
+              <div
+                key={course.id}
+                className={`bg-white border-2 rounded-lg transition-all ${
+                  course.is_active
+                    ? "border-green-300 hover:border-green-400"
+                    : "border-gray-300 hover:border-gray-400"
+                } ${isExpanded ? "shadow-md" : "hover:shadow-sm"}`}
+              >
+                {/* Accordion Header - Always Visible */}
+                <button
+                  onClick={() => toggleCourseExpansion(course.id)}
+                  className="w-full p-4 sm:p-5 text-left focus:outline-none focus:ring-2 focus:ring-amber-500 rounded-lg"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    {/* Left Side - Main Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 break-words">
+                          {course.title}
+                        </h3>
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded whitespace-nowrap ${
+                            course.is_active
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {course.is_active ? t("active") : t("inactive")}
+                        </span>
+                        {course.bookings_count !== undefined && course.bookings_count > 0 && (
+                          <span className="px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
+                            {course.bookings_count} Buchung{course.bookings_count !== 1 ? "en" : ""}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Key Info Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 text-sm">
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-gray-600">{course.duration}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-gray-600 font-semibold">{course.price}</span>
+                        </div>
+                        {course.day && (
+                          <div className="flex items-center gap-2">
+                            <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span className="text-gray-600">{course.day}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Right Side - Expand Icon */}
+                    <div className="flex-shrink-0">
+                      <svg
+                        className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
 
-              {/* Description */}
-              <p className="text-sm text-gray-600 mb-4 line-clamp-3 min-h-[60px]">
-                {course.description}
-              </p>
+                {/* Accordion Content - Expandable */}
+                {isExpanded && (
+                  <div className="px-4 sm:px-5 pb-4 sm:pb-5 border-t border-gray-200 pt-4 space-y-4">
+                    {/* Description */}
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="text-xs text-gray-500 mb-1">Beschreibung</div>
+                      <p className="text-sm text-gray-900 whitespace-pre-wrap">{course.description}</p>
+                    </div>
 
-              {/* Course Details */}
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center justify-between bg-gray-50 rounded-lg p-2">
-                  <span className="text-xs font-medium text-gray-700">{t("duration")}:</span>
-                  <span className="text-sm text-gray-900 font-semibold">{course.duration}</span>
-                </div>
-                <div className="flex items-center justify-between bg-amber-50 rounded-lg p-2">
-                  <span className="text-xs font-medium text-gray-700">{t("price")}:</span>
-                  <span className="text-sm text-amber-700 font-bold">{course.price}</span>
-                </div>
-                {course.day && (
-                  <div className="flex items-center justify-between bg-gray-50 rounded-lg p-2">
-                    <span className="text-xs font-medium text-gray-700">{t("day")}:</span>
-                    <span className="text-sm text-gray-900">{course.day}</span>
+                    {/* Actions */}
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditModal(course);
+                        }}
+                        className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        {t("edit")}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleCourseStatus(course);
+                        }}
+                        className={`px-4 py-2 text-sm rounded transition-colors flex items-center gap-2 ${
+                          course.is_active
+                            ? "bg-yellow-600 text-white hover:bg-yellow-700"
+                            : "bg-green-600 text-white hover:bg-green-700"
+                        }`}
+                      >
+                        {course.is_active ? (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                            </svg>
+                            Deaktivieren
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Aktivieren
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDeleteModal(course);
+                        }}
+                        className="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Löschen
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
-
-              {/* Actions */}
-              <div className="flex gap-2 pt-4 border-t border-gray-200">
-                <button
-                  onClick={() => openEditModal(course)}
-                  className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center justify-center gap-1"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                  {t("edit")}
-                </button>
-                <button
-                  onClick={() => toggleCourseStatus(course)}
-                  className={`px-3 py-2 text-sm rounded transition-colors flex items-center justify-center ${
-                    course.is_active
-                      ? "bg-yellow-600 text-white hover:bg-yellow-700"
-                      : "bg-green-600 text-white hover:bg-green-700"
-                  }`}
-                  title={course.is_active ? "Deaktivieren" : "Aktivieren"}
-                >
-                  {course.is_active ? (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                </button>
-                <button
-                  onClick={() => openDeleteModal(course)}
-                  className="px-3 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center justify-center"
-                  title="Löschen"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

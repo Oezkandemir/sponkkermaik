@@ -44,6 +44,7 @@ export default function DateOverrideManager({ courseId }: { courseId: string }) 
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
   const [showCourseSelector, setShowCourseSelector] = useState<string | null>(null);
+  const [expandedOverrides, setExpandedOverrides] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadOverrides();
@@ -382,6 +383,21 @@ export default function DateOverrideManager({ courseId }: { courseId: string }) 
   };
 
   /**
+   * Toggles override expansion
+   */
+  const toggleOverrideExpansion = (overrideId: string) => {
+    setExpandedOverrides((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(overrideId)) {
+        newSet.delete(overrideId);
+      } else {
+        newSet.add(overrideId);
+      }
+      return newSet;
+    });
+  };
+
+  /**
    * Deletes a date override
    */
   const deleteOverride = async (overrideId: string) => {
@@ -463,107 +479,190 @@ export default function DateOverrideManager({ courseId }: { courseId: string }) 
           <p>Keine Datumsüberschreibungen vorhanden</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {overrides.map((override) => (
-            <div
-              key={override.id}
-              className="bg-white border border-gray-200 rounded-lg p-4 flex items-start justify-between"
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="font-semibold text-gray-900">
-                    {new Date(override.override_date).toLocaleDateString("de-DE", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
-                  {override.is_available ? (
-                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
-                      Verfügbar
-                    </span>
-                  ) : (
-                    <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded">
-                      Nicht verfügbar
-                    </span>
-                  )}
-                </div>
-                {override.is_available && override.timeSlots.length > 0 && (
-                  <div className="mt-2 space-y-1">
-                    {override.timeSlots.map((slot, index) => (
-                      <div key={index} className="text-sm text-gray-600">
-                        {slot.start_time} - {slot.end_time}
+        <div className="space-y-4">
+          {overrides.map((override) => {
+            const isExpanded = expandedOverrides.has(override.id);
+            const dateString = new Date(override.override_date).toLocaleDateString("de-DE", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            });
+            
+            return (
+              <div
+                key={override.id}
+                className={`bg-white border-2 rounded-lg transition-all ${
+                  override.is_available
+                    ? "border-green-300 hover:border-green-400"
+                    : "border-red-300 hover:border-red-400"
+                } ${isExpanded ? "shadow-md" : "hover:shadow-sm"}`}
+              >
+                {/* Accordion Header - Always Visible */}
+                <button
+                  onClick={() => toggleOverrideExpansion(override.id)}
+                  className="w-full p-4 sm:p-5 text-left focus:outline-none focus:ring-2 focus:ring-amber-500 rounded-lg"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    {/* Left Side - Main Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 break-words">
+                          {dateString}
+                        </h3>
+                        {override.is_available ? (
+                          <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded whitespace-nowrap">
+                            Verfügbar
+                          </span>
+                        ) : (
+                          <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded whitespace-nowrap">
+                            Nicht verfügbar
+                          </span>
+                        )}
+                        {override.is_available && override.timeSlots.length > 0 && (
+                          <span className="px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
+                            {override.timeSlots.length} Zeit{override.timeSlots.length !== 1 ? "fenster" : "fenster"}
+                          </span>
+                        )}
+                        {override.appliedToCourses && override.appliedToCourses.length > 0 && (
+                          <span className="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">
+                            {override.appliedToCourses.length} Kurs{override.appliedToCourses.length !== 1 ? "e" : ""}
+                          </span>
+                        )}
                       </div>
-                    ))}
+                      
+                      {/* Preview Info */}
+                      {override.is_available && override.timeSlots.length > 0 && !isExpanded && (
+                        <div className="text-sm text-gray-600 mt-2">
+                          {override.timeSlots.slice(0, 2).map((slot, index) => (
+                            <span key={index} className="mr-3">
+                              {slot.start_time} - {slot.end_time}
+                            </span>
+                          ))}
+                          {override.timeSlots.length > 2 && (
+                            <span className="text-gray-500">+{override.timeSlots.length - 2} weitere</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Right Side - Expand Icon */}
+                    <div className="flex-shrink-0 flex items-center gap-2">
+                      <svg
+                        className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Accordion Content - Expandable */}
+                {isExpanded && (
+                  <div className="px-4 sm:px-5 pb-4 sm:pb-5 border-t border-gray-200 pt-4 space-y-4">
+                    {/* Time Slots */}
+                    {override.is_available && override.timeSlots.length > 0 && (
+                      <div className="bg-gray-50 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 mb-2 font-medium">Zeitfenster</div>
+                        <div className="space-y-2">
+                          {override.timeSlots.map((slot, index) => (
+                            <div key={index} className="flex items-center gap-2 text-sm text-gray-900 bg-white rounded p-2">
+                              <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span>{slot.start_time} - {slot.end_time}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Applied to courses */}
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-xs text-gray-500 font-medium">Angewendet auf Kurse</div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCourseIds([]);
+                            setShowCourseSelector(override.id);
+                          }}
+                          className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                          Kurse hinzufügen
+                        </button>
+                      </div>
+                      {override.appliedToCourses && override.appliedToCourses.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {override.appliedToCourses.map((cid) => {
+                            const course = courses.find((c) => c.id === cid);
+                            return (
+                              <span
+                                key={cid}
+                                className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded border border-blue-200"
+                              >
+                                {course?.title || cid}
+                                {cid !== courseId && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      removeOverrideFromCourse(override.override_date, cid);
+                                    }}
+                                    className="hover:text-red-600 transition-colors"
+                                    title="Entfernen"
+                                  >
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                )}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-gray-500">Noch keine Kurse zugewiesen</p>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex justify-end pt-2 border-t border-gray-200">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (confirm("Möchten Sie diese Datumsüberschreibung wirklich löschen?")) {
+                            deleteOverride(override.id);
+                          }
+                        }}
+                        className="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center gap-2"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                        Löschen
+                      </button>
+                    </div>
                   </div>
                 )}
-                {/* Applied to courses */}
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-medium text-gray-700">Angewendet auf:</span>
-                    <button
-                      onClick={() => {
-                        setSelectedCourseIds([]);
-                        setShowCourseSelector(override.id);
-                      }}
-                      className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                      Kurse hinzufügen
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {override.appliedToCourses?.map((cid) => {
-                      const course = courses.find((c) => c.id === cid);
-                      return (
-                        <span
-                          key={cid}
-                          className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded"
-                        >
-                          {course?.title || cid}
-                          {cid !== courseId && (
-                            <button
-                              onClick={() => removeOverrideFromCourse(override.override_date, cid)}
-                              className="hover:text-red-600"
-                              title="Entfernen"
-                            >
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                            </button>
-                          )}
-                        </span>
-                      );
-                    })}
-                  </div>
-                </div>
               </div>
-              <div className="flex flex-col gap-2 ml-4">
-                <button
-                  onClick={() => deleteOverride(override.id)}
-                  className="text-red-600 hover:text-red-800 transition-colors"
-                  title="Löschen"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

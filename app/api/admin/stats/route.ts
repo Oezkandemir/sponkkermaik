@@ -62,27 +62,43 @@ export async function GET() {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const today = new Date().toISOString().split("T")[0];
-    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0];
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const todayStart = today.toISOString();
+    const todayEnd = new Date(today);
+    todayEnd.setDate(todayEnd.getDate() + 1);
+    const todayEndStr = todayEnd.toISOString();
+    
+    const yesterdayStart = yesterday.toISOString();
+    const yesterdayEnd = today.toISOString();
+    
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-    const startOfWeekStr = startOfWeek.toISOString().split("T")[0];
+    startOfWeek.setHours(0, 0, 0, 0);
+    const startOfWeekStr = startOfWeek.toISOString();
 
     // Execute multiple queries in parallel for better performance
     const [
       { data: todayBookings, error: todayError },
-      { data: pendingBookings, error: pendingError },
+      { data: yesterdayBookings, error: yesterdayError },
       { data: activeVouchers, error: vouchersError },
     ] = await Promise.all([
       supabase
         .from("bookings")
-        .select("id, status, booking_date")
-        .eq("booking_date", today)
+        .select("id, status, created_at")
+        .gte("created_at", todayStart)
+        .lt("created_at", todayEndStr)
         .neq("status", "cancelled"),
       supabase
         .from("bookings")
-        .select("id")
-        .eq("status", "pending"),
+        .select("id, status, created_at")
+        .gte("created_at", yesterdayStart)
+        .lt("created_at", yesterdayEnd)
+        .neq("status", "cancelled"),
       supabase
         .from("vouchers")
         .select("id, value, status")
@@ -90,7 +106,7 @@ export async function GET() {
     ]);
 
     if (todayError) throw todayError;
-    if (pendingError) throw pendingError;
+    if (yesterdayError) throw yesterdayError;
     if (vouchersError) throw vouchersError;
 
     // Execute revenue queries in parallel
@@ -187,7 +203,7 @@ export async function GET() {
 
     return NextResponse.json({
       todayBookings: todayBookings?.length || 0,
-      pendingConfirmations: pendingBookings?.length || 0,
+      yesterdayBookings: yesterdayBookings?.length || 0,
       activeVouchers: activeVouchers?.length || 0,
       monthlyRevenue: monthlyRevenue,
       monthlyBookingRevenue: monthlyBookingRevenue,

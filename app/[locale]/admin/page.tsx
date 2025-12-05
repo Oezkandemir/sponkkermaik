@@ -45,6 +45,7 @@ export default function AdminPage() {
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [showApplyToAllModal, setShowApplyToAllModal] = useState(false);
   const [applyingToAll, setApplyingToAll] = useState(false);
+  const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<"dashboard" | "bookings" | "courses" | "vouchers" | "courseManagement" | "users" | "newsletter" | "calendar" | "invoices">("dashboard");
   const supabase = createClient();
 
@@ -494,90 +495,159 @@ export default function AdminPage() {
 
           {/* Courses Tab */}
           {activeTab === "courses" && (
-            <>
-              {/* Course Selection */}
-              <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-                  {t("selectCourse")}
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {courses.map((course) => (
-                    <button
-                      key={course.id}
-                      onClick={() => setSelectedCourseId(course.id)}
-                      className={`p-4 rounded-lg border-2 transition-all text-left ${
-                        selectedCourseId === course.id
-                          ? "border-amber-600 bg-amber-50"
-                          : "border-gray-200 hover:border-gray-300 bg-white"
-                      }`}
-                    >
-                      <h3 className="font-bold text-gray-900 mb-1">{course.title}</h3>
-                      <p className="text-sm text-gray-600 line-clamp-2 mb-2">
-                        {course.description}
+            <div className="space-y-4">
+              {/* Header with Apply to All Button */}
+              {courses.length > 1 && (
+                <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                        {t("selectCourse")}
+                      </h2>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Klicken Sie auf einen Kurs, um dessen Zeitpläne zu verwalten
                       </p>
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <span>{course.duration}</span>
-                        <span>•</span>
-                        <span>{course.price}</span>
-                        {course.day && (
-                          <>
-                            <span>•</span>
-                            <span>{course.day}</span>
-                          </>
-                        )}
-                      </div>
-                      {course.id === "keramik-bemalen-sonntag" && (
-                        <span className="inline-block mt-2 px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded">
-                          {t("firstSundayAvailable")}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Course Schedule Manager */}
-              {selectedCourseId && (
-                <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
-                  <div className="mb-4 sm:mb-6 pb-4 border-b border-gray-200">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 break-words">
-                          {courses.find((c) => c.id === selectedCourseId)?.title}
-                        </h2>
-                        <p className="text-sm sm:text-base text-gray-600 mt-1 break-words">
-                          {courses.find((c) => c.id === selectedCourseId)?.description}
-                        </p>
-                      </div>
-                      {courses.length > 1 && (
-                        <button
-                          onClick={() => setShowApplyToAllModal(true)}
-                          disabled={applyingToAll}
-                          className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap text-sm sm:text-base"
-                          title={t("applyToAllCourses")}
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                            />
-                          </svg>
-                          {applyingToAll ? t("applying") : t("applyToAllCourses")}
-                        </button>
-                      )}
                     </div>
+                    <button
+                      onClick={() => setShowApplyToAllModal(true)}
+                      disabled={applyingToAll}
+                      className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap text-sm sm:text-base"
+                      title={t("applyToAllCourses")}
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                        />
+                      </svg>
+                      {applyingToAll ? t("applying") : t("applyToAllCourses")}
+                    </button>
                   </div>
-                  <CourseScheduleManager courseId={selectedCourseId} />
                 </div>
               )}
-            </>
+
+              {/* Courses Accordion List */}
+              {courses.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                  <p className="text-gray-500">Keine Kurse vorhanden</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {courses.map((course) => {
+                    const isExpanded = expandedCourses.has(course.id);
+                    
+                    return (
+                      <div
+                        key={course.id}
+                        className={`bg-white border-2 rounded-lg transition-all ${
+                          course.is_active
+                            ? "border-green-300 hover:border-green-400"
+                            : "border-gray-300 hover:border-gray-400"
+                        } ${isExpanded ? "shadow-md" : "hover:shadow-sm"}`}
+                      >
+                        {/* Accordion Header - Always Visible */}
+                        <button
+                          onClick={() => {
+                            setExpandedCourses((prev) => {
+                              const newSet = new Set(prev);
+                              if (newSet.has(course.id)) {
+                                newSet.delete(course.id);
+                                setSelectedCourseId(null);
+                              } else {
+                                newSet.add(course.id);
+                                setSelectedCourseId(course.id);
+                              }
+                              return newSet;
+                            });
+                          }}
+                          className="w-full p-4 sm:p-5 text-left focus:outline-none focus:ring-2 focus:ring-amber-500 rounded-lg"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            {/* Left Side - Main Info */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                                <h3 className="text-base sm:text-lg font-semibold text-gray-900 break-words">
+                                  {course.title}
+                                </h3>
+                                <span
+                                  className={`px-2 py-1 text-xs font-medium rounded whitespace-nowrap ${
+                                    course.is_active
+                                      ? "bg-green-100 text-green-700"
+                                      : "bg-gray-100 text-gray-700"
+                                  }`}
+                                >
+                                  {course.is_active ? "Aktiv" : "Inaktiv"}
+                                </span>
+                                {course.id === "keramik-bemalen-sonntag" && (
+                                  <span className="px-2 py-1 text-xs font-medium rounded bg-purple-100 text-purple-700">
+                                    Erster Sonntag verfügbar
+                                  </span>
+                                )}
+                              </div>
+                              
+                              {/* Key Info Grid */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 text-sm">
+                                <div className="flex items-center gap-2">
+                                  <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  <span className="text-gray-600">{course.duration}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  <span className="text-gray-600 font-semibold">{course.price}</span>
+                                </div>
+                                {course.day && (
+                                  <div className="flex items-center gap-2">
+                                    <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span className="text-gray-600">{course.day}</span>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Description Preview */}
+                              <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                                {course.description}
+                              </p>
+                            </div>
+                            
+                            {/* Right Side - Expand Icon */}
+                            <div className="flex-shrink-0">
+                              <svg
+                                className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </div>
+                          </div>
+                        </button>
+
+                        {/* Accordion Content - Expandable with Course Schedule Manager */}
+                        {isExpanded && (
+                          <div className="px-4 sm:px-5 pb-4 sm:pb-5 border-t border-gray-200 pt-4">
+                            <CourseScheduleManager courseId={course.id} />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

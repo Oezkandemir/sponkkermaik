@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 /**
  * User Activity Heartbeat Component
@@ -13,76 +14,63 @@ import { useEffect, useRef } from "react";
 export default function UserActivityHeartbeat() {
   const sessionIdRef = useRef<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pathname = usePathname();
+  const currentPageRef = useRef<string | null>(null);
+  const pageStartTimeRef = useRef<number>(Date.now());
 
-  useEffect(() => {
-    // Generate or retrieve session ID
-    // Try localStorage first (persists across sessions), then sessionStorage, then generate new
-    if (!sessionIdRef.current) {
-      try {
-        sessionIdRef.current = 
-          localStorage.getItem("user_activity_session_id") ||
-          sessionStorage.getItem("user_activity_session_id") ||
-          `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        
-        // Store in both for reliability
-        try {
-          localStorage.setItem("user_activity_session_id", sessionIdRef.current);
-        } catch (e) {
-          // localStorage might not be available (private browsing, etc.)
-        }
-        try {
-          sessionStorage.setItem("user_activity_session_id", sessionIdRef.current);
-        } catch (e) {
-          // sessionStorage might not be available
-        }
-      } catch (error) {
-        // If storage is not available, generate a new ID
-        sessionIdRef.current = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        console.warn("Could not access storage, using temporary session ID:", sessionIdRef.current);
-      }
+  /**
+   * Tracks a page visit start
+   */
+  const trackPageVisit = async () => {
+    if (!sessionIdRef.current || !pathname) return;
+
+    try {
+      await fetch("/api/user-activity/page-visit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sessionId: sessionIdRef.current,
+          pagePath: pathname,
+          pageTitle: document.title,
+          referrer: document.referrer || null,
+          action: "start",
+        }),
+      });
+    } catch (error) {
+      // Silently fail - tracking failures shouldn't affect user experience
+      console.debug("Page visit tracking failed:", error);
     }
+  };
 
-    // Send initial heartbeat immediately
-    sendHeartbeat();
+  /**
+   * Tracks a page visit end
+   */
+  const trackPageVisitEnd = async (pagePath: string) => {
+    if (!sessionIdRef.current) return;
 
-    // Set up interval to send heartbeat every 30 seconds
-    intervalRef.current = setInterval(() => {
-      sendHeartbeat();
-    }, 30000); // 30 seconds
+    const duration = Math.floor((Date.now() - pageStartTimeRef.current) / 1000);
 
-    // Also send heartbeat when page becomes visible (user comes back to tab)
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        sendHeartbeat();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // Send heartbeat when page is about to unload
-    const handleBeforeUnload = () => {
-      // Use sendBeacon for reliability during page unload
-      if (navigator.sendBeacon) {
-        try {
-          navigator.sendBeacon(
-            '/api/user-activity/heartbeat',
-            JSON.stringify({ sessionId: sessionIdRef.current })
-          );
-        } catch (e) {
-          // Ignore errors during unload
-        }
-      }
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    // Cleanup on unmount
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, []);
+    try {
+      await fetch("/api/user-activity/page-visit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sessionId: sessionIdRef.current,
+          pagePath: pagePath,
+          pageTitle: document.title,
+          action: "end",
+          duration: duration,
+        }),
+      });
+    } catch (error) {
+      // Silently fail - tracking failures shouldn't affect user experience
+      console.debug("Page visit end tracking failed:", error);
+    }
+  };
 
   /**
    * Sends heartbeat request to server
@@ -126,6 +114,104 @@ export default function UserActivityHeartbeat() {
       });
     }
   };
+
+  // Initialize session and set up heartbeat
+  useEffect(() => {
+    // Generate or retrieve session ID
+    // Try localStorage first (persists across sessions), then sessionStorage, then generate new
+    if (!sessionIdRef.current) {
+      try {
+        sessionIdRef.current = 
+          localStorage.getItem("user_activity_session_id") ||
+          sessionStorage.getItem("user_activity_session_id") ||
+          `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Store in both for reliability
+        try {
+          localStorage.setItem("user_activity_session_id", sessionIdRef.current);
+        } catch (e) {
+          // localStorage might not be available (private browsing, etc.)
+        }
+        try {
+          sessionStorage.setItem("user_activity_session_id", sessionIdRef.current);
+        } catch (e) {
+          // sessionStorage might not be available
+        }
+      } catch (error) {
+        // If storage is not available, generate a new ID
+        sessionIdRef.current = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        console.warn("Could not access storage, using temporary session ID:", sessionIdRef.current);
+      }
+    }
+
+    // Track initial page visit
+    if (pathname) {
+      currentPageRef.current = pathname;
+      pageStartTimeRef.current = Date.now();
+      trackPageVisit();
+    }
+
+    // Send initial heartbeat immediately
+    sendHeartbeat();
+
+    // Set up interval to send heartbeat every 30 seconds
+    intervalRef.current = setInterval(() => {
+      sendHeartbeat();
+    }, 30000); // 30 seconds
+
+    // Also send heartbeat when page becomes visible (user comes back to tab)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        sendHeartbeat();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Send heartbeat when page is about to unload
+    const handleBeforeUnload = () => {
+      // Track page visit end before leaving
+      if (currentPageRef.current) {
+        trackPageVisitEnd(currentPageRef.current);
+      }
+      
+      // Use sendBeacon for reliability during page unload
+      if (navigator.sendBeacon) {
+        try {
+          navigator.sendBeacon(
+            '/api/user-activity/heartbeat',
+            JSON.stringify({ sessionId: sessionIdRef.current })
+          );
+        } catch (e) {
+          // Ignore errors during unload
+        }
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Cleanup on unmount
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []); // Only run once on mount
+
+  // Track page changes
+  useEffect(() => {
+    if (!pathname || !sessionIdRef.current) return;
+
+    // If page changed, track the previous page visit end
+    if (currentPageRef.current && currentPageRef.current !== pathname) {
+      trackPageVisitEnd(currentPageRef.current);
+    }
+    
+    // Start tracking new page
+    currentPageRef.current = pathname;
+    pageStartTimeRef.current = Date.now();
+    trackPageVisit();
+  }, [pathname]); // Run when pathname changes
 
   // This component doesn't render anything
   return null;
