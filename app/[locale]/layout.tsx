@@ -12,6 +12,7 @@ import ChatbaseWidget from "@/components/ChatbaseWidget";
 import SnowfallEffect from "@/components/Snowfall";
 import SantaAnimation from "@/components/SantaAnimation";
 import FloatingLanguageSwitcher from "@/components/FloatingLanguageSwitcher";
+import UserActivityHeartbeat from "@/components/UserActivityHeartbeat";
 import { locales } from '@/i18n';
 
 const geistSans = Geist({
@@ -78,6 +79,7 @@ export default async function LocaleLayout({
           <Footer />
           <ScrollToTopButton />
           <ChatbaseWidget />
+          <UserActivityHeartbeat />
         </NextIntlClientProvider>
       </body>
     </html>

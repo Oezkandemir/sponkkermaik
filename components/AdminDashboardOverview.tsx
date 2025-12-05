@@ -2,6 +2,7 @@
 
 import { useState, useEffect, memo } from "react";
 import { useTranslations } from "next-intl";
+import AdminOnlineUsers from "./AdminOnlineUsers";
 
 interface DashboardStats {
   todayBookings: number;
@@ -199,6 +200,11 @@ function AdminDashboardOverview() {
           <p className="text-2xl font-bold text-gray-900">{stats.monthlyVoucherRevenue.toFixed(2)}€</p>
           <p className="text-sm text-gray-600 mt-1">Aktive Gutscheine</p>
         </div>
+      </div>
+
+      {/* Online Users Section */}
+      <div className="mt-6">
+        <AdminOnlineUsers />
       </div>
     </div>
   );

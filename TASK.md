@@ -88,3 +88,13 @@ _(Hier werden neue Aufgaben hinzugefügt, die während der Entwicklung entdeckt 
 - [x] Freie Plätze/Kapazität: Bereits korrekt implementiert (verwendet `participants`)
 - [x] Umsatz-Berechnung: Bereits korrekt implementiert (multipliziert mit `participants`)
 
+### 2025-01-XX - Feature: Online User Tracking im Admin Dashboard
+- [x] Datenbank-Migration für `user_activity` Tabelle erstellt
+- [x] API-Route `/api/admin/online-users` erstellt (zeigt aktive User)
+- [x] API-Route `/api/user-activity/heartbeat` erstellt (für Client-Updates)
+- [x] `UserActivityHeartbeat` Komponente erstellt (sendet regelmäßig Heartbeats)
+- [x] `AdminOnlineUsers` Komponente erstellt (zeigt aktive User im Dashboard)
+- [x] Heartbeat-Komponente in Root Layout integriert
+- [x] Online-User-Komponente in AdminDashboardOverview integriert
+- [x] Migration erfolgreich angewendet
+
