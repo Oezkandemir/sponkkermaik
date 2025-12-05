@@ -32,10 +32,25 @@ const nextConfig: NextConfig = {
       '@supabase/supabase-js',
       'next-intl',
       '@paypal/react-paypal-js',
+      // Note: @react-pdf/renderer excluded from optimization as it needs special handling for SSR
     ],
   },
   // Optimize webpack for faster builds
   webpack: (config, { isServer, dev }) => {
+    // Configure @react-pdf/renderer for server-side rendering
+    if (isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        canvas: false,
+      };
+      // Ensure @react-pdf/renderer works in Node.js environment
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        canvas: false,
+        fs: false,
+      };
+    }
+
     if (!dev && !isServer) {
       // Optimize client bundle
       config.optimization = {

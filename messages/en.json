@@ -665,6 +665,37 @@
       "reply": "Reply",
       "participant": "Participant",
       "participants": "Participants"
+    },
+    "invoices": {
+      "title": "Manage Invoices",
+      "subtitle": "Create and manage invoices for customer bookings",
+      "createInvoice": "Create Invoice",
+      "searchPlaceholder": "Search by invoice number, customer or course...",
+      "allStatuses": "All Statuses",
+      "statusDraft": "Draft",
+      "statusSent": "Sent",
+      "statusPaid": "Paid",
+      "statusCancelled": "Cancelled",
+      "noInvoices": "No invoices found",
+      "invoiceNumber": "Invoice Number",
+      "customer": "Customer",
+      "course": "Course",
+      "amount": "Amount",
+      "status": "Status",
+      "date": "Date",
+      "actions": "Actions",
+      "downloadPDF": "Download PDF",
+      "sendEmail": "Send via Email",
+      "selectBooking": "Select Booking",
+      "selectBookingPlaceholder": "Select booking...",
+      "email": "Email",
+      "time": "Time",
+      "notes": "Notes",
+      "optional": "Optional",
+      "notesPlaceholder": "Optional notes for invoice...",
+      "cancel": "Cancel",
+      "create": "Create",
+      "creating": "Creating..."
     }
   },
   "scheduleSettings": {
@@ -736,6 +767,40 @@
       "nameRequired": "Please enter your name",
       "emailRequired": "Please enter a valid email address",
       "accountCreationFailed": "Error creating account. The booking was still created."
+    }
+  },
+  "waitlist": {
+    "title": "Waitlist",
+    "description": "This course is currently fully booked. Join the waitlist and we'll notify you when a spot becomes available.",
+    "joinWaitlist": "Join Waitlist",
+    "joining": "Joining...",
+    "autoBook": "Auto-book when spot becomes available",
+    "autoBookDescription": "When a spot becomes available, a booking will be automatically created for you.",
+    "notifyOnly": "Notify only",
+    "notifyOnlyDescription": "You'll receive an email notification when a spot becomes available. You can then decide if you want to book.",
+    "success": {
+      "added": "You have been successfully added to the waitlist!"
+    },
+    "errors": {
+      "addFailed": "Error joining waitlist",
+      "alreadyOnWaitlist": "You are already on the waitlist for this course",
+      "invalidEmail": "Invalid email address",
+      "nameRequired": "Please enter your name",
+      "emailRequired": "Please enter an email address"
+    },
+    "notification": {
+      "subject": "Spot available: {courseTitle}",
+      "title": "Spot available!",
+      "greeting": "Hello {customerName},",
+      "message": "great news! A spot has become available for the course {courseTitle}.",
+      "availableSlot": "Available appointment:",
+      "date": "Date: {date}",
+      "time": "Time: {time}",
+      "availablePlaces": "Available places: {places}",
+      "urgent": "⚠️ This spot is only available for a limited time. Book quickly to secure your place!",
+      "bookNow": "Book now",
+      "removedFromWaitlist": "You have been automatically removed from the waitlist. If you're no longer interested, you don't need to do anything.",
+      "closing": "Best regards,<br>Your Sponk Keramik Team"
     }
   },
   "workshopsData": {

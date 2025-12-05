@@ -24,6 +24,8 @@ interface Booking {
   customer_email?: string;
   hasMessages?: boolean;
   participantList?: string[]; // Extracted participant names
+  course_price?: number; // Price per person from course
+  calculated_amount?: number; // participants * course_price
 }
 
 type BookingFilter = "upcoming" | "unconfirmed" | "recurring" | "past" | "cancelled";
@@ -51,6 +53,8 @@ function AdminBookingsManager() {
   const [dateRangeEnd, setDateRangeEnd] = useState("");
   const [availableCourses, setAvailableCourses] = useState<Array<{ id: string; title: string }>>([]);
   const [expandedBookings, setExpandedBookings] = useState<Set<string>>(new Set());
+  const [creatingInvoice, setCreatingInvoice] = useState<string | null>(null);
+  const [invoices, setInvoices] = useState<Record<string, string>>({}); // booking_id -> invoice_id
 
   /**
    * Loads all available courses for filtering
@@ -95,16 +99,44 @@ function AdminBookingsManager() {
     }
   }, []);
 
+  /**
+   * Loads existing invoices to check which bookings already have invoices
+   */
+  const loadInvoices = useCallback(async () => {
+    try {
+      const response = await fetch("/api/admin/invoices");
+      if (response.ok) {
+        const data = await response.json();
+        const invoiceMap: Record<string, string> = {};
+        (data.invoices || []).forEach((inv: any) => {
+          if (inv.booking_id) {
+            invoiceMap[inv.booking_id] = inv.id;
+          }
+        });
+        setInvoices(invoiceMap);
+      }
+    } catch (err) {
+      console.error("Error loading invoices:", err);
+    }
+  }, []);
+
   useEffect(() => {
     loadBookings();
     loadCourses();
-  }, [loadBookings, loadCourses]);
+    loadInvoices();
+  }, [loadBookings, loadCourses, loadInvoices]);
 
   /**
    * Updates booking status
    */
   const updateBookingStatus = async (bookingId: string, newStatus: Booking["status"]) => {
     try {
+      // Get booking details before update to check course_id
+      const booking = bookings.find(b => b.id === bookingId);
+      if (!booking) {
+        throw new Error("Booking not found");
+      }
+
       const { error } = await supabase
         .from("bookings")
         .update({ status: newStatus })
@@ -114,6 +146,7 @@ function AdminBookingsManager() {
 
       setMessage({ type: "success", text: "Buchungsstatus erfolgreich aktualisiert" });
       loadBookings();
+
     } catch (err) {
       console.error("Error updating booking status:", err);
       setMessage({ type: "error", text: "Fehler beim Aktualisieren des Status" });
@@ -219,6 +252,79 @@ function AdminBookingsManager() {
     });
   };
 
+
+  /**
+   * Creates an invoice for a booking
+   */
+  const createInvoiceForBooking = async (booking: Booking) => {
+    if (!booking.customer_email || !booking.customer_name || !booking.course_title) {
+      setMessage({ type: "error", text: "Buchung hat nicht alle erforderlichen Informationen für eine Rechnung" });
+      return;
+    }
+
+    try {
+      setCreatingInvoice(booking.id);
+      setMessage(null);
+
+      // Calculate default amount: participants * course_price
+      let defaultAmount = "";
+      if (booking.participants && booking.course_price) {
+        const calculatedAmount = booking.participants * booking.course_price;
+        defaultAmount = calculatedAmount.toFixed(2);
+      }
+
+      // Prompt for amount with calculated default
+      const promptText = defaultAmount 
+        ? `Bitte geben Sie den Rechnungsbetrag ein (€):\n\nBerechneter Betrag: ${defaultAmount}€\n(${booking.participants} Teilnehmer × ${booking.course_price?.toFixed(2)}€)`
+        : "Bitte geben Sie den Rechnungsbetrag ein (€):";
+      
+      const amount = prompt(promptText, defaultAmount);
+      if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+        setMessage({ type: "error", text: "Ungültiger Betrag" });
+        return;
+      }
+
+      // Extract participant names
+      const participantNames: string[] = [booking.customer_name || ""];
+      if (booking.participantList && Array.isArray(booking.participantList)) {
+        participantNames.push(...booking.participantList);
+      }
+
+      const response = await fetch("/api/admin/invoices/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          booking_id: booking.id,
+          customer_email: booking.customer_email,
+          customer_name: booking.customer_name,
+          course_title: booking.course_title,
+          booking_date: booking.booking_date,
+          amount: parseFloat(amount),
+          participants: booking.participants || 1,
+          participant_names: participantNames,
+          course_price_per_person: booking.course_price || 0,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create invoice");
+      }
+
+      const data = await response.json();
+      setInvoices((prev) => ({ ...prev, [booking.id]: data.invoice.id }));
+      setMessage({ type: "success", text: "Rechnung erfolgreich erstellt. Wechseln Sie zum Rechnungen-Tab, um sie zu versenden." });
+      await loadInvoices();
+    } catch (err) {
+      console.error("Error creating invoice:", err);
+      setMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : "Fehler beim Erstellen der Rechnung",
+      });
+    } finally {
+      setCreatingInvoice(null);
+    }
+  };
 
   /**
    * Deletes a booking
@@ -730,6 +836,51 @@ function AdminBookingsManager() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                           </svg>
                           Nachrichten
+                        </button>
+                      )}
+                      
+                      {/* Create Invoice Button */}
+                      {invoices[booking.id] ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Navigate to invoices tab - this would require parent component coordination
+                            // For now, just show a message
+                            setMessage({ type: "success", text: "Rechnung bereits vorhanden. Wechseln Sie zum Rechnungen-Tab." });
+                          }}
+                          className="px-3 py-2 text-xs bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors flex items-center gap-1.5"
+                          title="Rechnung bereits erstellt"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Rechnung vorhanden
+                        </button>
+                      ) : (
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            await createInvoiceForBooking(booking);
+                          }}
+                          disabled={creatingInvoice === booking.id}
+                          className="px-3 py-2 text-xs bg-amber-600 text-white rounded hover:bg-amber-700 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          {creatingInvoice === booking.id ? (
+                            <>
+                              <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Erstelle...
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              Rechnung erstellen
+                            </>
+                          )}
                         </button>
                       )}
                       

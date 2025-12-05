@@ -666,6 +666,37 @@
       "reply": "Antworten",
       "participant": "Teilnehmer",
       "participants": "Teilnehmer"
+    },
+    "invoices": {
+      "title": "Rechnungen verwalten",
+      "subtitle": "Erstellen und verwalten Sie Rechnungen für Kundenbuchungen",
+      "createInvoice": "Rechnung erstellen",
+      "searchPlaceholder": "Suche nach Rechnungsnummer, Kunde oder Kurs...",
+      "allStatuses": "Alle Status",
+      "statusDraft": "Entwurf",
+      "statusSent": "Versendet",
+      "statusPaid": "Bezahlt",
+      "statusCancelled": "Storniert",
+      "noInvoices": "Keine Rechnungen gefunden",
+      "invoiceNumber": "Rechnungsnummer",
+      "customer": "Kunde",
+      "course": "Kurs",
+      "amount": "Betrag",
+      "status": "Status",
+      "date": "Datum",
+      "actions": "Aktionen",
+      "downloadPDF": "PDF herunterladen",
+      "sendEmail": "Per E-Mail versenden",
+      "selectBooking": "Buchung auswählen",
+      "selectBookingPlaceholder": "Buchung auswählen...",
+      "email": "E-Mail",
+      "time": "Zeit",
+      "notes": "Notizen",
+      "optional": "Optional",
+      "notesPlaceholder": "Optionale Notizen zur Rechnung...",
+      "cancel": "Abbrechen",
+      "create": "Erstellen",
+      "creating": "Erstelle..."
     }
   },
   "scheduleSettings": {
@@ -737,6 +768,40 @@
       "nameRequired": "Bitte geben Sie Ihren Namen ein",
       "emailRequired": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
       "accountCreationFailed": "Fehler beim Erstellen des Kontos. Die Buchung wurde trotzdem erstellt."
+    }
+  },
+  "waitlist": {
+    "title": "Warteliste",
+    "description": "Dieser Kurs ist derzeit ausgebucht. Tragen Sie sich in die Warteliste ein und wir benachrichtigen Sie, sobald ein Platz frei wird.",
+    "joinWaitlist": "In Warteliste eintragen",
+    "joining": "Wird eingetragen...",
+    "autoBook": "Automatisch buchen wenn Platz frei wird",
+    "autoBookDescription": "Wenn ein Platz frei wird, wird automatisch eine Buchung für Sie erstellt.",
+    "notifyOnly": "Nur benachrichtigen",
+    "notifyOnlyDescription": "Sie erhalten eine E-Mail-Benachrichtigung, wenn ein Platz frei wird. Sie können dann selbst entscheiden, ob Sie buchen möchten.",
+    "success": {
+      "added": "Sie wurden erfolgreich in die Warteliste eingetragen!"
+    },
+    "errors": {
+      "addFailed": "Fehler beim Eintragen in die Warteliste",
+      "alreadyOnWaitlist": "Sie sind bereits in der Warteliste für diesen Kurs",
+      "invalidEmail": "Ungültige E-Mail-Adresse",
+      "nameRequired": "Bitte geben Sie Ihren Namen ein",
+      "emailRequired": "Bitte geben Sie eine E-Mail-Adresse ein"
+    },
+    "notification": {
+      "subject": "Platz verfügbar: {courseTitle}",
+      "title": "Platz verfügbar!",
+      "greeting": "Hallo {customerName},",
+      "message": "gute Nachrichten! Ein Platz ist für den Kurs {courseTitle} verfügbar geworden.",
+      "availableSlot": "Verfügbarer Termin:",
+      "date": "Datum: {date}",
+      "time": "Zeit: {time}",
+      "availablePlaces": "Verfügbare Plätze: {places}",
+      "urgent": "⚠️ Dieser Platz ist nur begrenzt verfügbar. Buchen Sie schnell, um sicherzustellen, dass Sie dabei sind!",
+      "bookNow": "Jetzt buchen",
+      "removedFromWaitlist": "Sie wurden automatisch von der Warteliste entfernt. Falls Sie nicht mehr interessiert sind, müssen Sie nichts tun.",
+      "closing": "Mit freundlichen Grüßen,<br>Ihr Team von Sponk Keramik"
     }
   },
   "workshopsData": {

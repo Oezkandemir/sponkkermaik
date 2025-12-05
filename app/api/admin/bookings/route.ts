@@ -48,7 +48,7 @@ export async function GET() {
         .order("start_time", { ascending: false }),
       supabase
         .from("courses")
-        .select("id, title"),
+        .select("id, title, price"),
       supabase
         .from("booking_messages")
         .select("booking_id"),
@@ -58,10 +58,42 @@ export async function GET() {
     if (coursesError) throw coursesError;
     if (messagesError) throw messagesError;
 
+    /**
+     * Extracts price per person from price string
+     * Examples:
+     * - "39 € pro Person" -> 39
+     * - "80 € pro Person" -> 80
+     * - "87 € pro Person + 18 € pro Kg" -> 87
+     * - "195 € pro Person + 18 € pro Kg" -> 195
+     * - "Preis auf Anfrage" -> 0
+     */
+    const extractPricePerPerson = (priceString: string): number => {
+      if (!priceString) return 0;
+      
+      // Remove common text patterns
+      const cleaned = priceString
+        .replace(/pro Person/gi, "")
+        .replace(/pro Kg/gi, "")
+        .replace(/auf Anfrage/gi, "")
+        .replace(/€/g, "")
+        .replace(/,/g, ".")
+        .trim();
+      
+      // Extract first number (price per person)
+      const match = cleaned.match(/(\d+(?:\.\d+)?)/);
+      if (match) {
+        return parseFloat(match[1]);
+      }
+      
+      return 0;
+    };
+
     // Create lookup maps
     const courseTitlesMap: Record<string, string> = {};
+    const coursePriceMap: Record<string, number> = {};
     (coursesData || []).forEach((course: any) => {
       courseTitlesMap[course.id] = course.title;
+      coursePriceMap[course.id] = extractPricePerPerson(course.price || "");
     });
 
     const bookingsWithMessages = new Set(
@@ -94,6 +126,9 @@ export async function GET() {
     const bookingsWithDetails = (bookingsData || []).map((booking: any) => {
       const courseId = booking.course_schedule?.course_id;
       const participantList = extractParticipantsFromNotes(booking.notes || "");
+      const participants = booking.participants || 1;
+      const coursePrice = courseId ? (coursePriceMap[courseId] || 0) : 0;
+      const calculatedAmount = participants * coursePrice;
       
       return {
         ...booking,
@@ -102,6 +137,9 @@ export async function GET() {
         customer_name: booking.customer_name || "Unbekannt",
         hasMessages: bookingsWithMessages.has(booking.id),
         participantList: participantList,
+        participants: participants,
+        course_price: coursePrice,
+        calculated_amount: calculatedAmount,
       };
     });
 

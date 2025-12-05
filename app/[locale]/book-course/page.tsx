@@ -60,7 +60,6 @@ export default function BookCoursePage() {
   const [participantNames, setParticipantNames] = useState<string[]>([]);
   const [booking, setBooking] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  
   const supabase = createClient();
   const courseId = searchParams.get("course");
 
@@ -352,7 +351,12 @@ export default function BookCoursePage() {
         .select("*")
         .eq("course_id", courseId)
         .eq("override_date", dateString)
-        .single();
+        .maybeSingle();
+      
+      // Ignore errors - if no override exists, use regular schedule
+      if (overrideError && overrideError.code !== "PGRST116") {
+        console.warn("Error checking date override:", overrideError);
+      }
 
       if (!overrideError && override) {
         // Date override exists
@@ -531,7 +535,12 @@ export default function BookCoursePage() {
         .select("*")
         .eq("course_id", courseId)
         .eq("override_date", dateString)
-        .single();
+        .maybeSingle();
+      
+      // Ignore errors - if no override exists, use regular schedule
+      if (overrideError && overrideError.code !== "PGRST116") {
+        console.warn("Error checking date override:", overrideError);
+      }
 
       if (!overrideError && override) {
         // Date override exists
@@ -1009,6 +1018,20 @@ export default function BookCoursePage() {
     }
   };
 
+  /**
+   * Handles waitlist submission
+   */
+
+  /**
+   * Checks if course is fully booked (all slots have 0 available places)
+   */
+  const isCourseFullyBooked = (): boolean => {
+    if (!selectedDate || selectedDateSlots.length === 0) {
+      return false;
+    }
+    return selectedDateSlots.every(slot => slot.availablePlaces === 0);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -1291,62 +1314,119 @@ export default function BookCoursePage() {
                       <div className="animate-spin h-6 w-6 border-2 border-amber-600 border-t-transparent rounded-full mx-auto"></div>
                     </div>
                   ) : selectedDateSlots.length > 0 ? (
-                    <div className="space-y-2">
-                      {selectedDateSlots.map((slot, index) => {
-                        const isSelected = selectedSlot?.timeSlot.id === slot.timeSlot.id;
-                        const isFullyBooked = slot.availablePlaces === 0;
-                        
-                        return (
-                          <button
-                            key={index}
-                            onClick={() => !isFullyBooked && setSelectedSlot(slot)}
-                            disabled={isFullyBooked}
-                            className={`
-                              w-full p-4 rounded-lg border-2 text-left transition-all
-                              ${isFullyBooked
-                                ? "border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed"
-                                : isSelected
-                                ? "border-amber-600 bg-amber-50"
-                                : "border-gray-200 hover:border-amber-400 hover:bg-amber-50/50"
-                              }
-                            `}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="font-semibold text-gray-900">
-                                {slot.timeSlot.start_time} - {slot.timeSlot.end_time}
-                              </span>
-                              {isSelected && (
-                                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                              )}
-                            </div>
-                            <div className="flex items-center justify-between mt-1">
-                              <div className="flex items-center gap-2">
-                                <span className={`inline-block w-2 h-2 rounded-full ${
-                                  isFullyBooked ? "bg-red-500" : slot.availablePlaces <= 2 ? "bg-yellow-500" : "bg-green-500"
-                                }`}></span>
-                                <span className="text-xs text-gray-600">
-                                  {formatDuration(slot.duration)}
-                                </span>
+                    <>
+                      {/* Check if all slots are fully booked */}
+                      {isCourseFullyBooked() ? (
+                        <div className="text-center py-8">
+                          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6">
+                            <svg className="w-12 h-12 text-red-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                              {t("fullyBooked")}
+                            </h3>
+                            <p className="text-sm text-gray-700">
+                              Dieser Kurs ist leider vollständig ausgebucht.
+                            </p>
+                          </div>
+                          <div className="space-y-2">
+                            {selectedDateSlots.map((slot, index) => (
+                              <div
+                                key={index}
+                                className="w-full p-4 rounded-lg border-2 border-gray-200 bg-gray-50 opacity-50"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="font-semibold text-gray-600">
+                                    {slot.timeSlot.start_time} - {slot.timeSlot.end_time}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between mt-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="inline-block w-2 h-2 rounded-full bg-red-500"></span>
+                                    <span className="text-xs text-gray-600">
+                                      {formatDuration(slot.duration)}
+                                    </span>
+                                  </div>
+                                  <span className="text-xs font-medium text-red-600">
+                                    {t("fullyBooked")}
+                                  </span>
+                                </div>
                               </div>
-                              <span className={`text-xs font-medium ${
-                                isFullyBooked 
-                                  ? "text-red-600" 
-                                  : slot.availablePlaces <= 2 
-                                  ? "text-yellow-600" 
-                                  : "text-green-600"
-                              }`}>
-                                {isFullyBooked 
-                                  ? t("fullyBooked") 
-                                  : `${slot.availablePlaces} / ${slot.totalCapacity} ${t("placesAvailable")}`
-                                }
-                              </span>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {selectedDateSlots.map((slot, index) => {
+                            const isSelected = selectedSlot?.timeSlot.id === slot.timeSlot.id;
+                            const isFullyBooked = slot.availablePlaces === 0;
+                            
+                            return (
+                              <div
+                                key={index}
+                                className={`
+                                  w-full p-4 rounded-lg border-2 text-left transition-all
+                                  ${isFullyBooked
+                                    ? "border-red-200 bg-red-50"
+                                    : isSelected
+                                    ? "border-amber-600 bg-amber-50"
+                                    : "border-gray-200 hover:border-amber-400 hover:bg-amber-50/50"
+                                  }
+                                `}
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="font-semibold text-gray-900">
+                                    {slot.timeSlot.start_time} - {slot.timeSlot.end_time}
+                                  </span>
+                                  {isSelected && !isFullyBooked && (
+                                    <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  )}
+                                </div>
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`inline-block w-2 h-2 rounded-full ${
+                                      isFullyBooked ? "bg-red-500" : slot.availablePlaces <= 2 ? "bg-yellow-500" : "bg-green-500"
+                                    }`}></span>
+                                    <span className="text-xs text-gray-600">
+                                      {formatDuration(slot.duration)}
+                                    </span>
+                                  </div>
+                                  <span className={`text-xs font-medium ${
+                                    isFullyBooked 
+                                      ? "text-red-600" 
+                                      : slot.availablePlaces <= 2 
+                                      ? "text-yellow-600" 
+                                      : "text-green-600"
+                                  }`}>
+                                    {isFullyBooked 
+                                      ? t("fullyBooked") 
+                                      : `${slot.availablePlaces} / ${slot.totalCapacity} ${t("placesAvailable")}`
+                                    }
+                                  </span>
+                                </div>
+                                {isFullyBooked ? (
+                                  <button
+                                    className="w-full mt-2 px-4 py-2 bg-gray-200 text-gray-600 rounded-lg text-sm font-semibold text-center"
+                                    disabled
+                                  >
+                                    {t("fullyBooked")}
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => setSelectedSlot(slot)}
+                                    className="w-full mt-2 px-4 py-2 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-lg hover:from-amber-700 hover:to-amber-800 transition-all duration-200 text-sm font-semibold"
+                                  >
+                                    {t("confirm")}
+                                  </button>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="text-center py-8 text-gray-500">
                       <p className="text-sm">Keine verfügbaren Zeitslots</p>
@@ -1765,6 +1845,7 @@ export default function BookCoursePage() {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );
