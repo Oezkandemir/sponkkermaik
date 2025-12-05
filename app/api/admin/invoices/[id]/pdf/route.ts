@@ -52,7 +52,7 @@ export async function GET(
 
     // Generate PDF using @react-pdf/renderer
     const pdfBuffer = await renderToBuffer(
-      <InvoiceDocument invoice={invoice} />
+      React.createElement(InvoiceDocument, { invoice })
     );
 
     // Check if this is a preview request (from iframe) or download request
